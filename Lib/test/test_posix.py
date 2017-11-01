@@ -12,14 +12,15 @@ import os
 import fcntl
 import platform
 import pwd
-import shutil
 import stat
+import subprocess
 import tempfile
 import unittest
 import warnings
 
 _DUMMY_SYMLINK = os.path.join(tempfile.gettempdir(),
                               support.TESTFN + '-dummy-symlink')
+
 
 class PosixTester(unittest.TestCase):
 
@@ -530,9 +531,10 @@ class PosixTester(unittest.TestCase):
             check_stat(uid, gid)
             self.assertRaises(OSError, chown_func, first_param, 0, -1)
             check_stat(uid, gid)
-            if 0 not in os.getgroups():
-                self.assertRaises(OSError, chown_func, first_param, -1, 0)
-                check_stat(uid, gid)
+            if hasattr(os, 'getgroups'):
+                if 0 not in os.getgroups():
+                    self.assertRaises(OSError, chown_func, first_param, -1, 0)
+                    check_stat(uid, gid)
         # test illegal types
         for t in str, float:
             self.assertRaises(TypeError, chown_func, first_param, t(uid), gid)
@@ -792,8 +794,8 @@ class PosixTester(unittest.TestCase):
         group = pwd.getpwuid(os.getuid())[3]
         self.assertIn(group, posix.getgrouplist(user, group))
 
-
     @unittest.skipUnless(hasattr(os, 'getegid'), "test needs os.getegid()")
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_getgroups(self):
         with os.popen('id -G 2>/dev/null') as idg:
             groups = idg.read().strip()

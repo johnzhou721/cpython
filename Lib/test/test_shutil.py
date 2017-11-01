@@ -45,6 +45,7 @@ try:
 except ImportError:
     ZIP_SUPPORT = shutil.which('zip')
 
+
 def _fake_rename(*args, **kwargs):
     # Pretend the destination path is on a different filesystem.
     raise OSError(getattr(errno, 'EXDEV', 18), "Invalid cross-device link")
@@ -1388,6 +1389,8 @@ class TestShutil(unittest.TestCase):
         self.assertEqual(['foo'], os.listdir(rv))
 
 
+@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos',
+                 "%s doesn't support other executables." % sys.platform)
 class TestWhich(unittest.TestCase):
 
     def setUp(self):
@@ -1811,6 +1814,7 @@ class TermsizeTests(unittest.TestCase):
         self.assertEqual(size.lines, 888)
 
     @unittest.skipUnless(os.isatty(sys.__stdout__.fileno()), "not on tty")
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_stty_match(self):
         """Check if stty returns the same results ignoring env
 

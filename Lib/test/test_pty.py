@@ -110,7 +110,7 @@ class PtyTest(unittest.TestCase):
         os.close(slave_fd)
         os.close(master_fd)
 
-
+    @unittest.skipUnless(hasattr(os, 'fork'), "test requires os.fork()")
     def test_fork(self):
         debug("calling pty.fork()")
         pid, master_fd = pty.fork()

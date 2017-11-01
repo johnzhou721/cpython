@@ -11,6 +11,7 @@ import subprocess
 import py_compile
 import contextlib
 import shutil
+import unittest
 import zipfile
 
 from importlib.util import source_from_cache
@@ -92,6 +93,8 @@ def run_python_until_end(*args, **env_vars):
     err = strip_python_stderr(err)
     return _PythonRunResult(rc, out, err), cmd_line
 
+
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 def _assert_python(expected_success, *args, **env_vars):
     res, cmd_line = run_python_until_end(*args, **env_vars)
     if (res.rc and expected_success) or (not res.rc and not expected_success):
@@ -100,6 +103,7 @@ def _assert_python(expected_success, *args, **env_vars):
             "stderr follows:\n%s" % (res.rc, cmd_line,
                                      res.err.decode('ascii', 'ignore')))
     return res
+
 
 def assert_python_ok(*args, **env_vars):
     """
@@ -114,6 +118,7 @@ def assert_python_ok(*args, **env_vars):
     """
     return _assert_python(True, *args, **env_vars)
 
+
 def assert_python_failure(*args, **env_vars):
     """
     Assert that running the interpreter with `args` and optional environment
@@ -124,6 +129,8 @@ def assert_python_failure(*args, **env_vars):
     """
     return _assert_python(False, *args, **env_vars)
 
+
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 def spawn_python(*args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kw):
     """Run a Python subprocess with the given arguments.
 
@@ -144,6 +151,7 @@ def spawn_python(*args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kw):
                             stdout=stdout, stderr=stderr,
                             **kw)
 
+
 def kill_python(p):
     """Run the given Popen process until completion and return stdout."""
     p.stdin.close()
@@ -154,6 +162,7 @@ def kill_python(p):
     p.wait()
     subprocess._cleanup()
     return data
+
 
 def make_script(script_dir, script_basename, source, omit_suffix=False):
     script_filename = script_basename
@@ -166,6 +175,7 @@ def make_script(script_dir, script_basename, source, omit_suffix=False):
     script_file.close()
     importlib.invalidate_caches()
     return script_name
+
 
 def make_zip_script(zip_dir, zip_basename, script_name, name_in_zip=None):
     zip_filename = zip_basename+os.extsep+'zip'
@@ -188,9 +198,11 @@ def make_zip_script(zip_dir, zip_basename, script_name, name_in_zip=None):
     #    zip_file.close()
     return zip_name, os.path.join(zip_name, name_in_zip)
 
+
 def make_pkg(pkg_dir, init_source=''):
     os.mkdir(pkg_dir)
     make_script(pkg_dir, '__init__', init_source)
+
 
 def make_zip_pkg(zip_dir, zip_basename, pkg_name, script_basename,
                  source, depth=1, compiled=False):

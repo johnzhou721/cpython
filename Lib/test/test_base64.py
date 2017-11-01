@@ -5,7 +5,6 @@ import binascii
 import os
 import sys
 import subprocess
-import struct
 from array import array
 
 
@@ -622,7 +621,7 @@ class BaseXYTestCase(unittest.TestCase):
         self.assertTrue(issubclass(binascii.Error, ValueError))
 
 
-
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 class TestMain(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(support.TESTFN):
@@ -656,7 +655,6 @@ class TestMain(unittest.TestCase):
             fp.write(b'Yf9iCg==')
         output = self.get_output('-d', support.TESTFN)
         self.assertEqual(output.rstrip(), b'a\xffb')
-
 
 
 def test_main():

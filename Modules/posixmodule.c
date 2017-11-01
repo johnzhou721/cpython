@@ -20,6 +20,8 @@
 #  pragma weak statvfs
 #  pragma weak fstatvfs
 
+#  include "TargetConditionals.h"
+
 #endif /* __APPLE__ */
 
 #define PY_SSIZE_T_CLEAN
@@ -180,6 +182,23 @@ corresponding Unix manual entries for more information on calls.");
 #endif  /* __BORLANDC__ */
 #endif  /* ! __WATCOMC__ || __QNX__ */
 
+// iOS *defines* a number of POSIX functions, but you can't use them
+// because iOS isn't a conventional multiprocess environment.
+#if TARGET_OS_IPHONE
+#  undef HAVE_EXECV
+#  undef HAVE_FORK
+#  undef HAVE_FORK1
+#  undef HAVE_FORKPTY
+#  undef HAVE_GETGROUPS
+#  undef HAVE_SCHED_H
+#  undef HAVE_SENDFILE
+#  undef HAVE_SETPRIORITY
+#  undef HAVE_SPAWNV
+#  undef HAVE_WAIT
+#  undef HAVE_WAIT3
+#  undef HAVE_WAIT4
+#  undef HAVE_WAITPID
+#endif /* TARGET_OS_IPHONE */
 
 /*[clinic input]
 module os
@@ -1206,7 +1225,9 @@ win32_get_reparse_tag(HANDLE reparse_point_handle, ULONG *reparse_tag)
 #include <crt_externs.h>
 static char **environ;
 #elif !defined(_MSC_VER) && ( !defined(__WATCOMC__) || defined(__QNX__) )
+#if !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
 extern char **environ;
+#endif
 #endif /* !_MSC_VER */
 
 static PyObject *
@@ -1257,7 +1278,7 @@ convertenviron(void)
         Py_DECREF(k);
         Py_DECREF(v);
     }
-#else
+#elif !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
     if (environ == NULL)
         return d;
     /* This part ignores errors */
@@ -4489,7 +4510,12 @@ posix_system(PyObject *self, PyObject *args)
 
     command = PyBytes_AsString(command_obj);
     Py_BEGIN_ALLOW_THREADS
+#if defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) || defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+    sts = -1;
+    errno = ENOTSUP;
+#else
     sts = system(command);
+#endif
     Py_END_ALLOW_THREADS
     Py_DECREF(command_obj);
 #endif

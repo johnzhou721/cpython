@@ -26,6 +26,9 @@ except ImportError:
 
 mswindows = (sys.platform == "win32")
 
+if not hasattr(subprocess, 'Popen'):
+    raise unittest.SkipTest("subprocess module doesn't provide Popen()")
+
 #
 # Depends on the following external programs: Python
 #

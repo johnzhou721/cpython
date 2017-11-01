@@ -13,17 +13,26 @@
 #include "code.h"
 #include "marshal.h"
 
+#ifdef __APPLE__
+#  include "TargetConditionals.h"
+#endif /* __APPLE__ */
+
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* High water mark to determine when the marshalled object is dangerously deep
  * and risks coring the interpreter.  When the object stack gets this deep,
  * raise an exception instead of continuing.
  * On Windows debug builds, reduce this value.
+ * iOS also requires a reduced value.
  */
 #if defined(MS_WINDOWS) && defined(_DEBUG)
-#define MAX_MARSHAL_STACK_DEPTH 1500
+#  define MAX_MARSHAL_STACK_DEPTH 1500
 #else
-#define MAX_MARSHAL_STACK_DEPTH 2000
+#  if TARGET_OS_IPHONE
+#    define MAX_MARSHAL_STACK_DEPTH 1500
+#  else
+#    define MAX_MARSHAL_STACK_DEPTH 2000
+#  endif /* TARGET_OS_IPHONE */
 #endif
 
 #define TYPE_NULL               '0'

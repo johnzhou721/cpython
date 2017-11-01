@@ -22,7 +22,7 @@ work. One should use importlib as the public-facing version of this module.
 
 # Bootstrap-related code ######################################################
 
-_CASE_INSENSITIVE_PLATFORMS = 'win', 'cygwin', 'darwin'
+_CASE_INSENSITIVE_PLATFORMS = 'win', 'cygwin', 'darwin', 'ios', 'tvos', 'watchos'
 
 
 def _make_relax_case():

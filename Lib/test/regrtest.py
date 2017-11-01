@@ -538,7 +538,7 @@ def main(tests=None, **kwargs):
         sys.stdout.flush()
         print()   # Force a newline (just in case)
         print(json.dumps(result))
-        sys.exit(0)
+        return 0
 
     good = []
     bad = []
@@ -678,7 +678,7 @@ def main(tests=None, **kwargs):
             from threading import Thread
         except ImportError:
             print("Multiprocess option requires thread support")
-            sys.exit(2)
+            return 2
         from queue import Queue
         debug_output_pat = re.compile(r"\[\d+ refs, \d+ blocks\]$")
         output = Queue()
@@ -843,7 +843,7 @@ def main(tests=None, **kwargs):
     if ns.runleaks:
         os.system("leaks %d" % os.getpid())
 
-    sys.exit(len(bad) > 0 or interrupted)
+    return (len(bad) > 0 or interrupted)
 
 
 # small set of tests to determine if we have a basically functioning interpreter
@@ -1560,7 +1560,9 @@ def main_in_temp_cwd():
     # change the CWD, the original CWD will be used.  The original CWD is
     # available from support.SAVEDCWD.
     with support.temp_cwd(test_cwd, quiet=True):
-        main()
+        result = main()
+
+    return result
 
 
 if __name__ == '__main__':
@@ -1585,4 +1587,5 @@ if __name__ == '__main__':
     # sanity check
     assert __file__ == os.path.abspath(sys.argv[0])
 
-    main_in_temp_cwd()
+    result = main_in_temp_cwd()
+    sys.exit(result)

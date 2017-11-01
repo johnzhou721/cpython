@@ -222,8 +222,10 @@ class UnicodeFunctionsTest(UnicodeDatabaseTest):
         self.assertEqual(eaw('\u2010'), 'A')
         self.assertEqual(eaw('\U00020000'), 'W')
 
+
 class UnicodeMiscTest(UnicodeDatabaseTest):
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_failed_import_during_compiling(self):
         # Issue 4367
         # Decoding \N escapes requires the unicodedata module. If it can't be

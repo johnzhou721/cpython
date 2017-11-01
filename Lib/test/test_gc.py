@@ -629,6 +629,8 @@ class GCTests(unittest.TestCase):
             del x
             gc.set_debug(%s)
         """
+
+        @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
         def run_command(code):
             p = subprocess.Popen([sys.executable, "-Wd", "-c", code],
                 stdout=subprocess.PIPE,

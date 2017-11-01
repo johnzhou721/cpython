@@ -3,8 +3,10 @@ from test import support
 import builtins
 import io
 import os
+import subprocess
 import shutil
 import uuid
+
 
 def importable(name):
     try:
@@ -12,6 +14,7 @@ def importable(name):
         return True
     except:
         return False
+
 
 class TestUUID(unittest.TestCase):
     def test_UUID(self):
@@ -387,6 +390,7 @@ class TestUUID(unittest.TestCase):
             equal(str(u), v)
 
     @unittest.skipUnless(os.name == 'posix', 'requires Posix')
+    @unittest.skipUnless(hasattr(os, 'fork'), "test requires os.fork()")
     def testIssue8621(self):
         # On at least some versions of OSX uuid.uuid4 generates
         # the same sequence of UUIDs in the parent and any
@@ -449,6 +453,7 @@ eth0      Link encap:Ethernet  HWaddr 12:34:56:78:90:ab
                         "%s is not an RFC 4122 node ID" % hex)
 
     @unittest.skipUnless(os.name == 'posix', 'requires Posix')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_ifconfig_getnode(self):
         node = uuid._ifconfig_getnode()
         self.check_node(node, 'ifconfig', True)

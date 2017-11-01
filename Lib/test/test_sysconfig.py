@@ -15,6 +15,7 @@ from sysconfig import (get_paths, get_platform, get_config_vars,
                        get_scheme_names, get_config_var, _main)
 import _osx_support
 
+
 class TestSysConfig(unittest.TestCase):
 
     def setUp(self):
@@ -235,10 +236,12 @@ class TestSysConfig(unittest.TestCase):
 
     def test_get_scheme_names(self):
         wanted = ('nt', 'nt_user', 'osx_framework_user',
-                  'posix_home', 'posix_prefix', 'posix_user')
+                  'posix_home', 'posix_prefix', 'posix_user',
+                  'ios', 'tvos', 'watchos')
         self.assertEqual(get_scheme_names(), wanted)
 
     @skip_unless_symlink
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_symlink(self):
         # On Windows, the EXE needs to know where pythonXY.dll is at so we have
         # to add the directory to the path.

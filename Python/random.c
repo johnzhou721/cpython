@@ -1,11 +1,23 @@
 #include "Python.h"
 #ifdef MS_WINDOWS
-#include <windows.h>
+#  include <windows.h>
+/* All sample MSDN wincrypt programs include the header below. It is at least
+ * required with Min GW. */
+#  include <wincrypt.h>
 #else
-#include <fcntl.h>
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
+#  include <fcntl.h>
+#  ifdef HAVE_SYS_STAT_H
+#    include <sys/stat.h>
+#  endif
+#  ifdef HAVE_LINUX_RANDOM_H
+#    include <linux/random.h>
+#  endif
+#  if defined(HAVE_SYS_RANDOM_H) && (defined(HAVE_GETRANDOM) || defined(HAVE_GETENTROPY))
+#    include <sys/random.h>
+#  endif
+#  if !defined(HAVE_GETRANDOM) && defined(HAVE_GETRANDOM_SYSCALL)
+#    include <sys/syscall.h>
+#  endif
 #endif
 
 #ifdef Py_DEBUG

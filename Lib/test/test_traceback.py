@@ -1,6 +1,7 @@
 """Test cases for traceback module"""
 
 from io import StringIO
+import subprocess
 import sys
 import unittest
 import re
@@ -101,11 +102,12 @@ class SyntaxTracebackCases(unittest.TestCase):
         err = traceback.format_exception_only(None, None)
         self.assertEqual(err, ['None\n'])
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_encoded_file(self):
         # Test that tracebacks are correctly printed for encoded source files:
         # - correct line number (Issue2384)
         # - respect file encoding (Issue3975)
-        import tempfile, sys, subprocess, os
+        import tempfile, sys, os
 
         # The spawned subprocess has its stdout redirected to a PIPE, and its
         # encoding may be different from the current interpreter, on Windows

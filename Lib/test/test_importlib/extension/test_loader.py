@@ -10,6 +10,8 @@ import types
 import unittest
 
 
+@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                 '%s does not support dynamic loading' % sys.platform)
 class LoaderTests(abc.LoaderTests):
 
     """Test load_module() for extension modules."""

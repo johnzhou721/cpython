@@ -1,6 +1,10 @@
 
 /* UNIX password file access module */
 
+#ifdef __APPLE__
+#  include "TargetConditionals.h"
+#endif /* __APPLE__ */
+
 #include "Python.h"
 #include "posixmodule.h"
 
@@ -105,6 +109,21 @@ pwd_getpwuid(PyObject *self, PyObject *args)
         return NULL;
     }
     if ((p = getpwuid(uid)) == NULL) {
+// iPhone has a "user" with UID 501, username "mobile"; but the simulator
+// doesn't reflect this. Generate a simulated response.
+#if TARGET_IPHONE_SIMULATOR
+        if (uid == 501) {
+            struct passwd mp;
+            mp.pw_name = "mobile";
+            mp.pw_passwd = "/smx7MYTQIi2M";
+            mp.pw_uid = 501;
+            mp.pw_gid = 501;
+            mp.pw_gecos = "Mobile User";
+            mp.pw_dir = "/var/mobile";
+            mp.pw_shell = "/bin/sh";
+            return mkpwent(&mp);
+        }
+#endif
         PyObject *uid_obj = _PyLong_FromUid(uid);
         if (uid_obj == NULL)
             return NULL;
@@ -136,6 +155,22 @@ pwd_getpwnam(PyObject *self, PyObject *args)
     if (PyBytes_AsStringAndSize(bytes, &name, NULL) == -1)
         goto out;
     if ((p = getpwnam(name)) == NULL) {
+// iPhone has a "user" with UID 501, username "mobile"; but the simulator
+// doesn't reflect this. Generate a simulated response.
+#if TARGET_IPHONE_SIMULATOR
+        if (strcmp(name, "mobile") == 0) {
+            struct passwd mp;
+            mp.pw_name = "mobile";
+            mp.pw_passwd = "/smx7MYTQIi2M";
+            mp.pw_uid = 501;
+            mp.pw_gid = 501;
+            mp.pw_gecos = "Mobile User";
+            mp.pw_dir = "/var/mobile";
+            mp.pw_shell = "/bin/sh";
+            retval = mkpwent(&mp);
+            goto out;
+        }
+#endif
         PyErr_Format(PyExc_KeyError,
                      "getpwnam(): name not found: %s", name);
         goto out;
@@ -175,6 +210,7 @@ pwd_getpwall(PyObject *self)
     return d;
 }
 #endif
+
 
 static PyMethodDef pwd_methods[] = {
     {"getpwuid",        pwd_getpwuid, METH_VARARGS, pwd_getpwuid__doc__},

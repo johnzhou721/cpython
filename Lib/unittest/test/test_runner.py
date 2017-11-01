@@ -270,6 +270,7 @@ class Test_TextTestRunner(unittest.TestCase):
         expectedresult = (runner.stream, DESCRIPTIONS, VERBOSITY)
         self.assertEqual(runner._makeResult(), expectedresult)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_warnings(self):
         """
         Check that warnings argument of TextTestRunner correctly affects the

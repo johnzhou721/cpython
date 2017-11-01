@@ -588,6 +588,7 @@ class EnvironTests(mapping_tests.BasicTestMappingProtocol):
 
     # Bug 1110478
     @unittest.skipUnless(os.path.exists('/bin/sh'), 'requires /bin/sh')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_update2(self):
         os.environ.clear()
         os.environ.update(HELLO="World")
@@ -596,6 +597,7 @@ class EnvironTests(mapping_tests.BasicTestMappingProtocol):
             self.assertEqual(value, "World")
 
     @unittest.skipUnless(os.path.exists('/bin/sh'), 'requires /bin/sh')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_os_popen_iter(self):
         with os.popen(
             "/bin/sh -c 'echo \"line1\nline2\nline3\"'") as popen:
@@ -1226,6 +1228,7 @@ def _execvpe_mockup(defpath=None):
         os.execve = orig_execve
         os.defpath = orig_defpath
 
+@unittest.skipUnless(hasattr(os, 'execv'), "os module doesn't provide execvpe()")
 class ExecTests(unittest.TestCase):
     @unittest.skipIf(USING_LINUXTHREADS,
                      "avoid triggering a linuxthreads bug: see issue #4970")
@@ -1477,6 +1480,7 @@ class PosixUidGidTests(unittest.TestCase):
         self.assertRaises(OverflowError, os.setreuid, 0, 1<<32)
 
     @unittest.skipUnless(hasattr(os, 'setreuid'), 'test needs os.setreuid()')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_setreuid_neg1(self):
         # Needs to accept -1.  We run this in a subprocess to avoid
         # altering the test runner's process state (issue8045).
@@ -1485,6 +1489,7 @@ class PosixUidGidTests(unittest.TestCase):
                 'import os,sys;os.setreuid(-1,-1);sys.exit(0)'])
 
     @unittest.skipUnless(hasattr(os, 'setregid'), 'test needs os.setregid()')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_setregid(self):
         if os.getuid() != 0 and not HAVE_WHEEL_GROUP:
             self.assertRaises(OSError, os.setregid, 0, 0)
@@ -1492,6 +1497,7 @@ class PosixUidGidTests(unittest.TestCase):
         self.assertRaises(OverflowError, os.setregid, 0, 1<<32)
 
     @unittest.skipUnless(hasattr(os, 'setregid'), 'test needs os.setregid()')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_setregid_neg1(self):
         # Needs to accept -1.  We run this in a subprocess to avoid
         # altering the test runner's process state (issue8045).
@@ -1917,6 +1923,7 @@ class DeviceEncodingTests(unittest.TestCase):
 
 class PidTests(unittest.TestCase):
     @unittest.skipUnless(hasattr(os, 'getppid'), "test needs os.getppid")
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_getppid(self):
         p = subprocess.Popen([sys.executable, '-c',
                               'import os; print(os.getppid())'],
@@ -2382,6 +2389,7 @@ class TermsizeTests(unittest.TestCase):
         self.assertGreaterEqual(size.columns, 0)
         self.assertGreaterEqual(size.lines, 0)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_stty_match(self):
         """Check if stty returns the same results
 

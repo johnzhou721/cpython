@@ -63,17 +63,21 @@ class CaseSensitivityTest:
             self.assertIsNotNone(insensitive)
             self.assertIn(self.name, insensitive.get_filename(self.name))
 
+
 class CaseSensitivityTestPEP302(CaseSensitivityTest):
     def find(self, finder):
         return finder.find_module(self.name)
 
+
 Frozen_CaseSensitivityTestPEP302, Source_CaseSensitivityTestPEP302 = util.test_both(
     CaseSensitivityTestPEP302, importlib=importlib, machinery=machinery)
+
 
 class CaseSensitivityTestPEP451(CaseSensitivityTest):
     def find(self, finder):
         found = finder.find_spec(self.name)
         return found.loader if found is not None else found
+
 
 Frozen_CaseSensitivityTestPEP451, Source_CaseSensitivityTestPEP451 = util.test_both(
     CaseSensitivityTestPEP451, importlib=importlib, machinery=machinery)

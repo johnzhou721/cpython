@@ -38,6 +38,7 @@ class ConfigTestCase(support.LoggingSilencer,
         self.assertEqual(len(self._logs), numlines+1)
 
     @unittest.skipIf(sys.platform == 'win32', "can't test on Windows")
+    @unittest.skipUnless(hasattr(os, 'fork'), "distutils cannot spawn child processes")
     def test_search_cpp(self):
         pkg_dir, dist = self.create_dist()
         cmd = config(dist)

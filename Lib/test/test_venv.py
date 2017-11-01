@@ -14,7 +14,6 @@ import sys
 import tempfile
 from test.support import (captured_stdout, captured_stderr, run_unittest,
                           can_symlink, EnvironmentVarGuard, rmtree)
-import textwrap
 import unittest
 import venv
 
@@ -34,6 +33,7 @@ if os.devnull.lower() == 'nul':
 else:
     def failsOnWindows(f):
         return f
+
 
 class BaseTest(unittest.TestCase):
     """Base class for venv tests."""
@@ -111,6 +111,7 @@ class BasicTest(BaseTest):
         self.assertTrue(os.path.exists(fn), 'File %r should exist.' % fn)
 
     @skipInVenv
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_prefixes(self):
         """
         Test that the prefix values are as expected.
@@ -249,6 +250,7 @@ class BasicTest(BaseTest):
     # point to the venv being used to run the test, and we lose the link
     # to the source build - so Python can't initialise properly.
     @skipInVenv
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_executable(self):
         """
         Test that the sys.executable value is as expected.
@@ -263,6 +265,7 @@ class BasicTest(BaseTest):
         self.assertEqual(out.strip(), envpy.encode())
 
     @unittest.skipUnless(can_symlink(), 'Needs symlinks')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_executable_symlinks(self):
         """
         Test that the sys.executable value is as expected.
@@ -281,6 +284,7 @@ class BasicTest(BaseTest):
 @skipInVenv
 class EnsurePipTest(BaseTest):
     """Test venv module installation of pip."""
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def assert_pip_not_installed(self):
         envpy = os.path.join(os.path.realpath(self.env_dir),
                              self.bindir, self.exe)
@@ -319,6 +323,7 @@ class EnsurePipTest(BaseTest):
 
     # Requesting pip fails without SSL (http://bugs.python.org/issue19744)
     @unittest.skipIf(ssl is None, ensurepip._MISSING_SSL_MESSAGE)
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_with_pip(self):
         rmtree(self.env_dir)
         with EnvironmentVarGuard() as envvars:

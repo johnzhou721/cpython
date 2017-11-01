@@ -20,6 +20,7 @@ try:
 except ImportError:
     threading = None
 
+
 class SysModuleTest(unittest.TestCase):
 
     def setUp(self):
@@ -217,6 +218,7 @@ class SysModuleTest(unittest.TestCase):
         finally:
             sys.setrecursionlimit(oldlimit)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_recursionlimit_fatalerror(self):
         # A fatal error occurs if a second recursion limit is hit when recovering
         # from a first one.
@@ -544,6 +546,7 @@ class SysModuleTest(unittest.TestCase):
     def test_clear_type_cache(self):
         sys._clear_type_cache()
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_ioencoding(self):
         env = dict(os.environ)
 
@@ -589,6 +592,7 @@ class SysModuleTest(unittest.TestCase):
 
     @unittest.skipUnless(test.support.FS_NONASCII,
                          'requires OS support of non-ASCII encodings')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_ioencoding_nonascii(self):
         env = dict(os.environ)
 
@@ -601,6 +605,7 @@ class SysModuleTest(unittest.TestCase):
 
     @unittest.skipIf(sys.base_prefix != sys.prefix,
                      'Test is not venv-compatible')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_executable(self):
         # sys.executable should be absolute
         self.assertEqual(os.path.abspath(sys.executable), sys.executable)

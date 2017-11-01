@@ -1,6 +1,7 @@
 import mailcap
 import os
 import shutil
+import sys
 import test.support
 import unittest
 
@@ -190,7 +191,8 @@ class FindmatchTest(unittest.TestCase):
         ]
         self._run_cases(cases)
 
-    @unittest.skipUnless(os.name == "posix", "Requires 'test' command on system")
+    @unittest.skipUnless(os.name == "posix" and sys.platform not in ('ios', 'tvos', 'watchos'),
+                         "Requires 'test' command on system")
     def test_test(self):
         # findmatch() will automatically check any "test" conditions and skip
         # the entry if the check fails.
