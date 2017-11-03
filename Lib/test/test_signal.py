@@ -143,6 +143,7 @@ class InterProcessSignalTests(unittest.TestCase):
     @unittest.skipIf(sys.platform=='freebsd6',
         'inter process signals not reliable (do not mix well with threading) '
         'on freebsd6')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_main(self):
         # This function spawns a child process to insulate the main
         # test-running process from all the signals. It then
@@ -292,6 +293,7 @@ class SiginterruptTest(unittest.TestCase):
         oldhandler = signal.signal(self.signum, lambda x,y: None)
         self.addCleanup(signal.signal, self.signum, oldhandler)
 
+    @unittest.skipUnless(hasattr(os, 'fork'), "test requires os.fork()")
     def readpipe_interrupted(self):
         """Perform a read during which a signal will arrive.  Return True if the
         read is interrupted by the signal and raises an exception.  Return False

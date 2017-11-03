@@ -654,6 +654,7 @@ class FileThreadingTests(unittest.TestCase):
 
 
 @unittest.skipUnless(os.name == 'posix', 'test requires a posix system.')
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 class TestFileSignalEINTR(unittest.TestCase):
     def _test_reading(self, data_to_write, read_and_verify_code, method_name,
                       universal_newlines=False):
@@ -827,6 +828,7 @@ class StdoutTests(unittest.TestCase):
         finally:
             sys.stdout = save_stdout
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_unicode(self):
         import subprocess
 

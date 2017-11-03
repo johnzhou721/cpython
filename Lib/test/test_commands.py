@@ -2,6 +2,7 @@
    Tests for commands module
    Nick Mathewson
 '''
+import subprocess
 import unittest
 import os, tempfile, re
 
@@ -23,6 +24,7 @@ if os.name != 'posix':
 
 class CommandTests(unittest.TestCase):
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_getoutput(self):
         self.assertEqual(commands.getoutput('echo xyzzy'), 'xyzzy')
         self.assertEqual(commands.getstatusoutput('echo xyzzy'), (0, 'xyzzy'))
@@ -41,6 +43,7 @@ class CommandTests(unittest.TestCase):
             if dir is not None:
                 os.rmdir(dir)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_getstatus(self):
         # This pattern should match 'ls -ld /.' on any posix
         # system, however perversely configured.  Even on systems

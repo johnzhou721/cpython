@@ -1,3 +1,4 @@
+import os
 import unittest
 from ctypes import *
 from ctypes.test import need_symbol
@@ -66,7 +67,7 @@ class SlicesTestCase(unittest.TestCase):
     def test_char_ptr(self):
         s = "abcdefghijklmnopqrstuvwxyz"
 
-        dll = CDLL(_ctypes_test.__file__)
+        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
         dll.my_strdup.restype = POINTER(c_char)
         dll.my_free.restype = None
         res = dll.my_strdup(s)
@@ -100,7 +101,7 @@ class SlicesTestCase(unittest.TestCase):
         dll.my_free(res)
 
     def test_char_ptr_with_free(self):
-        dll = CDLL(_ctypes_test.__file__)
+        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
         s = "abcdefghijklmnopqrstuvwxyz"
 
         class allocated_c_char_p(c_char_p):
@@ -136,7 +137,7 @@ class SlicesTestCase(unittest.TestCase):
     def test_wchar_ptr(self):
         s = u"abcdefghijklmnopqrstuvwxyz\0"
 
-        dll = CDLL(_ctypes_test.__file__)
+        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
         dll.my_wcsdup.restype = POINTER(c_wchar)
         dll.my_wcsdup.argtypes = POINTER(c_wchar),
         dll.my_free.restype = None

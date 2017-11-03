@@ -102,6 +102,7 @@ class SysconfigTestCase(support.EnvironGuard,
         self.assertEqual(global_sysconfig.get_config_var('LDSHARED'), sysconfig.get_config_var('LDSHARED'))
         self.assertEqual(global_sysconfig.get_config_var('CC'), sysconfig.get_config_var('CC'))
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_customize_compiler_before_get_config_vars(self):
         # Issue #21923: test that a Distribution compiler
         # instance can be called without an explicit call to

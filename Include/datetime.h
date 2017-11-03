@@ -164,6 +164,12 @@ typedef struct {
 /* "magic" constant used to partially protect against developer mistakes. */
 #define DATETIME_API_MAGIC 0x414548d5
 
+/* Define global variable for the C API and a macro for setting it. */
+static PyDateTime_CAPI *PyDateTimeAPI = NULL;
+
+#define PyDateTime_IMPORT \
+    PyDateTimeAPI = (PyDateTime_CAPI *)PyCapsule_Import(PyDateTime_CAPSULE_NAME, 0)
+
 #ifdef Py_BUILD_CORE
 
 /* Macros for type checking when building the Python core. */
@@ -183,12 +189,6 @@ typedef struct {
 #define PyTZInfo_CheckExact(op) (Py_TYPE(op) == &PyDateTime_TZInfoType)
 
 #else
-
-/* Define global variable for the C API and a macro for setting it. */
-static PyDateTime_CAPI *PyDateTimeAPI = NULL;
-
-#define PyDateTime_IMPORT \
-    PyDateTimeAPI = (PyDateTime_CAPI *)PyCapsule_Import(PyDateTime_CAPSULE_NAME, 0)
 
 /* Macros for type checking when not building the Python core. */
 #define PyDate_Check(op) PyObject_TypeCheck(op, PyDateTimeAPI->DateType)

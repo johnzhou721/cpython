@@ -1,12 +1,14 @@
-import unittest
 import ctypes
 import gc
+import os
+import unittest
 
 MyCallback = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int)
 OtherCallback = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_ulonglong)
 
 import _ctypes_test
-dll = ctypes.CDLL(_ctypes_test.__file__)
+dll = ctypes.CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+
 
 class RefcountTestCase(unittest.TestCase):
 
@@ -32,7 +34,6 @@ class RefcountTestCase(unittest.TestCase):
         gc.collect()
 
         self.assertEqual(grc(callback), 2)
-
 
     def test_refcount(self):
         from sys import getrefcount as grc

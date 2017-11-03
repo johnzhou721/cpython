@@ -226,6 +226,7 @@ class TestForkInThread(unittest.TestCase):
 
     @unittest.skipIf(sys.platform.startswith('win'),
                      "This test is only appropriate for POSIX-like systems.")
+    @unittest.skipUnless(hasattr(os, 'fork'), "test requires os.fork()")
     @test_support.reap_threads
     def test_forkinthread(self):
         def thread1():

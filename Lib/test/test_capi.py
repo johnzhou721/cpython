@@ -5,6 +5,7 @@ from __future__ import with_statement
 import sys
 import time
 import random
+import subprocess
 import unittest
 from test import test_support as support
 try:
@@ -13,6 +14,7 @@ try:
 except ImportError:
     thread = None
     threading = None
+
 # Skip this test if the _testcapi module isn't available.
 _testcapi = support.import_module('_testcapi')
 
@@ -23,6 +25,7 @@ class CAPITest(unittest.TestCase):
 
 
 @unittest.skipUnless(threading, 'Threading required for this test.')
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 class TestPendingCalls(unittest.TestCase):
 
     def pendingcalls_submit(self, l, n):

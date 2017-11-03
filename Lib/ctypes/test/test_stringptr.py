@@ -1,9 +1,11 @@
+import os
 import unittest
 from ctypes import *
 
 import _ctypes_test
 
-lib = CDLL(_ctypes_test.__file__)
+lib = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+
 
 class StringPtrTestCase(unittest.TestCase):
 
@@ -73,3 +75,4 @@ class StringPtrTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

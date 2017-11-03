@@ -20,6 +20,7 @@ try:
 except ImportError:
     thread = None
 
+
 def get_gdb_version():
     try:
         proc = subprocess.Popen(["gdb", "-nx", "--version"],
@@ -31,6 +32,8 @@ def get_gdb_version():
         # This is what "no gdb" looks like.  There may, however, be other
         # errors that manifest this way too.
         raise unittest.SkipTest("Couldn't find gdb on the path")
+    except AttributeError:
+        raise unittest.SkipTest("subprocess module doesn't provide Popen()")
 
     # Regex to parse:
     # 'GNU gdb (GDB; SUSE Linux Enterprise 12) 7.7\n' -> 7.7

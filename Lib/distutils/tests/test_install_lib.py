@@ -43,6 +43,7 @@ class InstallLibTestCase(support.TempdirManager,
         return pkg_dir
 
     @unittest.skipIf(sys.dont_write_bytecode, 'byte-compile not enabled')
+    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork')), "distutils cannot spawn child processes")
     def test_byte_compile(self):
         pkg_dir = self._setup_byte_compile()
         if sys.flags.optimize < 1:

@@ -423,7 +423,7 @@ class GeneralModuleTests(unittest.TestCase):
         if (sys.platform.startswith('linux') or
             sys.platform.startswith('freebsd') or
             sys.platform.startswith('netbsd') or
-            sys.platform == 'darwin'):
+            sys.platform in ('darwin', 'ios', 'tvos', 'watchos')):
             # avoid the 'echo' service on this platform, as there is an
             # assumption breaking non-standard port/protocol entry
             services = ('daytime', 'qotd', 'domain')

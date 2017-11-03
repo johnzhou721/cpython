@@ -197,6 +197,7 @@ class InstallTestCase(support.TempdirManager,
                     'UNKNOWN-0.0.0-py%s.%s.egg-info' % sys.version_info[:2]]
         self.assertEqual(found, expected)
 
+    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork')), "distutils cannot spawn child processes")
     def test_record_extensions(self):
         install_dir = self.mkdtemp()
         project_dir, dist = self.create_dist(ext_modules=[

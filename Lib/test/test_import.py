@@ -16,6 +16,11 @@ from test.test_support import (unlink, TESTFN, unload, run_unittest, rmtree,
 from test import symlink_support
 from test import script_helper
 
+skip_if_dont_write_bytecode = unittest.skipIf(
+        sys.dont_write_bytecode,
+        "test meaningful only when writing bytecode")
+
+
 def _files(name):
     return (name + os.extsep + "py",
             name + os.extsep + "pyc",
@@ -333,6 +338,7 @@ class ImportTests(unittest.TestCase):
         finally:
             os.rmdir(source)
 
+    @skip_if_dont_write_bytecode
     def test_timestamp_overflow(self):
         # A modification timestamp larger than 2**32 should not be a problem
         # when importing a module (issue #11235).

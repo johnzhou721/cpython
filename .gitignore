@@ -68,7 +68,7 @@ libpython*.dylib
 libpython*.dll
 platform
 pybuilddir.txt
-pyconfig.h
+./pyconfig.h
 python$
 python.exe
 python-gdb.py

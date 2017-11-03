@@ -1673,6 +1673,8 @@ class UnicodeTest(
 class CAPITest(unittest.TestCase):
 
     # Test PyUnicode_FromFormat()
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "Can't dynamically load libraries on %s" % sys.platform)
     def test_from_format(self):
         test_support.import_module('ctypes')
         from ctypes import (

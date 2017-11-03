@@ -3,7 +3,7 @@ import re
 import sys
 import os
 from test import test_support
-from subprocess import Popen, PIPE
+import subprocess
 
 # Skip this test if the _tkinter module wasn't built.
 _tkinter = test_support.import_module('_tkinter')
@@ -254,7 +254,7 @@ class TclTest(unittest.TestCase):
             cmd = '%s -c "import Tkinter; print Tkinter"' % (unc_name,)
 
             try:
-                p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except WindowsError as e:
                 if e.winerror == 5:
                     self.skipTest('Not permitted to start the child process')

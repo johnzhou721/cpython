@@ -242,7 +242,14 @@ RESOURCE_NAMES = ('audio', 'curses', 'largefile', 'network', 'bsddb',
                   'decimal', 'cpu', 'subprocess', 'urlfetch', 'gui',
                   'xpickle')
 
-TEMPDIR = os.path.abspath(tempfile.gettempdir())
+# When tests are run from the Python build directory, it is best practice
+# to keep the test files in a subfolder.  It eases the cleanup of leftover
+# files using command "make distclean".
+if sysconfig.is_python_build():
+    TEMPDIR = os.path.join(sysconfig.get_config_var('srcdir'), 'build')
+else:
+    TEMPDIR = tempfile.gettempdir()
+TEMPDIR = os.path.abspath(TEMPDIR)
 
 
 def usage(code, msg=''):
@@ -880,7 +887,7 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         result = "SUCCESS"
     print("Tests result: %s" % result)
 
-    sys.exit(len(bad) > 0 or interrupted)
+    return (len(bad) > 0 or interrupted)
 
 
 STDTESTS = [

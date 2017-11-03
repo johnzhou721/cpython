@@ -3273,6 +3273,15 @@ then
 	*-*-cygwin*)
 		ac_sys_system=Cygwin
 		;;
+	*-apple-ios)
+		ac_sys_system=iOS
+		;;
+  *-apple-tvos)
+    ac_sys_system=tvOS
+    ;;
+  *-apple-watchos)
+    ac_sys_system=watchOS
+    ;;
 	*)
 		# for now, limit cross builds to known configurations
 		MACHDEP="unknown"
@@ -3316,6 +3325,15 @@ if test "$cross_compiling" = yes; then
 			_host_cpu=$host_cpu
 		esac
 		;;
+	*-apple-*)
+		case "$host_cpu" in
+		arm*)
+			_host_cpu=arm
+			;;
+		*)
+			_host_cpu=$host_cpu
+        	esac
+        	;;
 	*-*-cygwin*)
 		_host_cpu=
 		;;
@@ -3394,6 +3412,13 @@ $as_echo "#define _BSD_SOURCE 1" >>confdefs.h
   Darwin/[6789].*)
     define_xopen_source=no;;
   Darwin/1[0-9].*)
+    define_xopen_source=no;;
+  # On iOS, defining _POSIX_C_SOURCE also disables platform specific features.
+  iOS/*)
+    define_xopen_source=no;;
+  tvOS/*)
+    define_xopen_source=no;;
+  watchOS/*)
     define_xopen_source=no;;
   # On AIX 4 and 5.1, mbstate_t is defined only when _XOPEN_SOURCE == 500 but
   # used in wcsnrtombs() and mbsnrtowcs() even if _XOPEN_SOURCE is not defined
@@ -16457,7 +16482,17 @@ fi
 echo "creating Modules/Setup.local"
 if test ! -f Modules/Setup.local
 then
-	echo "# Edit this file for local setup changes" >Modules/Setup.local
+	if test ! -f Modules/Setup.$_PYTHON_HOST_PLATFORM
+	then
+		echo "# Edit this file for local setup changes" >Modules/Setup.local
+	else
+		if test -f Modules/Setup.$_PYTHON_HOST_PLATFORM.local
+		then
+			cp Modules/Setup.$_PYTHON_HOST_PLATFORM.local Modules/Setup.local
+		else
+			cat Modules/Setup.embedded Modules/Setup.$_PYTHON_HOST_PLATFORM > Modules/Setup.local
+		fi
+	fi
 fi
 
 echo "creating Makefile"

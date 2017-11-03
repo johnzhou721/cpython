@@ -2,6 +2,7 @@
 # because of running
 from lib2to3.tests import (test_fixers, test_pytree, test_util, test_refactor,
                            test_parser, test_main as test_main_)
+import subprocess
 import unittest
 from test.test_support import run_unittest
 
@@ -13,6 +14,7 @@ def suite():
         tests.addTests(loader.loadTestsFromModule(m))
     return tests
 
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 def test_main():
     run_unittest(suite())
 

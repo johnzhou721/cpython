@@ -1,19 +1,22 @@
 # PyOS_ascii_formatd is deprecated and not called from anywhere in
 #  Python itself. So this module is the only place it gets tested.
 # Test that it works, and test that it's deprecated.
-
+import sys
 import unittest
 from test.test_support import check_warnings, run_unittest, import_module
 
 # Skip tests if _ctypes module does not exist
 import_module('_ctypes')
 
+# Skip on Apple mobile platforms; this test relies on dynamic symbol loading.
+if sys.platform in ('ios', 'tvos', 'watchos'):
+    raise unittest.SkipTest("Can't dynamically load libraries on %s" % sys.platform)
+
 from ctypes import pythonapi, create_string_buffer, sizeof, byref, c_double
 PyOS_ascii_formatd = pythonapi.PyOS_ascii_formatd
 
 
 class FormatDeprecationTests(unittest.TestCase):
-
     def test_format_deprecation(self):
         buf = create_string_buffer(' ' * 100)
 

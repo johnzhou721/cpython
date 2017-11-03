@@ -232,7 +232,7 @@ class MmapTests(unittest.TestCase):
         self.assertRaises(ValueError, mmap.mmap, f.fileno(), mapsize, access=4)
         f.close()
 
-        if os.name == "posix":
+        if os.name == "posix" and sys.platform not in ('ios', 'tvos', 'watchos'):
             # Try incompatible flags, prot and access parameters.
             f = open(TESTFN, "r+b")
             self.assertRaises(ValueError, mmap.mmap, f.fileno(), mapsize,
@@ -676,7 +676,7 @@ class LargeMmapTests(unittest.TestCase):
         unlink(TESTFN)
 
     def _make_test_file(self, num_zeroes, tail):
-        if sys.platform[:3] == 'win' or sys.platform == 'darwin':
+        if sys.platform[:3] == 'win' or sys.platform in ('darwin', 'ios', 'tvos', 'watchos'):
             requires('largefile',
                 'test requires %s bytes and a long time to run' % str(0x180000000))
         f = open(TESTFN, 'w+b')

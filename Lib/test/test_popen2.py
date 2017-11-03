@@ -29,6 +29,7 @@ except ImportError:
     from os import fork
     del fork
 
+@unittest.skipUnless(hasattr(os, 'popen2'), "test requires os.popen2()")
 class Popen2Test(unittest.TestCase):
     cmd = "cat"
     if os.name == "nt":

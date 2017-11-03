@@ -831,6 +831,7 @@ class PyZipFileTests(unittest.TestCase):
             self.skipTest('requires write access to the installed location')
         unlink(filename)
 
+    @unittest.skipIf(sys.dont_write_bytecode, "Test requires ability to write bytecode")
     def test_write_pyfile(self):
         self.requiresWriteAccess(os.path.dirname(__file__))
         with zipfile.PyZipFile(TemporaryFile(), "w") as zipfp:

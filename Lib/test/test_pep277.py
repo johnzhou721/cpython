@@ -24,7 +24,7 @@ filenames = [
 # these normal forms.  For example, HFS Plus uses a variant of Normal Form D
 # in which U+2000 through U+2FFF, U+F900 through U+FAFF, and U+2F800 through
 # U+2FAFF are not decomposed."
-if sys.platform != 'darwin':
+if sys.platform not in ('darwin', 'ios', 'tvos', 'watchos'):
     filenames.extend([
         # Specific code points: NFC(fn), NFD(fn), NFKC(fn) and NFKD(fn) all differents
         u'11_\u0385\u03d3\u03d4',
@@ -122,11 +122,12 @@ class UnicodeFileTests(unittest.TestCase):
             f.close()
             os.stat(name)
 
-    # Skip the test on darwin, because darwin does normalize the filename to
+    # Skip the test on darwin/iOS/tvOS/watchOS, because darwin does normalize the filename to
     # NFD (a variant of Unicode NFD form). Normalize the filename to NFC, NFKC,
     # NFKD in Python is useless, because darwin will normalize it later and so
     # open(), os.stat(), etc. don't raise any exception.
-    @unittest.skipIf(sys.platform == 'darwin', 'irrelevant test on Mac OS X')
+    @unittest.skipIf(sys.platform in ('darwin', 'ios', 'tvos', 'watchos'),
+                     'irrelevant test on %s' % sys.platform)
     def test_normalize(self):
         files = set(f for f in self.files if isinstance(f, unicode))
         others = set()
@@ -142,10 +143,11 @@ class UnicodeFileTests(unittest.TestCase):
             # listdir may append a wildcard to the filename, so dont check
             self._apply_failure(os.listdir, name, OSError, False)
 
-    # Skip the test on darwin, because darwin uses a normalization different
+    # Skip the test on darwin/iOS/tvOS/watchOS, because darwin uses a normalization different
     # than Python NFD normalization: filenames are different even if we use
     # Python NFD normalization.
-    @unittest.skipIf(sys.platform == 'darwin', 'irrelevant test on Mac OS X')
+    @unittest.skipIf(sys.platform in ('darwin', 'ios', 'tvos', 'watchos'),
+                     'irrelevant test on %s' % sys.platform)
     def test_listdir(self):
         sf0 = set(self.files)
         f1 = os.listdir(test_support.TESTFN)

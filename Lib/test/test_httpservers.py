@@ -12,6 +12,7 @@ import ntpath
 import shutil
 import urllib
 import httplib
+import subprocess
 import tempfile
 import unittest
 import CGIHTTPServer
@@ -87,6 +88,7 @@ class BaseTestCase(unittest.TestCase):
         self.connection.request(method, uri, body, headers)
         return self.connection.getresponse()
 
+
 class BaseHTTPRequestHandlerTestCase(unittest.TestCase):
     """Test the functionality of the BaseHTTPServer focussing on
     BaseHTTPRequestHandler.
@@ -94,7 +96,7 @@ class BaseHTTPRequestHandlerTestCase(unittest.TestCase):
 
     HTTPResponseMatch = re.compile('HTTP/1.[0-9]+ 200 OK')
 
-    def setUp (self):
+    def setUp(self):
         self.handler = SocketlessRequestHandler()
 
     def send_typical_request(self, message):
@@ -450,6 +452,7 @@ print(os.environ["%s"])
 
 @unittest.skipIf(hasattr(os, 'geteuid') and os.geteuid() == 0,
         "This test can't be run reliably as root (issue #13308).")
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 class CGIHTTPServerTestCase(BaseTestCase):
     class request_handler(NoLogRequestHandler, CGIHTTPRequestHandler):
         pass
@@ -620,6 +623,7 @@ class CGIHTTPServerTestCase(BaseTestCase):
             (b'k=aa%2F%2Fbb&//q//p//=//a//b//\n',
              'text/html', 200),
             (res.read(), res.getheader('Content-type'), res.status))
+
 
 
 class SimpleHTTPRequestHandlerTestCase(unittest.TestCase):

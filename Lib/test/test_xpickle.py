@@ -56,6 +56,8 @@ class DumpPickle_LoadCPickle(AbstractPickleTests):
         # Ignore fast
         return cPickle.loads(buf)
 
+@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                 "Can't run python cross-version pickle tests on %s" % sys.platform)
 def have_python_version(name, cache={}):
     """Check whether the given name is a valid Python binary and has
     test.test_support.
@@ -87,6 +89,7 @@ class AbstractCompatTests(AbstractPickleTests):
         if not have_python_version(self.python):
             self.skipTest('%s not available' % self.python)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def send_to_worker(self, python, obj, proto):
         """Bounce a pickled object through another version of Python.
 

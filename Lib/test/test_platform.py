@@ -6,11 +6,13 @@ import subprocess
 
 from test import test_support
 
+
 class PlatformTest(unittest.TestCase):
     def test_architecture(self):
         res = platform.architecture()
 
     if hasattr(os, "symlink"):
+        @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
         def test_architecture_via_symlink(self): # issue3762
             def get(python):
                 cmd = [python, '-c',
@@ -195,7 +197,7 @@ class PlatformTest(unittest.TestCase):
         else:
             have_toolbox_glue = True
 
-        if have_toolbox_glue and platform.uname()[0] == 'Darwin':
+        if have_toolbox_glue and platform.uname()[0] == 'Darwin' and sys.platform not in ('ios', 'tvos', 'watchos'):
             # We're on a MacOSX system, check that
             # the right version information is returned
             fd = os.popen('sw_vers', 'r')
@@ -223,7 +225,6 @@ class PlatformTest(unittest.TestCase):
                 self.assertIn(res[2], ('i386', 'x86_64'))
             else:
                 self.assertEqual(res[2], 'PowerPC')
-
 
     @unittest.skipUnless(sys.platform == 'darwin', "OSX only test")
     def test_mac_ver_with_fork(self):

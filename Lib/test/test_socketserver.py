@@ -8,7 +8,7 @@ import os
 import select
 import signal
 import socket
-import select
+import sys
 import errno
 import tempfile
 import unittest
@@ -29,8 +29,9 @@ HOST = test.test_support.HOST
 HAVE_UNIX_SOCKETS = hasattr(socket, "AF_UNIX")
 requires_unix_sockets = unittest.skipUnless(HAVE_UNIX_SOCKETS,
                                             'requires Unix sockets')
-HAVE_FORKING = hasattr(os, "fork") and os.name != "os2"
+HAVE_FORKING = hasattr(os, "fork")
 requires_forking = unittest.skipUnless(HAVE_FORKING, 'requires forking')
+
 
 def signal_alarm(n):
     """Call signal.alarm when it exists (i.e. not on Windows)."""
@@ -203,12 +204,16 @@ class SocketServerTest(unittest.TestCase):
                             self.stream_examine)
 
     @requires_unix_sockets
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_UnixStreamServer(self):
         self.run_server(SocketServer.UnixStreamServer,
                         SocketServer.StreamRequestHandler,
                         self.stream_examine)
 
     @requires_unix_sockets
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_ThreadingUnixStreamServer(self):
         self.run_server(SocketServer.ThreadingUnixStreamServer,
                         SocketServer.StreamRequestHandler,
@@ -272,12 +277,16 @@ class SocketServerTest(unittest.TestCase):
             self.assertGreater(mock_select.called, 1)
 
     @requires_unix_sockets
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_UnixDatagramServer(self):
         self.run_server(SocketServer.UnixDatagramServer,
                         SocketServer.DatagramRequestHandler,
                         self.dgram_examine)
 
     @requires_unix_sockets
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_ThreadingUnixDatagramServer(self):
         self.run_server(SocketServer.ThreadingUnixDatagramServer,
                         SocketServer.DatagramRequestHandler,

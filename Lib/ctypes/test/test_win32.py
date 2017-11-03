@@ -2,10 +2,13 @@
 
 from ctypes import *
 from ctypes.test import requires
-import unittest, sys
+import os
+import sys
+import unittest
 from test import test_support as support
 
 import _ctypes_test
+
 
 # Only windows 32-bit has different calling conventions.
 @unittest.skipUnless(sys.platform == "win32", 'Windows-specific test')
@@ -35,6 +38,7 @@ class WindowsTestCase(unittest.TestCase):
         # ValueError: Procedure called with not enough arguments
         # (4 bytes missing) or wrong calling convention
         self.assertRaises(ValueError, IsWindow, None)
+
 
 @unittest.skipUnless(sys.platform == "win32", 'Windows-specific test')
 class FunctionCallTestCase(unittest.TestCase):
@@ -88,7 +92,7 @@ class Structures(unittest.TestCase):
                         ("right", c_long),
                         ("bottom", c_long)]
 
-        dll = CDLL(_ctypes_test.__file__)
+        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
 
         pt = POINT(15, 25)
         left = c_long.in_dll(dll, 'left')

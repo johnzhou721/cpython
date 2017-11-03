@@ -1,7 +1,13 @@
 """Test dlmodule.c
    Roger E. Masse  revised strategy by Barry Warsaw
 """
+import sys
 import unittest
+
+# Skip on Apple mobile platforms; this test relies on dynamic symbol loading.
+if sys.platform in ('ios', 'tvos', 'watchos'):
+    raise unittest.SkipTest("Can't dynamically load libraries on %s" % sys.platform)
+
 from test.test_support import verbose, import_module
 dl = import_module('dl', deprecated=True)
 

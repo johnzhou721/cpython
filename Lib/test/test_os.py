@@ -361,6 +361,7 @@ class EnvironTests(mapping_tests.BasicTestMappingProtocol):
         os.environ.update(self.__save)
 
     # Bug 1110478
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_update2(self):
         if os.path.exists("/bin/sh"):
             os.environ.update(HELLO="World")
@@ -546,6 +547,7 @@ class URandomTests (unittest.TestCase):
         data2 = os.urandom(16)
         self.assertNotEqual(data1, data2)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def get_urandom_subprocess(self, count):
         # We need to use repr() and eval() to avoid line ending conversions
         # under Windows.
@@ -599,6 +601,7 @@ class URandomFDTests(unittest.TestCase):
         assert_python_ok('-c', code)
 
 
+@unittest.skipUnless(hasattr(os, 'execv'), "os module doesn't provide execvpe()")
 class ExecvpeTests(unittest.TestCase):
 
     def test_execvpe_with_bad_arglist(self):
@@ -742,6 +745,7 @@ class PosixUidGidTests(unittest.TestCase):
         self.assertRaises(OverflowError, os.setreuid, 0, 1<<32)
 
     @unittest.skipUnless(hasattr(os, 'setreuid'), 'test needs os.setreuid()')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_setreuid_neg1(self):
         # Needs to accept -1.  We run this in a subprocess to avoid
         # altering the test runner's process state (issue8045).
@@ -750,6 +754,7 @@ class PosixUidGidTests(unittest.TestCase):
                 'import os,sys;os.setreuid(-1,-1);sys.exit(0)'])
 
     @unittest.skipUnless(hasattr(os, 'setregid'), 'test needs os.setregid()')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_setregid(self):
         if os.getuid() != 0:
             self.assertRaises(os.error, os.setregid, 0, 0)
@@ -757,6 +762,7 @@ class PosixUidGidTests(unittest.TestCase):
         self.assertRaises(OverflowError, os.setregid, 0, 1<<32)
 
     @unittest.skipUnless(hasattr(os, 'setregid'), 'test needs os.setregid()')
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_setregid_neg1(self):
         # Needs to accept -1.  We run this in a subprocess to avoid
         # altering the test runner's process state (issue8045).

@@ -51,6 +51,7 @@ def tearDownModule():
     sys.path[:] = OLD_SYS_PATH
 
 
+
 class HelperFunctionsTests(unittest.TestCase):
     """Tests for helper functions.
 
@@ -185,6 +186,7 @@ class HelperFunctionsTests(unittest.TestCase):
 
     @unittest.skipUnless(site.ENABLE_USER_SITE, "requires access to PEP 370 "
                           "user-site (site.ENABLE_USER_SITE)")
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_s_option(self):
         usersite = site.USER_SITE
         self.assertIn(usersite, sys.path)

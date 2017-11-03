@@ -803,6 +803,7 @@ class PyCatchWarningTests(CatchWarningTests):
     module = py_warnings
 
 
+@unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
 class EnvironmentVariableTests(BaseTest):
 
     def test_single_warning(self):

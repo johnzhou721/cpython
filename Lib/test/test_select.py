@@ -1,6 +1,7 @@
 from test import test_support
 import unittest
 import select
+import subprocess
 import os
 import sys
 
@@ -28,6 +29,7 @@ class SelectTestCase(unittest.TestCase):
         self.assertIsNot(r, x)
         self.assertIsNot(w, x)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_select(self):
         cmd = 'for i in 0 1 2 3 4 5 6 7 8 9; do echo testing...; sleep 1; done'
         p = os.popen(cmd, 'r')

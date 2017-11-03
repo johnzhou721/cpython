@@ -150,6 +150,7 @@ class HashRandomizationTests(unittest.TestCase):
     def get_hash_command(self, repr_):
         return 'print(hash(%s))' % repr_
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def get_hash(self, repr_, seed=None):
         env = os.environ.copy()
         if seed is not None:
@@ -169,6 +170,7 @@ class HashRandomizationTests(unittest.TestCase):
         run1 = self.get_hash(self.repr_, seed='random')
         run2 = self.get_hash(self.repr_, seed='random')
         self.assertNotEqual(run1, run2)
+
 
 class StringlikeHashRandomizationTests(HashRandomizationTests):
     def test_null_hash(self):
@@ -199,11 +201,13 @@ class StringlikeHashRandomizationTests(HashRandomizationTests):
                 h = -1024014457
         self.assertEqual(self.get_hash(self.repr_, seed=42), h)
 
+
 class StrHashRandomizationTests(StringlikeHashRandomizationTests):
     repr_ = repr('abc')
 
     def test_empty_string(self):
         self.assertEqual(hash(""), 0)
+
 
 class UnicodeHashRandomizationTests(StringlikeHashRandomizationTests):
     repr_ = repr(u'abc')
@@ -211,12 +215,14 @@ class UnicodeHashRandomizationTests(StringlikeHashRandomizationTests):
     def test_empty_string(self):
         self.assertEqual(hash(u""), 0)
 
+
 class BufferHashRandomizationTests(StringlikeHashRandomizationTests):
     repr_ = 'buffer("abc")'
 
     def test_empty_string(self):
         with test_support.check_py3k_warnings():
             self.assertEqual(hash(buffer("")), 0)
+
 
 class DatetimeTests(HashRandomizationTests):
     def get_hash_command(self, repr_):

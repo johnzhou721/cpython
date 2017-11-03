@@ -15,6 +15,7 @@ from test_doctest import _FakeInput
 
 class PdbTestCase(unittest.TestCase):
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def run_pdb(self, script, commands):
         """Run 'script' lines with pdb and the pdb 'commands'."""
         filename = 'main.py'
@@ -351,6 +352,7 @@ def test_pdb_continue_in_bottomframe():
 
 class ModuleInitTester(unittest.TestCase):
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_filename_correct(self):
         """
         In issue 7750, it was found that if the filename has a sequence that

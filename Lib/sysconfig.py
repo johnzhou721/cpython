@@ -82,6 +82,33 @@ _INSTALL_SCHEMES = {
         'scripts': '{userbase}/bin',
         'data'   : '{userbase}',
         },
+    'ios': {
+        'stdlib': '{base}/lib/python%s' % sys.version[:3],
+        'platstdlib': '{base}/lib/python%s' % sys.version[:3],
+        'purelib': '{base}/lib/python%s/site-packages' % sys.version[:3],
+        'platlib': '{base}/lib/python%s/site-packages' % sys.version[:3],
+        'include': '{base}/include',
+        'scripts': '{base}/bin',
+        'data': '{base}/Resources',
+        },
+    'tvos': {
+        'stdlib': '{base}/lib/python%s' % sys.version[:3],
+        'platstdlib': '{base}/lib/python%s' % sys.version[:3],
+        'purelib': '{base}/lib/python%s/site-packages' % sys.version[:3],
+        'platlib': '{base}/lib/python%s/site-packages' % sys.version[:3],
+        'include': '{base}/include',
+        'scripts': '{base}/bin',
+        'data': '{base}/Resources',
+        },
+    'watchos': {
+        'stdlib': '{base}/lib/python%s' % sys.version[:3],
+        'platstdlib': '{base}/lib/python%s' % sys.version[:3],
+        'purelib': '{base}/lib/python%s/site-packages' % sys.version[:3],
+        'platlib': '{base}/lib/python%s/site-packages' % sys.version[:3],
+        'include': '{base}/include',
+        'scripts': '{base}/bin',
+        'data': '{base}/Resources',
+        },
     }
 
 _SCHEME_KEYS = ('stdlib', 'platstdlib', 'purelib', 'platlib', 'include',
@@ -170,6 +197,8 @@ def _get_default_scheme():
     if os.name == 'posix':
         # the default scheme for posix is posix_prefix
         return 'posix_prefix'
+    elif sys.platform == 'ios':
+        return sys.platform
     return os.name
 
 def _getuserbase():
@@ -188,6 +217,12 @@ def _getuserbase():
             return env_base if env_base else \
                                joinuser("~", "Library", framework, "%d.%d"
                                             % (sys.version_info[:2]))
+
+    elif sys.platform in ('ios', 'tvos', 'watchos'):
+        if env_base:
+            return env_base
+        else:
+            return _PREFIX
 
     return env_base if env_base else joinuser("~", ".local")
 

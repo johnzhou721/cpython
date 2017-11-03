@@ -6,6 +6,10 @@ import socket
 import urllib2
 import os
 import sys
+try:
+    import ssl
+except ImportError:
+    ssl = None
 
 TIMEOUT = 60  # seconds
 
@@ -152,6 +156,7 @@ class OtherNetworkTests(unittest.TestCase):
 
 ##             self._test_urls(urls, self._extra_handlers()+[bauth, dauth])
 
+    @unittest.skipIf(ssl is None, 'test requires ssl module')
     def test_urlwithfrag(self):
         urlwith_frag = "http://www.pythontest.net/index.html#frag"
         with test_support.transient_internet(urlwith_frag):

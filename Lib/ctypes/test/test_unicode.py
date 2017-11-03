@@ -1,14 +1,16 @@
 # coding: latin-1
+import os
 import unittest
 import ctypes
 from ctypes.test import need_symbol
 import _ctypes_test
 
+
 @need_symbol('c_wchar')
 class UnicodeTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        dll = ctypes.CDLL(_ctypes_test.__file__)
+        dll = ctypes.CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
         cls.wcslen = dll.my_wcslen
         cls.wcslen.argtypes = [ctypes.c_wchar_p]
     def setUp(self):
@@ -74,12 +76,13 @@ class UnicodeTestCase(unittest.TestCase):
         self.assertEqual(buf[::2], u"a\0\0")
         self.assertEqual(buf[6:5:-1], u"")
 
+
 @need_symbol('c_wchar')
 class StringTestCase(UnicodeTestCase):
     @classmethod
     def setUpClass(cls):
         super(StringTestCase, cls).setUpClass()
-        cls.func = ctypes.CDLL(_ctypes_test.__file__)._testfunc_p_p
+        cls.func = ctypes.CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))._testfunc_p_p
 
     def setUp(self):
         func = self.func

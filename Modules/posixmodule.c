@@ -21,6 +21,8 @@
 #  pragma weak statvfs
 #  pragma weak fstatvfs
 
+#  include "TargetConditionals.h"
+
 #endif /* __APPLE__ */
 
 #define PY_SSIZE_T_CLEAN
@@ -350,6 +352,26 @@ extern int lstat(const char *, struct stat *);
 #endif
 #endif
 
+// iOS *defines* a number of POSIX functions, but you can't use them
+// because iOS isn't a conventional multiprocess environment.
+#if TARGET_OS_IPHONE
+#  undef HAVE_EXECV
+#  undef HAVE_FORK
+#  undef HAVE_FORK1
+#  undef HAVE_FORKPTY
+#  undef HAVE_GETGROUPS
+#  undef HAVE_SETGROUPS
+#  undef HAVE_SCHED_H
+#  undef HAVE_SENDFILE
+#  undef HAVE_SETPRIORITY
+#  undef HAVE_SPAWNV
+#  undef HAVE_TMPNAM
+#  undef HAVE_TMPFILE
+#  undef HAVE_WAIT
+#  undef HAVE_WAIT3
+#  undef HAVE_WAIT4
+#  undef HAVE_WAITPID
+#endif /* TARGET_OS_IPHONE */
 
 #ifndef MS_WINDOWS
 PyObject *
@@ -631,7 +653,9 @@ _PyVerify_fd_dup2(int fd1, int fd2)
 #include <crt_externs.h>
 static char **environ;
 #elif !defined(_MSC_VER) && ( !defined(__WATCOMC__) || defined(__QNX__) )
+#if !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
 extern char **environ;
+#endif
 #endif /* !_MSC_VER */
 
 static PyObject *
@@ -650,6 +674,7 @@ convertenviron(void)
     if (environ == NULL)
         environ = *_NSGetEnviron();
 #endif
+#if !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
     if (environ == NULL)
         return d;
     /* This part ignores errors */
@@ -677,6 +702,7 @@ convertenviron(void)
         Py_DECREF(k);
         Py_DECREF(v);
     }
+#endif
 #if defined(PYOS_OS2)
     rc = DosQueryExtLIBPATH(buffer, BEGIN_LIBPATH);
     if (rc == NO_ERROR) { /* (not a type, envname is NOT 'BEGIN_LIBPATH') */
@@ -2841,7 +2867,12 @@ posix_system(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s:system", &command))
         return NULL;
     Py_BEGIN_ALLOW_THREADS
+#if defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) || defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+    sts = -1;
+    errno = ENOTSUP;
+#else
     sts = system(command);
+#endif
     Py_END_ALLOW_THREADS
     return PyInt_FromLong(sts);
 }

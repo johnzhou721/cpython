@@ -6,7 +6,9 @@ import gc
 import operator
 import os
 import struct
+import subprocess
 import sys
+
 
 class SysModuleTest(unittest.TestCase):
 
@@ -446,6 +448,7 @@ class SysModuleTest(unittest.TestCase):
     def test_clear_type_cache(self):
         sys._clear_type_cache()
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_ioencoding(self):
         import subprocess
         env = dict(os.environ)
@@ -469,6 +472,7 @@ class SysModuleTest(unittest.TestCase):
         self.assertEqual(sys.call_tracing(str, (2,)), "2")
         self.assertRaises(TypeError, sys.call_tracing, str, 2)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_executable(self):
         # sys.executable should be absolute
         self.assertEqual(os.path.abspath(sys.executable), sys.executable)

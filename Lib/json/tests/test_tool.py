@@ -6,6 +6,7 @@ import subprocess
 from test import test_support
 from test.script_helper import assert_python_ok
 
+
 class TestTool(unittest.TestCase):
     data = """
 
@@ -37,6 +38,7 @@ class TestTool(unittest.TestCase):
     ]
     """)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_stdin_stdout(self):
         proc = subprocess.Popen(
                 (sys.executable, '-m', 'json.tool'),

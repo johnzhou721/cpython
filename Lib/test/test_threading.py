@@ -163,6 +163,8 @@ class ThreadTests(BaseTestCase):
 
     # PyThreadState_SetAsyncExc() is a CPython-only gimmick, not (currently)
     # exposed at the Python level.  This test relies on ctypes to get at it.
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "Can't dynamically load libraries on %s" % sys.platform)
     def test_PyThreadState_SetAsyncExc(self):
         try:
             import ctypes
@@ -266,6 +268,8 @@ class ThreadTests(BaseTestCase):
         finally:
             threading._start_new_thread = _start_new_thread
 
+    @unittest.skipUnless(hasattr(subprocess, 'call'), "test requires subprocess.call()")
+    @unittest.skipIf(sys.platform == 'ios', "Can't dynamically load libraries on iOS")
     def test_finalize_runnning_thread(self):
         # Issue 1402: the PyGILState_Ensure / _Release functions may be called
         # very late on python exit: on deallocation of a running thread for
@@ -302,6 +306,7 @@ class ThreadTests(BaseTestCase):
             """])
         self.assertEqual(rc, 42)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_finalize_with_trace(self):
         # Issue1733757
         # Avoid a deadlock when sys.settrace steps into threading._shutdown
@@ -336,6 +341,7 @@ class ThreadTests(BaseTestCase):
         self.assertTrue(rc == 0,
                         "Unexpected error: " + repr(stderr))
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_join_nondaemon_on_shutdown(self):
         # Issue 1722344
         # Raising SystemExit skipped threading._shutdown
@@ -489,6 +495,7 @@ class ThreadJoinOnShutdown(BaseTestCase):
     platforms_to_skip = ('freebsd4', 'freebsd5', 'freebsd6', 'netbsd5',
                          'os2emx')
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def _run_and_join(self, script):
         script = """if 1:
             import sys, os, time, threading
@@ -561,6 +568,7 @@ class ThreadJoinOnShutdown(BaseTestCase):
             """
         self._run_and_join(script)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def assertScriptHasOutput(self, script, expected_output):
         p = subprocess.Popen([sys.executable, "-c", script],
                              stdout=subprocess.PIPE)

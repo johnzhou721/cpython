@@ -16,6 +16,7 @@ from sysconfig import (get_paths, get_platform, get_config_vars,
                        get_scheme_names, get_config_var)
 import _osx_support
 
+
 class TestSysConfig(unittest.TestCase):
 
     def setUp(self):
@@ -239,8 +240,9 @@ class TestSysConfig(unittest.TestCase):
         self.assertTrue(os.path.isfile(config_h), config_h)
 
     def test_get_scheme_names(self):
-        wanted = ('nt', 'nt_user', 'os2', 'os2_home', 'osx_framework_user',
-                  'posix_home', 'posix_prefix', 'posix_user')
+        wanted = ('ios', 'nt', 'nt_user', 'os2', 'os2_home', 'osx_framework_user',
+                  'posix_home', 'posix_prefix', 'posix_user',
+                  'tvos', 'watchos')
         self.assertEqual(get_scheme_names(), wanted)
 
     @unittest.skipIf(sys.platform.startswith('win'),
@@ -251,6 +253,7 @@ class TestSysConfig(unittest.TestCase):
         # Issue 22199
         self.assertEqual(sysconfig._get_makefile_filename(), makefile)
 
+    @unittest.skipUnless(hasattr(subprocess, 'Popen'), "test requires subprocess.Popen()")
     def test_symlink(self):
         # Issue 7880
         symlink = get_attribute(os, "symlink")
