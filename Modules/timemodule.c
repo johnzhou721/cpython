@@ -38,7 +38,8 @@
 #endif /* !__WATCOMC__ || __QNX__ */
 
 #if defined(__APPLE__)
-#include <mach/mach_time.h>
+#  include <mach/mach_time.h>
+#  include "TargetConditionals.h"
 #endif
 
 /* Forward declarations */
@@ -198,11 +199,13 @@ time_clock_settime(PyObject *self, PyObject *args)
     tp.tv_sec = tv_sec;
     tp.tv_nsec = tv_nsec;
 
+#if !TARGET_OS_IPHONE
     ret = clock_settime((clockid_t)clk_id, &tp);
     if (ret != 0) {
         PyErr_SetFromErrno(PyExc_IOError);
         return NULL;
     }
+#endif
     Py_RETURN_NONE;
 }
 

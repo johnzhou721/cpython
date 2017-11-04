@@ -1225,7 +1225,7 @@ win32_get_reparse_tag(HANDLE reparse_point_handle, ULONG *reparse_tag)
 #include <crt_externs.h>
 static char **environ;
 #elif !defined(_MSC_VER) && ( !defined(__WATCOMC__) || defined(__QNX__) )
-#if !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+#if !TARGET_OS_TV && !TARGET_OS_WATCH
 extern char **environ;
 #endif
 #endif /* !_MSC_VER */
@@ -1278,7 +1278,7 @@ convertenviron(void)
         Py_DECREF(k);
         Py_DECREF(v);
     }
-#elif !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+#elif !TARGET_OS_TV && !TARGET_OS_WATCH
     if (environ == NULL)
         return d;
     /* This part ignores errors */
@@ -4510,7 +4510,7 @@ posix_system(PyObject *self, PyObject *args)
 
     command = PyBytes_AsString(command_obj);
     Py_BEGIN_ALLOW_THREADS
-#if defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) || defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+#if TARGET_OS_IPHONE
     sts = -1;
     errno = ENOTSUP;
 #else
@@ -4812,7 +4812,7 @@ typedef struct {
 static int
 utime_dir_fd(utime_t *ut, int dir_fd, char *path, int follow_symlinks)
 {
-#ifdef HAVE_UTIMENSAT
+#if defined(HAVE_UTIMENSAT) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     int flags = follow_symlinks ? 0 : AT_SYMLINK_NOFOLLOW;
     UTIME_TO_TIMESPEC;
     return utimensat(dir_fd, path, time, flags);
@@ -4835,7 +4835,7 @@ utime_dir_fd(utime_t *ut, int dir_fd, char *path, int follow_symlinks)
 static int
 utime_fd(utime_t *ut, int fd)
 {
-#ifdef HAVE_FUTIMENS
+#if defined(HAVE_FUTIMENS) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     UTIME_TO_TIMESPEC;
     return futimens(fd, time);
 #else
@@ -4855,7 +4855,7 @@ utime_fd(utime_t *ut, int fd)
 static int
 utime_nofollow_symlinks(utime_t *ut, char *path)
 {
-#ifdef HAVE_UTIMENSAT
+#if defined(HAVE_UTIMENSAT) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     UTIME_TO_TIMESPEC;
     return utimensat(DEFAULT_DIR_FD, path, time, AT_SYMLINK_NOFOLLOW);
 #else
@@ -4871,7 +4871,7 @@ utime_nofollow_symlinks(utime_t *ut, char *path)
 static int
 utime_default(utime_t *ut, char *path)
 {
-#ifdef HAVE_UTIMENSAT
+#if defined(HAVE_UTIMENSAT) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     UTIME_TO_TIMESPEC;
     return utimensat(DEFAULT_DIR_FD, path, time, 0);
 #elif defined(HAVE_UTIMES)

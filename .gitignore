@@ -61,7 +61,7 @@ libpython*.a
 libpython*.so*
 platform
 pybuilddir.txt
-./pyconfig.h
+/pyconfig.h
 python-config
 python-config.py
 python.exe
@@ -75,3 +75,12 @@ TAGS
 coverage/
 externals/
 htmlcov/
+Tools/msi/obj
+Tools/ssl/amd64
+Tools/ssl/win32
+.vs/
+.vscode/
+Python.framework
+iOS/_freeze_importlib
+tvOS/_freeze_importlib
+watchOS/_freeze_importlib
