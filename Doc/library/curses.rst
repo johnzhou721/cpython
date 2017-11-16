@@ -765,11 +765,11 @@ the following methods:
             window.chgat(y, x, num, attr)
 
    Set the attributes of *num* characters at the current cursor position, or at
-   position ``(y, x)`` if supplied. If no value of *num* is given or *num* = -1,
-   the attribute will  be set on all the characters to the end of the line.  This
-   function does not move the cursor. The changed line will be touched using the
-   :meth:`touchline` method so that the contents will be redisplayed by the next
-   window refresh.
+   position ``(y, x)`` if supplied. If *num* is not given or is ``-1``,
+   the attribute will be set on all the characters to the end of the line.  This
+   function moves cursor to position ``(y, x)`` if supplied. The changed line
+   will be touched using the :meth:`touchline` method so that the contents will
+   be redisplayed by the next window refresh.
 
 
 .. method:: window.clear()
@@ -1234,27 +1234,63 @@ The :mod:`curses` module defines the following data members:
    A string representing the current version of the module.  Also available as
    :const:`__version__`.
 
-Several constants are available to specify character cell attributes:
+Some constants are available to specify character cell attributes.
+The exact constants available are system dependent.
 
 +------------------+-------------------------------+
 | Attribute        | Meaning                       |
 +==================+===============================+
-| ``A_ALTCHARSET`` | Alternate character set mode. |
+| ``A_ALTCHARSET`` | Alternate character set mode  |
 +------------------+-------------------------------+
-| ``A_BLINK``      | Blink mode.                   |
+| ``A_BLINK``      | Blink mode                    |
 +------------------+-------------------------------+
-| ``A_BOLD``       | Bold mode.                    |
+| ``A_BOLD``       | Bold mode                     |
 +------------------+-------------------------------+
-| ``A_DIM``        | Dim mode.                     |
+| ``A_DIM``        | Dim mode                      |
 +------------------+-------------------------------+
-| ``A_NORMAL``     | Normal attribute.             |
+| ``A_INVIS``      | Invisible or blank mode       |
++------------------+-------------------------------+
+| ``A_NORMAL``     | Normal attribute              |
++------------------+-------------------------------+
+| ``A_PROTECT``    | Protected mode                |
 +------------------+-------------------------------+
 | ``A_REVERSE``    | Reverse background and        |
-|                  | foreground colors.            |
+|                  | foreground colors             |
 +------------------+-------------------------------+
-| ``A_STANDOUT``   | Standout mode.                |
+| ``A_STANDOUT``   | Standout mode                 |
 +------------------+-------------------------------+
-| ``A_UNDERLINE``  | Underline mode.               |
+| ``A_UNDERLINE``  | Underline mode                |
++------------------+-------------------------------+
+| ``A_HORIZONTAL`` | Horizontal highlight          |
++------------------+-------------------------------+
+| ``A_LEFT``       | Left highlight                |
++------------------+-------------------------------+
+| ``A_LOW``        | Low highlight                 |
++------------------+-------------------------------+
+| ``A_RIGHT``      | Right highlight               |
++------------------+-------------------------------+
+| ``A_TOP``        | Top highlight                 |
++------------------+-------------------------------+
+| ``A_VERTICAL``   | Vertical highlight            |
++------------------+-------------------------------+
+| ``A_CHARTEXT``   | Bit-mask to extract a         |
+|                  | character                     |
++------------------+-------------------------------+
+
+Several constants are available to extract corresponding attributes returned
+by some methods.
+
++------------------+-------------------------------+
+| Bit-mask         | Meaning                       |
++==================+===============================+
+| ``A_ATTRIBUTES`` | Bit-mask to extract           |
+|                  | attributes                    |
++------------------+-------------------------------+
+| ``A_CHARTEXT``   | Bit-mask to extract a         |
+|                  | character                     |
++------------------+-------------------------------+
+| ``A_COLOR``      | Bit-mask to extract           |
+|                  | color-pair field information  |
 +------------------+-------------------------------+
 
 Keys are referred to by integer constants with names starting with  ``KEY_``.

@@ -733,6 +733,7 @@ class GeneralModuleTests(unittest.TestCase):
                 self.assertRaises(socket.timeout, c.sendall,
                                   b"x" * test_support.SOCK_MAX_SIZE)
         finally:
+            signal.alarm(0)
             signal.signal(signal.SIGALRM, old_alarm)
             c.close()
             s.close()
@@ -1357,6 +1358,10 @@ class NetworkConnectionNoServer(unittest.TestCase):
         expected_errnos = [ errno.ECONNREFUSED, ]
         if hasattr(errno, 'ENETUNREACH'):
             expected_errnos.append(errno.ENETUNREACH)
+        if hasattr(errno, 'EADDRNOTAVAIL'):
+            # bpo-31910: socket.create_connection() fails randomly
+            # with EADDRNOTAVAIL on Travis CI
+            expected_errnos.append(errno.EADDRNOTAVAIL)
 
         self.assertIn(cm.exception.errno, expected_errnos)
 

@@ -38,6 +38,7 @@ Selecting tests
 -x/--exclude    -- arguments are tests to *exclude*
 -s/--single     -- single step through a set of tests (see below)
 -m/--match PAT  -- match test cases and methods with glob pattern PAT
+--matchfile FILENAME -- filters tests using a text file, one pattern per line
 -G/--failfast   -- fail as soon as a test fails (only with -v or -W)
 -u/--use RES1,RES2,...
                 -- specify which special resource intensive tests to run
@@ -64,6 +65,10 @@ Special runs
                    (instead of the Python stdlib test suite)
 --list-tests    -- only write the name of tests that will be run,
                    don't execute them
+--list-cases    -- only write the name of test cases that will be run,
+                   don't execute them
+--fail-env-changed  -- if a test file alters the environment, mark the test
+                       as failed
 
 
 Additional Option Details:
@@ -157,6 +162,13 @@ resources to test.  Currently only the following are defined:
 To enable all resources except one, use '-uall,-<resource>'.  For
 example, to run all the tests except for the bsddb tests, give the
 option '-uall,-bsddb'.
+
+--matchfile filters tests using a text file, one pattern per line.
+Pattern examples:
+
+- test method: test_stat_attributes
+- test class: FileTests
+- test identifier: test_os.FileTests.test_stat_attributes
 """
 
 import StringIO
@@ -238,9 +250,15 @@ PROGRESS_UPDATE = 30.0   # seconds
 
 from test import test_support
 
-RESOURCE_NAMES = ('audio', 'curses', 'largefile', 'network', 'bsddb',
-                  'decimal', 'cpu', 'subprocess', 'urlfetch', 'gui',
-                  'xpickle')
+ALL_RESOURCES = ('audio', 'curses', 'largefile', 'network', 'bsddb',
+                 'decimal', 'cpu', 'subprocess', 'urlfetch', 'gui',
+                 'xpickle')
+
+# Other resources excluded from --use=all:
+#
+# - extralagefile (ex: test_zipfile64): really too slow to be enabled
+#   "by default"
+RESOURCE_NAMES = ALL_RESOURCES + ('extralargefile',)
 
 # When tests are run from the Python build directory, it is best practice
 # to keep the test files in a subfolder.  It eases the cleanup of leftover
@@ -284,6 +302,31 @@ def format_test_result(test_name, result):
     return fmt % test_name
 
 
+def cpu_count():
+    # first try os.sysconf() to prevent loading the big multiprocessing module
+    try:
+        return os.sysconf('SC_NPROCESSORS_ONLN')
+    except (AttributeError, ValueError):
+        pass
+
+    # try multiprocessing.cpu_count()
+    try:
+        import multiprocessing
+    except ImportError:
+        pass
+    else:
+        return multiprocessing.cpu_count()
+
+    return None
+
+
+def unload_test_modules(save_modules):
+    # Unload the newly imported modules (best effort finalization)
+    for module in sys.modules.keys():
+        if module not in save_modules and module.startswith("test."):
+            test_support.unload(module)
+
+
 def main(tests=None, testdir=None, verbose=0, quiet=False,
          exclude=False, single=False, randomize=False, fromfile=None,
          findleaks=False, use_resources=None, trace=False, coverdir='coverage',
@@ -323,7 +366,8 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
              'use=', 'threshold=', 'trace', 'coverdir=', 'nocoverdir',
              'runleaks', 'huntrleaks=', 'memlimit=', 'randseed=',
              'multiprocess=', 'slaveargs=', 'forever', 'header', 'pgo',
-             'failfast', 'match=', 'testdir=', 'list-tests', 'coverage'])
+             'failfast', 'match=', 'testdir=', 'list-tests', 'list-cases',
+             'coverage', 'matchfile=', 'fail-env-changed'])
     except getopt.error, msg:
         usage(2, msg)
 
@@ -334,6 +378,8 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         use_resources = []
     slaveargs = None
     list_tests = False
+    list_cases_opt = False
+    fail_env_changed = False
     for o, a in opts:
         if o in ('-h', '--help'):
             usage(0)
@@ -361,7 +407,16 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         elif o in ('-f', '--fromfile'):
             fromfile = a
         elif o in ('-m', '--match'):
-            match_tests = a
+            if match_tests is None:
+                match_tests = []
+            match_tests.append(a)
+        elif o == '--matchfile':
+            if match_tests is None:
+                match_tests = []
+            filename = os.path.join(test_support.SAVEDCWD, a)
+            with open(filename) as fp:
+                for line in fp:
+                    match_tests.append(line.strip())
         elif o in ('-l', '--findleaks'):
             findleaks = True
         elif o in ('-L', '--runleaks'):
@@ -396,7 +451,7 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
             u = [x.lower() for x in a.split(',')]
             for r in u:
                 if r == 'all':
-                    use_resources[:] = RESOURCE_NAMES
+                    use_resources[:] = ALL_RESOURCES
                     continue
                 remove = False
                 if r[0] == '-':
@@ -423,6 +478,10 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
             testdir = a
         elif o == '--list-tests':
             list_tests = True
+        elif o == '--list-cases':
+            list_cases_opt = True
+        elif o == '--fail-env-changed':
+            fail_env_changed = True
         else:
             print >>sys.stderr, ("No handler for option {}.  Please "
                 "report this as a bug at http://bugs.python.org.").format(o)
@@ -443,8 +502,18 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         # to locate tests
         sys.path.insert(0, testdir)
 
+    # Make sure that '' and Lib/test/ are not in sys.path
+    regrtest_dir = os.path.abspath(os.path.dirname(__file__))
+    for path in ('', regrtest_dir):
+        try:
+            sys.path.remove(path)
+        except ValueError:
+            pass
+
     if slaveargs is not None:
         args, kwargs = json.loads(slaveargs)
+        if kwargs['huntrleaks']:
+            warm_caches()
         if testdir:
             kwargs['testdir'] = testdir
         try:
@@ -454,6 +523,9 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         print   # Force a newline (just in case)
         print json.dumps(result)
         sys.exit(0)
+
+    if huntrleaks:
+        warm_caches()
 
     good = []
     bad = []
@@ -507,17 +579,7 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
             nottests.add(arg)
         args = []
 
-    # For a partial run, we do not need to clutter the output.
-    if verbose or header or not (quiet or single or tests or args):
-        if not pgo:
-            # Print basic platform information
-            print "==", platform.python_implementation(), \
-                        " ".join(sys.version.split())
-            print "==  ", platform.platform(aliased=True), \
-                          "%s-endian" % sys.byteorder
-            print "==  ", os.getcwd()
-            print "Testing with flags:", sys.flags
-
+    display_header = (verbose or header or not (quiet or single or tests or args)) and (not pgo)
     alltests = findtests(testdir, stdtests, nottests)
     selected = tests or args or alltests
     if single:
@@ -526,14 +588,14 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
             next_single_test = alltests[alltests.index(selected[0])+1]
         except IndexError:
             next_single_test = None
-    if randomize:
-        random.seed(random_seed)
-        print "Using random seed", random_seed
-        random.shuffle(selected)
 
     if list_tests:
         for name in selected:
             print(name)
+        sys.exit(0)
+
+    if list_cases_opt:
+        list_cases(testdir, selected, match_tests)
         sys.exit(0)
 
     if trace:
@@ -569,6 +631,8 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
                     yield test
                     if bad:
                         return
+                    if fail_env_changed and environment_changed:
+                        return
         tests = test_forever()
         test_count = ''
         test_count_width = 3
@@ -579,17 +643,43 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
 
     def display_progress(test_index, test):
         # "[ 51/405/1] test_tcl"
-        fmt = "[{1:{0}}{2}/{3}] {4}" if bad else "[{1:{0}}{2}] {4}"
-        line = fmt.format(test_count_width, test_index, test_count,
-                          len(bad), test)
+        line = "{1:{0}}{2}".format(test_count_width, test_index, test_count)
+        if bad and not pgo:
+            line = '{}/{}'.format(line, len(bad))
+        line = '[{}]'.format(line)
+
+        # add the system load prefix: "load avg: 1.80 "
+        if hasattr(os, 'getloadavg'):
+            load_avg_1min = os.getloadavg()[0]
+            line = "load avg: {:.2f} {}".format(load_avg_1min, line)
 
         # add the timestamp prefix:  "0:01:05 "
         test_time = time.time() - regrtest_start_time
         test_time = datetime.timedelta(seconds=int(test_time))
         line = "%s %s" % (test_time, line)
 
+        # add the test name
+        line = "{} {}".format(line, test)
+
         print(line)
         sys.stdout.flush()
+
+    # For a partial run, we do not need to clutter the output.
+    if display_header:
+        # Print basic platform information
+        print "==", platform.python_implementation(), \
+                    " ".join(sys.version.split())
+        print "==  ", platform.platform(aliased=True), \
+                      "%s-endian" % sys.byteorder
+        print "==  ", os.getcwd()
+        ncpu = cpu_count()
+        if ncpu:
+            print "== CPU count:", ncpu
+
+    if randomize:
+        random.seed(random_seed)
+        print "Using random seed", random_seed
+        random.shuffle(selected)
 
     if use_mp:
         try:
@@ -794,10 +884,8 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
                     # them again
                     found_garbage.extend(gc.garbage)
                     del gc.garbage[:]
-            # Unload the newly imported modules (best effort finalization)
-            for module in sys.modules.keys():
-                if module not in save_modules and module.startswith("test."):
-                    test_support.unload(module)
+
+            unload_test_modules(save_modules)
 
     if interrupted and not pgo:
         # print a newline after ^C
@@ -883,11 +971,19 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         result = "FAILURE"
     elif interrupted:
         result = "INTERRUPTED"
+    elif fail_env_changed and environment_changed:
+        result = "ENV CHANGED"
     else:
         result = "SUCCESS"
     print("Tests result: %s" % result)
 
-    return (len(bad) > 0 or interrupted)
+    if bad:
+        return 2
+    if interrupted:
+        return 130
+    if fail_env_changed and environment_changed:
+        return 3
+    return 0
 
 
 STDTESTS = [
@@ -1112,6 +1208,9 @@ class saved_test_environment:
         return False
 
 
+def post_test_cleanup():
+    test_support.reap_children()
+
 def runtest_inner(test, verbose, quiet, huntrleaks=False, pgo=False, testdir=None):
     test_support.unload(test)
     if verbose:
@@ -1126,11 +1225,7 @@ def runtest_inner(test, verbose, quiet, huntrleaks=False, pgo=False, testdir=Non
         try:
             if capture_stdout:
                 sys.stdout = capture_stdout
-            if test.startswith('test.') or testdir:
-                abstest = test
-            else:
-                # Always import it from the test package
-                abstest = 'test.' + test
+            abstest = get_abs_module(testdir, test)
             clear_caches()
             with saved_test_environment(test, verbose, quiet, pgo) as environment:
                 start_time = time.time()
@@ -1149,6 +1244,7 @@ def runtest_inner(test, verbose, quiet, huntrleaks=False, pgo=False, testdir=Non
                     refleak = dash_R(the_module, test, indirect_test,
                         huntrleaks)
                 test_time = time.time() - start_time
+            post_test_cleanup()
         finally:
             sys.stdout = save_stdout
     except test_support.ResourceDenied, msg:
@@ -1289,7 +1385,18 @@ def dash_R(the_module, test, indirect_test, huntrleaks):
         if i >= nwarmup:
             deltas.append(rc_after - rc_before)
     print >> sys.stderr
-    if any(deltas):
+
+    # bpo-30776: Try to ignore false positives:
+    #
+    #   [3, 0, 0]
+    #   [0, 1, 0]
+    #   [8, -8, 1]
+    #
+    # Expected leaks:
+    #
+    #   [5, 5, 6]
+    #   [10, 1, 1]
+    if all(delta >= 1 for delta in deltas):
         msg = '%s leaked %s references, sum=%s' % (test, deltas, sum(deltas))
         print >> sys.stderr, msg
         with open(fname, "a") as refrep:
@@ -1425,6 +1532,18 @@ def clear_caches():
     # Collect cyclic trash.
     gc.collect()
 
+def warm_caches():
+    """Create explicitly internal singletons which are created on demand
+    to prevent false positive when hunting reference leaks."""
+    # char cache
+    for i in range(256):
+        chr(i)
+    # unicode cache
+    for i in range(256):
+        unichr(i)
+    # int cache
+    list(range(-5, 257))
+
 def findtestdir(path=None):
     return path or os.path.dirname(__file__) or os.curdir
 
@@ -1442,7 +1561,7 @@ def count(n, word):
     else:
         return "%d %ss" % (n, word)
 
-def printlist(x, width=70, indent=4):
+def printlist(x, width=70, indent=4, file=None):
     """Print the elements of iterable x to stdout.
 
     Optional arg width (default 70) is the maximum line length.
@@ -1453,8 +1572,44 @@ def printlist(x, width=70, indent=4):
     from textwrap import fill
     blanks = ' ' * indent
     # Print the sorted list: 'x' may be a '--random' list or a set()
-    print fill(' '.join(str(elt) for elt in sorted(x)), width,
-               initial_indent=blanks, subsequent_indent=blanks)
+    print >>file, fill(' '.join(str(elt) for elt in sorted(x)), width,
+                       initial_indent=blanks, subsequent_indent=blanks)
+
+def get_abs_module(testdir, test):
+    if test.startswith('test.') or testdir:
+        return test
+    else:
+        # Always import it from the test package
+        return 'test.' + test
+
+def _list_cases(suite):
+    for test in suite:
+        if isinstance(test, unittest.TestSuite):
+            _list_cases(test)
+        elif isinstance(test, unittest.TestCase):
+            if test_support._match_test(test):
+                print(test.id())
+
+def list_cases(testdir, selected, match_tests):
+    test_support.verbose = False
+    test_support.match_tests = match_tests
+
+    save_modules = set(sys.modules)
+    skipped = []
+    for test in selected:
+        abstest = get_abs_module(testdir, test)
+        try:
+            suite = unittest.defaultTestLoader.loadTestsFromName(abstest)
+            _list_cases(suite)
+        except unittest.SkipTest:
+            skipped.append(test)
+
+        unload_test_modules(save_modules)
+
+    if skipped:
+        print >>sys.stderr
+        print >>sys.stderr, count(len(skipped), "test"), "skipped:"
+        printlist(skipped, file=sys.stderr)
 
 # Map sys.platform to a string containing the basenames of tests
 # expected to be skipped on that platform.

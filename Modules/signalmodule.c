@@ -111,6 +111,10 @@ timeval_from_double(double d, struct timeval *tv)
 {
     tv->tv_sec = floor(d);
     tv->tv_usec = fmod(d, 1.0) * 1000000.0;
+    /* Don't disable the timer if the computation above rounds down to zero. */
+    if (d > 0.0 && tv->tv_sec == 0 && tv->tv_usec == 0) {
+        tv->tv_usec = 1;
+    }
 }
 
 Py_LOCAL_INLINE(double)
@@ -313,12 +317,15 @@ signal_signal(PyObject *self, PyObject *args)
     }
     else
         func = signal_handler;
+    /* Check for pending signals before changing signal handler */
+    if (PyErr_CheckSignals()) {
+        return NULL;
+    }
     if (PyOS_setsig(sig_num, func) == SIG_ERR) {
         PyErr_SetFromErrno(PyExc_RuntimeError);
         return NULL;
     }
     old_handler = Handlers[sig_num].func;
-    Handlers[sig_num].tripped = 0;
     Py_INCREF(obj);
     Handlers[sig_num].func = obj;
     if (old_handler != NULL)

@@ -417,9 +417,11 @@ Miscellaneous options
 
    Warn about Python 3.x possible incompatibilities by emitting a
    :exc:`DeprecationWarning` for features that are removed or significantly
-   changed in Python 3.
+   changed in Python 3 and can't be detected using static code analysis.
 
    .. versionadded:: 2.6
+
+   See :doc:`/howto/pyporting` for more details.
 
 Options you shouldn't use
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -661,3 +663,17 @@ if Python was configured with the ``--with-pydebug`` build option.
 
    If set, Python will print memory allocation statistics every time a new
    object arena is created, and on shutdown.
+
+.. envvar:: PYTHONSHOWALLOCCOUNT
+
+   If set and Python was compiled with ``COUNT_ALLOCS`` defined, Python will
+   dump allocations counts into stderr on shutdown.
+
+   .. versionadded:: 2.7.15
+
+.. envvar:: PYTHONSHOWREFCOUNT
+
+   If set, Python will print the total reference count when the program
+   finishes or after each statement in the interactive interpreter.
+
+   .. versionadded:: 2.7.15

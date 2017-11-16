@@ -23,6 +23,7 @@ import time
 import struct
 import sysconfig
 import types
+
 try:
     import thread
 except ImportError:
@@ -43,7 +44,8 @@ __all__ = ["Error", "TestFailed", "ResourceDenied", "import_module",
            "threading_cleanup", "reap_threads", "start_threads", "cpython_only",
            "check_impl_detail", "get_attribute", "py3k_bytes",
            "import_fresh_module", "threading_cleanup", "reap_children",
-           "strip_python_stderr", "IPV6_ENABLED", "run_with_tz"]
+           "strip_python_stderr", "IPV6_ENABLED", "run_with_tz",
+           "SuppressCrashReport"]
 
 class Error(Exception):
     """Base class for regression test exceptions."""
@@ -1540,6 +1542,23 @@ def _run_suite(suite):
         raise TestFailed(err)
 
 
+def _match_test(test):
+    global match_tests
+
+    if match_tests is None:
+        return True
+    test_id = test.id()
+
+    for match_test in match_tests:
+        if fnmatch.fnmatchcase(test_id, match_test):
+            return True
+
+        for name in test_id.split("."):
+            if fnmatch.fnmatchcase(name, match_test):
+                return True
+    return False
+
+
 def run_unittest(*classes):
     """Run tests from unittest.TestCase-derived classes."""
     valid_types = (unittest.TestSuite, unittest.TestCase)
@@ -1554,14 +1573,7 @@ def run_unittest(*classes):
             suite.addTest(cls)
         else:
             suite.addTest(unittest.makeSuite(cls))
-    def case_pred(test):
-        if match_tests is None:
-            return True
-        for name in test.id().split("."):
-            if fnmatch.fnmatchcase(name, match_tests):
-                return True
-        return False
-    _filter_suite(suite, case_pred)
+    _filter_suite(suite, _match_test)
     _run_suite(suite)
 
 #=======================================================================
@@ -1783,6 +1795,9 @@ def py3k_bytes(b):
         except TypeError:
             return bytes(b)
 
+requires_type_collecting = unittest.skipIf(hasattr(sys, 'getcounts'),
+                        'types are immortal if COUNT_ALLOCS is defined')
+
 def args_from_interpreter_flags():
     """Return a list of command-line arguments reproducing the current
     settings in sys.flags."""
@@ -1836,3 +1851,157 @@ def python_is_optimized():
         if opt.startswith('-O'):
             final_opt = opt
     return final_opt not in ('', '-O0', '-Og')
+
+
+class SuppressCrashReport:
+    """Try to prevent a crash report from popping up.
+
+    On Windows, don't display the Windows Error Reporting dialog.  On UNIX,
+    disable the creation of coredump file.
+    """
+    old_value = None
+    old_modes = None
+
+    def __enter__(self):
+        """On Windows, disable Windows Error Reporting dialogs using
+        SetErrorMode.
+
+        On UNIX, try to save the previous core file size limit, then set
+        soft limit to 0.
+        """
+        if sys.platform.startswith('win'):
+            # see http://msdn.microsoft.com/en-us/library/windows/desktop/ms680621.aspx
+            # GetErrorMode is not available on Windows XP and Windows Server 2003,
+            # but SetErrorMode returns the previous value, so we can use that
+            import ctypes
+            self._k32 = ctypes.windll.kernel32
+            SEM_NOGPFAULTERRORBOX = 0x02
+            self.old_value = self._k32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
+            self._k32.SetErrorMode(self.old_value | SEM_NOGPFAULTERRORBOX)
+
+            # Suppress assert dialogs in debug builds
+            # (see http://bugs.python.org/issue23314)
+            try:
+                import _testcapi
+                _testcapi.CrtSetReportMode
+            except (AttributeError, ImportError):
+                # no _testcapi or a release build
+                pass
+            else:
+                self.old_modes = {}
+                for report_type in [_testcapi.CRT_WARN,
+                                    _testcapi.CRT_ERROR,
+                                    _testcapi.CRT_ASSERT]:
+                    old_mode = _testcapi.CrtSetReportMode(report_type,
+                            _testcapi.CRTDBG_MODE_FILE)
+                    old_file = _testcapi.CrtSetReportFile(report_type,
+                            _testcapi.CRTDBG_FILE_STDERR)
+                    self.old_modes[report_type] = old_mode, old_file
+
+        else:
+            try:
+                import resource
+            except ImportError:
+                resource = None
+
+            if resource is not None:
+                try:
+                    self.old_value = resource.getrlimit(resource.RLIMIT_CORE)
+                    resource.setrlimit(resource.RLIMIT_CORE,
+                                       (0, self.old_value[1]))
+                except (ValueError, OSError):
+                    pass
+
+            if sys.platform == 'darwin':
+                # Check if the 'Crash Reporter' on OSX was configured
+                # in 'Developer' mode and warn that it will get triggered
+                # when it is.
+                #
+                # This assumes that this context manager is used in tests
+                # that might trigger the next manager.
+                import subprocess
+                cmd = ['/usr/bin/defaults', 'read',
+                       'com.apple.CrashReporter', 'DialogType']
+                proc = subprocess.Popen(cmd,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+                stdout = proc.communicate()[0]
+                if stdout.strip() == b'developer':
+                    sys.stdout.write("this test triggers the Crash Reporter, "
+                                     "that is intentional")
+                    sys.stdout.flush()
+
+        return self
+
+    def __exit__(self, *ignore_exc):
+        """Restore Windows ErrorMode or core file behavior to initial value."""
+        if self.old_value is None:
+            return
+
+        if sys.platform.startswith('win'):
+            self._k32.SetErrorMode(self.old_value)
+
+            if self.old_modes:
+                import _testcapi
+                for report_type, (old_mode, old_file) in self.old_modes.items():
+                    _testcapi.CrtSetReportMode(report_type, old_mode)
+                    _testcapi.CrtSetReportFile(report_type, old_file)
+        else:
+            import resource
+            try:
+                resource.setrlimit(resource.RLIMIT_CORE, self.old_value)
+            except (ValueError, OSError):
+                pass
+
+
+def _crash_python():
+    """Deliberate crash of Python.
+
+    Python can be killed by a segmentation fault (SIGSEGV), a bus error
+    (SIGBUS), or a different error depending on the platform.
+
+    Use SuppressCrashReport() to prevent a crash report from popping up.
+    """
+
+    import _testcapi
+    with SuppressCrashReport():
+        _testcapi._read_null()
+
+
+class SaveSignals:
+    """
+    Save an restore signal handlers.
+
+    This class is only able to save/restore signal handlers registered
+    by the Python signal module: see bpo-13285 for "external" signal
+    handlers.
+    """
+
+    def __init__(self):
+        import signal
+        self.signal = signal
+        self.signals = list(range(1, signal.NSIG))
+        # SIGKILL and SIGSTOP signals cannot be ignored nor catched
+        for signame in ('SIGKILL', 'SIGSTOP'):
+            try:
+                signum = getattr(signal, signame)
+            except AttributeError:
+                continue
+            self.signals.remove(signum)
+        self.handlers = {}
+
+    def save(self):
+        for signum in self.signals:
+            handler = self.signal.getsignal(signum)
+            if handler is None:
+                # getsignal() returns None if a signal handler was not
+                # registered by the Python signal module,
+                # and the handler is not SIG_DFL nor SIG_IGN.
+                #
+                # Ignore the signal: we cannot restore the handler.
+                continue
+            self.handlers[signum] = handler
+
+    def restore(self):
+        for signum, handler in self.handlers.items():
+            self.signal.signal(signum, handler)

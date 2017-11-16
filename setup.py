@@ -1492,6 +1492,9 @@ class PyBuildExt(build_ext):
             expat_inc = [os.path.join(os.getcwd(), srcdir, 'Modules', 'expat')]
             define_macros = [
                 ('HAVE_EXPAT_CONFIG_H', '1'),
+                # bpo-30947: Python uses best available entropy sources to
+                # call XML_SetHashSalt(), expat entropy sources are not needed
+                ('XML_POOR_ENTROPY', '1'),
             ]
             expat_lib = []
             expat_sources = ['expat/xmlparse.c',
@@ -2007,7 +2010,9 @@ class PyBuildExt(build_ext):
                              'java_raw_api.c',
                              'closures.c',
                              'x86/ffi_i386.c',
+                             'x86/ffi64_x86_64.c',
                              'x86/sysv_i386.S',
+                             'x86/unix64_x86_64.S',
                              ]]
 
         # Add .S (preprocessed assembly) to C compiler source extensions.
