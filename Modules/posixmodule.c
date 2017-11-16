@@ -658,7 +658,7 @@ _PyVerify_fd_dup2(int fd1, int fd2)
 #include <crt_externs.h>
 static char **environ;
 #elif !defined(_MSC_VER) && ( !defined(__WATCOMC__) || defined(__QNX__) )
-#if !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+#if !TARGET_OS_TV && !TARGET_OS_WATCH
 extern char **environ;
 #endif
 #endif /* !_MSC_VER */
@@ -679,7 +679,7 @@ convertenviron(void)
     if (environ == NULL)
         environ = *_NSGetEnviron();
 #endif
-#if !defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) && !defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+#if !TARGET_OS_TV && !TARGET_OS_WATCH
     if (environ == NULL)
         return d;
     /* This part ignores errors */
@@ -2872,7 +2872,7 @@ posix_system(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s:system", &command))
         return NULL;
     Py_BEGIN_ALLOW_THREADS
-#if defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__) || defined(__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__)
+#if TARGET_OS_IPHONE
     sts = -1;
     errno = ENOTSUP;
 #else

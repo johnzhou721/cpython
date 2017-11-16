@@ -3276,12 +3276,12 @@ then
 	*-apple-ios)
 		ac_sys_system=iOS
 		;;
-  *-apple-tvos)
-    ac_sys_system=tvOS
-    ;;
-  *-apple-watchos)
-    ac_sys_system=watchOS
-    ;;
+    *-apple-tvos)
+        ac_sys_system=tvOS
+        ;;
+    *-apple-watchos)
+        ac_sys_system=watchOS
+        ;;
 	*)
 		# for now, limit cross builds to known configurations
 		MACHDEP="unknown"
@@ -3325,7 +3325,7 @@ if test "$cross_compiling" = yes; then
 			_host_cpu=$host_cpu
 		esac
 		;;
-	*-apple-*)
+	*-apple-ios)
 		case "$host_cpu" in
 		arm*)
 			_host_cpu=arm
@@ -6424,7 +6424,6 @@ if test "$Py_OPT" = 'true' ; then
   # compile working code using it and both test_distutils and test_gdb are
   # broken when you do managed to get a toolchain that works with it.  People
   # who want LTO need to use --with-lto themselves.
-  Py_LTO='true'
   DEF_MAKE_ALL_RULE="profile-opt"
   REQUIRE_PGO="yes"
   DEF_MAKE_RULE="build_all"
@@ -10544,7 +10543,9 @@ then
 	hp*|HP*) DYNLOADFILE="dynload_hpux.o";;
 	# Use dynload_next.c only on 10.2 and below, which don't have native dlopen()
 	Darwin/[0156]\..*) DYNLOADFILE="dynload_next.o";;
-	atheos*) DYNLOADFILE="dynload_atheos.o";;
+    # Disable dynamic loading on iOS
+    iOS/*) DYNLOADFILE="dynload_stub.o";;
+    atheos*) DYNLOADFILE="dynload_atheos.o";;
 	*)
 	# use dynload_shlib.c and dlopen() if we have it; otherwise stub
 	# out any dynamic loading
@@ -16729,17 +16730,17 @@ fi
 echo "creating Modules/Setup.local"
 if test ! -f Modules/Setup.local
 then
-	if test ! -f Modules/Setup.$_PYTHON_HOST_PLATFORM
-	then
-		echo "# Edit this file for local setup changes" >Modules/Setup.local
-	else
-		if test -f Modules/Setup.$_PYTHON_HOST_PLATFORM.local
-		then
-			cp Modules/Setup.$_PYTHON_HOST_PLATFORM.local Modules/Setup.local
-		else
-			cat Modules/Setup.embedded Modules/Setup.$_PYTHON_HOST_PLATFORM > Modules/Setup.local
-		fi
-	fi
+    if test ! -f Modules/Setup.$_PYTHON_HOST_PLATFORM
+    then
+        echo "# Edit this file for local setup changes" >Modules/Setup.local
+    else
+        if test -f Modules/Setup.$_PYTHON_HOST_PLATFORM.local
+        then
+            cp Modules/Setup.$_PYTHON_HOST_PLATFORM.local Modules/Setup.local
+        else
+            cat Modules/Setup.embedded Modules/Setup.$_PYTHON_HOST_PLATFORM > Modules/Setup.local
+        fi
+    fi
 fi
 
 echo "creating Makefile"

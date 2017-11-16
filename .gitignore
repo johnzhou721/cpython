@@ -22,7 +22,7 @@ Doc/tools/pygments/
 Doc/tools/sphinx/
 Lib/lib2to3/*.pickle
 Lib/test/data/*
-Makefile
+/Makefile
 Makefile.pre
 Misc/python.pc
 Modules/Setup
@@ -75,7 +75,7 @@ libpython*.dylib
 libpython*.dll
 platform
 pybuilddir.txt
-./pyconfig.h
+/pyconfig.h
 python$
 python.bat
 python.exe
