@@ -24,6 +24,9 @@ sockets, both client-side and server-side.  This module uses the OpenSSL
 library. It is available on all modern Unix systems, Windows, Mac OS X, and
 probably additional platforms, as long as OpenSSL is installed on that platform.
 
+.. versionchanged:: 2.7.13
+   Updated to support linking with OpenSSL 1.1.0
+
 .. note::
 
    Some behavior may be platform dependent, since calls are made to the
@@ -1330,7 +1333,7 @@ to speed up repeated connections from the same clients.
 
       import socket, ssl
 
-      context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+      context = ssl.SSLContext(ssl.PROTOCOL_TLS)
       context.verify_mode = ssl.CERT_REQUIRED
       context.check_hostname = True
       context.load_default_certs()
@@ -1392,7 +1395,7 @@ message with one of the parts, you can decrypt it with the other part, and
 
 A certificate contains information about two principals.  It contains the name
 of a *subject*, and the subject's public key.  It also contains a statement by a
-second principal, the *issuer*, that the subject is who he claims to be, and
+second principal, the *issuer*, that the subject is who they claim to be, and
 that this is indeed the subject's public key.  The issuer's statement is signed
 with the issuer's private key, which only the issuer knows.  However, anyone can
 verify the issuer's statement by finding the issuer's public key, decrypting the
@@ -1536,7 +1539,7 @@ If you prefer to tune security settings yourself, you might create
 a context from scratch (but beware that you might not get the settings
 right)::
 
-   >>> context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+   >>> context = ssl.SSLContext(ssl.PROTOCOL_TLS)
    >>> context.verify_mode = ssl.CERT_REQUIRED
    >>> context.check_hostname = True
    >>> context.load_verify_locations("/etc/ssl/certs/ca-bundle.crt")
@@ -1586,7 +1589,7 @@ Visual inspection shows that the certificate does identify the desired service
                 (('commonName', 'www.python.org'),)),
     'subjectAltName': (('DNS', 'www.python.org'),
                        ('DNS', 'python.org'),
-                       ('DNS', 'pypi.python.org'),
+                       ('DNS', 'pypi.org'),
                        ('DNS', 'docs.python.org'),
                        ('DNS', 'testpypi.python.org'),
                        ('DNS', 'bugs.python.org'),
@@ -1806,6 +1809,23 @@ handle forked processes.  Applications must change the PRNG state of the
 parent process if they use any SSL feature with :func:`os.fork`.  Any
 successful call of :func:`~ssl.RAND_add`, :func:`~ssl.RAND_bytes` or
 :func:`~ssl.RAND_pseudo_bytes` is sufficient.
+
+
+.. ssl-libressl:
+
+LibreSSL support
+----------------
+
+LibreSSL is a fork of OpenSSL 1.0.1. The ssl module has limited support for
+LibreSSL. Some features are not available when the ssl module is compiled
+with LibreSSL.
+
+* LibreSSL >= 2.6.1 no longer supports NPN. The methods
+  :meth:`SSLContext.set_npn_protocols` and
+  :meth:`SSLSocket.selected_npn_protocol` are not available.
+* :meth:`SSLContext.set_default_verify_paths` ignores the env vars
+  :envvar:`SSL_CERT_FILE` and :envvar:`SSL_CERT_PATH` although
+  :func:`get_default_verify_paths` still reports them.
 
 
 .. seealso::

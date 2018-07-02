@@ -14,7 +14,7 @@ import gc
 import os
 import errno
 import pprint
-import tempfile
+import shutil
 import urllib2
 import traceback
 import weakref
@@ -989,6 +989,13 @@ class ContextTests(unittest.TestCase):
 
 
     def test_load_dh_params(self):
+        filename = u'dhpäräm.pem'
+        fs_encoding = sys.getfilesystemencoding()
+        try:
+            filename.encode(fs_encoding)
+        except UnicodeEncodeError:
+            self.skipTest("filename %r cannot be encoded to the filesystem encoding %r" % (filename, fs_encoding))
+
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
         ctx.load_dh_params(DHFILE)
         if os.name != 'nt':
@@ -1000,6 +1007,10 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(cm.exception.errno, errno.ENOENT)
         with self.assertRaises(ssl.SSLError) as cm:
             ctx.load_dh_params(CERTFILE)
+        with support.temp_dir() as d:
+            fname = os.path.join(d, filename)
+            shutil.copy(DHFILE, fname)
+            ctx.load_dh_params(fname)
 
     @skip_if_broken_ubuntu_ssl
     def test_session_stats(self):
@@ -1774,7 +1785,7 @@ else:
             else:
                 self.context = ssl.SSLContext(ssl_version
                                               if ssl_version is not None
-                                              else ssl.PROTOCOL_TLSv1)
+                                              else ssl.PROTOCOL_TLS)
                 self.context.verify_mode = (certreqs if certreqs is not None
                                             else ssl.CERT_NONE)
                 if cacerts:

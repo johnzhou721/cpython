@@ -78,7 +78,7 @@ need to derive from a specific class.
    Module :mod:`doctest`
       Another test-support module with a very different flavor.
 
-   `unittest2: A backport of new unittest features for Python 2.4-2.6 <https://pypi.python.org/pypi/unittest2>`_
+   `unittest2: A backport of new unittest features for Python 2.4-2.6 <https://pypi.org/project/unittest2>`_
       Many new features were added to unittest in Python 2.7, including test
       discovery. unittest2 allows you to use these features with earlier
       versions of Python.
@@ -2038,7 +2038,7 @@ handling functionality within test frameworks.
 
    When called without arguments this function removes the control-c handler
    if it has been installed. This function can also be used as a test decorator
-   to temporarily remove the handler whilst the test is being executed::
+   to temporarily remove the handler while the test is being executed::
 
       @unittest.removeHandler
       def test_signal_handling(self):

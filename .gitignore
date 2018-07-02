@@ -86,5 +86,6 @@ TAGS
 coverage/
 externals/
 htmlcov/
+gmon.out
 Python.framework/
 Tools/iOS-test/Python.framework/
