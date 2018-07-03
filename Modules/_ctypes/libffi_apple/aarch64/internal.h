@@ -1,4 +1,6 @@
-/*
+#ifdef __arm64__
+
+/* 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 ``Software''), to deal in the Software without restriction, including
@@ -65,3 +67,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #define N_X_ARG_REG		8
 #define N_V_ARG_REG		8
 #define CALL_CONTEXT_SIZE	(N_V_ARG_REG * 16 + N_X_ARG_REG * 8)
+
+
+#endif

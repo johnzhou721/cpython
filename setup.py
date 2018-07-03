@@ -2003,8 +2003,10 @@ class PyBuildExt(build_ext):
                              'closures.c',
                              'x86/ffi_i386.c',
                              'x86/ffi64_x86_64.c',
+                             'x86/ffiw64_x86_64.c',
                              'x86/sysv_i386.S',
                              'x86/unix64_x86_64.S',
+                             'x86/win64_x86_64.S',
                              ]]
 
         # Add .S (preprocessed assembly) to C compiler source extensions.

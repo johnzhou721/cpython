@@ -1,10 +1,11 @@
 #ifdef __i386__
 
 /* -----------------------------------------------------------------------
-   sysv.S - Copyright (c) 2013  The Written Word, Inc.
-	  - Copyright (c) 1996,1998,2001-2003,2005,2008,2010  Red Hat, Inc.
-
-   X86 Foreign Function Interface
+   sysv.S - Copyright (c) 2017  Anthony Green
+          - Copyright (c) 2013  The Written Word, Inc.
+          - Copyright (c) 1996,1998,2001-2003,2005,2008,2010  Red Hat, Inc.
+   
+   X86 Foreign Function Interface 
 
    Permission is hereby granted, free of charge, to any person obtaining
    a copy of this software and associated documentation files (the
@@ -28,8 +29,9 @@
    ----------------------------------------------------------------------- */
 
 #ifndef __x86_64__
+#ifndef _MSC_VER
 
-#define LIBFFI_ASM
+#define LIBFFI_ASM	
 #include <fficonfig.h>
 #include <ffi.h>
 #include "internal.h"
@@ -274,7 +276,7 @@ L(C1(pc,N)):								\
 #  define FFI_CLOSURE_CALL_INNER(UWN)					\
 	movl	%ebx, 40(%esp);			/* save ebx */		\
 L(C1(UW,UWN)):								\
-	# cfi_rel_offset(%ebx, 40);					\
+	/* cfi_rel_offset(%ebx, 40); */					\
 	call	C(__x86.get_pc_thunk.bx);	/* load got register */	\
 	addl	$C(_GLOBAL_OFFSET_TABLE_), %ebx;			\
 	call	ffi_closure_inner@PLT
@@ -284,7 +286,7 @@ L(C1(UW,UWN)):								\
 	leal	L(C1(load_table,N))@GOTOFF(%ebx, %eax, 8), %edx;	\
 	movl	40(%esp), %ebx;			/* restore ebx */	\
 L(C1(UW,UWN)):								\
-	# cfi_restore(%ebx);						\
+	/* cfi_restore(%ebx); */					\
 	movl	closure_CF(%esp), %eax;		/* optimiztic load */	\
 	jmp	*%edx
 # endif /* DARWIN || HIDDEN */
@@ -792,7 +794,7 @@ ENDF(C(ffi_closure_raw_THISCALL))
 
 #ifdef X86_DARWIN
 # define COMDAT(X)							\
-        .section __TEXT,__textcoal_nt,coalesced,pure_instructions;	\
+        .section __TEXT,__text,coalesced,pure_instructions;		\
         .weak_definition X;						\
         .private_extern X
 #elif defined __ELF__ && !(defined(__sun__) && defined(__svr4__))
@@ -1035,6 +1037,93 @@ L(SFDE9):
 L(EFDE9):
 #endif /* !FFI_NO_RAW_API */
 
+#ifdef _WIN32
+	.def	 @feat.00;
+	.scl	3;
+	.type	0;
+	.endef
+	.globl	@feat.00
+@feat.00 = 1
+#endif
+
+#ifdef __APPLE__
+    .subsections_via_symbols
+    .section __LD,__compact_unwind,regular,debug
+
+    /* compact unwind for ffi_call_i386 */
+    .long    C(ffi_call_i386)
+    .set     L1,L(UW5)-L(UW0)
+    .long    L1
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_go_closure_EAX */
+    .long    C(ffi_go_closure_EAX)
+    .set     L2,L(UW8)-L(UW6)
+    .long    L2
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_go_closure_ECX */
+    .long    C(ffi_go_closure_ECX)
+    .set     L3,L(UW11)-L(UW9)
+    .long    L3
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_closure_i386 */
+    .long    C(ffi_closure_i386)
+    .set     L4,L(UW20)-L(UW12)
+    .long    L4
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_go_closure_STDCALL */
+    .long    C(ffi_go_closure_STDCALL)
+    .set     L5,L(UW23)-L(UW21)
+    .long    L5
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_closure_REGISTER */
+    .long    C(ffi_closure_REGISTER)
+    .set     L6,L(UW26)-L(UW24)
+    .long    L6
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_closure_STDCALL */
+    .long    C(ffi_closure_STDCALL)
+    .set     L7,L(UW31)-L(UW27)
+    .long    L7
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_closure_raw_SYSV */
+    .long    C(ffi_closure_raw_SYSV)
+    .set     L8,L(UW40)-L(UW32)
+    .long    L8
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+
+    /* compact unwind for ffi_closure_raw_THISCALL */
+    .long    C(ffi_closure_raw_THISCALL)
+    .set     L9,L(UW52)-L(UW41)
+    .long    L9
+    .long    0x04000000 /* use dwarf unwind info */
+    .long    0
+    .long    0
+#endif /* __APPLE__ */
+
+#endif /* ifndef _MSC_VER */
 #endif /* ifndef __x86_64__ */
 
 #if defined __ELF__ && defined __linux__

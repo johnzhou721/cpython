@@ -87,6 +87,7 @@
 
 #define ARM_FUNC_START(name)		\
 	.globl CNAME(name);		\
+	.private_extern CNAME(name);	\
 	FFI_HIDDEN(CNAME(name));	\
 	ARM_FUNC_START_LOCAL(name)
 
@@ -358,7 +359,7 @@ ARM_FUNC_END(ffi_closure_ret)
 #if FFI_EXEC_TRAMPOLINE_TABLE
 
 #ifdef __MACH__
-#include <mach/vm_param.h>
+#include <mach/machine/vm_param.h>
 
 .align	PAGE_MAX_SHIFT
 ARM_FUNC_START(ffi_closure_trampoline_table_page)

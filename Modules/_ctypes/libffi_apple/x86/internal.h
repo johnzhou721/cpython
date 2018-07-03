@@ -1,3 +1,5 @@
+#ifdef __i386__
+
 #define X86_RET_FLOAT		0
 #define X86_RET_DOUBLE		1
 #define X86_RET_LDOUBLE		2
@@ -26,4 +28,7 @@
 # define HAVE_FASTCALL 0
 #else
 # define HAVE_FASTCALL 1
+#endif
+
+
 #endif

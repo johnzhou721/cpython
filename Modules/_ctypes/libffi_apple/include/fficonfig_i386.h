@@ -83,7 +83,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `mkostemp' function. */
-/* #undef HAVE_MKOSTEMP */
+#define HAVE_MKOSTEMP 1
 
 /* Define to 1 if you have the `mmap' function. */
 #define HAVE_MMAP 1
@@ -124,21 +124,23 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to 1 if GNU symbol versioning is used for libatomic. */
+/* #undef LIBFFI_GNU_SYMBOL_VERSIONING */
+
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
 
 /* Name of package */
 #define PACKAGE "libffi"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "http://github.com/atgreen/libffi/issues"
+#define PACKAGE_BUGREPORT "http://github.com/libffi/libffi/issues"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "libffi"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libffi 3.99999"
+#define PACKAGE_STRING "libffi 3.3-rc0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libffi"
@@ -147,7 +149,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.99999"
+#define PACKAGE_VERSION "3.3-rc0"
 
 /* The size of `double', as computed by sizeof. */
 #define SIZEOF_DOUBLE 8
@@ -177,7 +179,7 @@
 /* #undef USING_PURIFY */
 
 /* Version number of package */
-#define VERSION "3.99999"
+#define VERSION "3.3-rc0"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
