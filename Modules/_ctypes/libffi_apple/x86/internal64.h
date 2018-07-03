@@ -1,3 +1,5 @@
+#ifdef __x86_64__
+
 #define UNIX64_RET_VOID		0
 #define UNIX64_RET_UINT8	1
 #define UNIX64_RET_UINT16	2
@@ -20,3 +22,6 @@
 #define UNIX64_FLAG_RET_IN_MEM	(1 << 10)
 #define UNIX64_FLAG_XMM_ARGS	(1 << 11)
 #define UNIX64_SIZE_SHIFT	12
+
+
+#endif

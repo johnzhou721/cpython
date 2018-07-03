@@ -57,6 +57,14 @@ struct call_context
   UINT64 x[N_X_ARG_REG];
 };
 
+#if FFI_EXEC_TRAMPOLINE_TABLE
+
+#ifdef __MACH__
+#include <mach/vm_param.h>
+#endif
+
+#else
+
 #if defined (__clang__) && defined (__APPLE__)
 extern void sys_icache_invalidate (void *start, size_t len);
 #endif
@@ -72,12 +80,6 @@ ffi_clear_cache (void *start, void *end)
 #error "Missing builtin to flush instruction cache"
 #endif
 }
-
-#if FFI_EXEC_TRAMPOLINE_TABLE
-
-#ifdef __MACH__
-#include <mach/vm_param.h>
-#endif
 
 #endif
 
@@ -231,7 +233,7 @@ is_vfp_type (const ffi_type *ty)
 
   /* All tests succeeded.  Encode the result.  */
  done:
-  return candidate * 4 + (4 - ele_count);
+  return candidate * 4 + (4 - (int)ele_count);
 }
 
 /* Representation of the procedure call argument marshalling
@@ -280,7 +282,7 @@ allocate_to_stack (struct arg_state *state, void *stack,
     alignment = 8;
 #endif
     
-  nsaa = ALIGN (nsaa, alignment);
+  nsaa = FFI_ALIGN (nsaa, alignment);
   state->nsaa = nsaa + size;
 
   return (char *)stack + nsaa;
@@ -318,7 +320,7 @@ extend_integer_type (void *source, int type)
 static void
 extend_hfa_type (void *dest, void *src, int h)
 {
-  int f = h - AARCH64_RET_S4;
+  ssize_t f = h - AARCH64_RET_S4;
   void *x0;
 
   asm volatile (
@@ -528,7 +530,7 @@ ffi_prep_cif_machdep (ffi_cif *cif)
       }
 
   /* Round the stack up to a multiple of the stack alignment requirement. */
-  cif->bytes = ALIGN(bytes, 16);
+  cif->bytes = (unsigned) FFI_ALIGN(bytes, 16);
   cif->flags = flags;
 #if defined (__APPLE__)
   cif->aarch64_nfixedargs = 0;
@@ -668,6 +670,7 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *orig_rvalue,
 		   the argument is replaced by a pointer to the copy.  */
 		a = &avalue[i];
 		t = FFI_TYPE_POINTER;
+		s = sizeof (void *);
 		goto do_pointer;
 	      }
 	    else
@@ -919,6 +922,15 @@ ffi_closure_SYSV_inner (ffi_cif *cif,
 	default:
 	  abort();
 	}
+
+#if defined (__APPLE__)
+      if (i + 1 == cif->aarch64_nfixedargs)
+	{
+	  state.ngrn = N_X_ARG_REG;
+	  state.nsrn = N_V_ARG_REG;
+	  state.allocating_variadic = 1;
+	}
+#endif
     }
 
   flags = cif->flags;

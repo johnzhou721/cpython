@@ -87,6 +87,7 @@
 
 #define ARM_FUNC_START(name)		\
 	.globl CNAME(name);		\
+	.private_extern CNAME(name);	\
 	FFI_HIDDEN(CNAME(name));	\
 	ARM_FUNC_START_LOCAL(name)
 
@@ -230,7 +231,7 @@ ARM_FUNC_START(ffi_closure_SYSV)
 	cfi_startproc
 	stmdb	sp!, {r0-r3}			@ save argument regs
 	cfi_adjust_cfa_offset(16)
-	
+
 #if FFI_EXEC_TRAMPOLINE_TABLE
 	ldr ip, [ip]				@ ip points to the config page, dereference to get the ffi_closure*
 #endif
@@ -277,7 +278,7 @@ ARM_FUNC_START(ffi_closure_VFP)
 	cfi_startproc
 	stmdb	sp!, {r0-r3}			@ save argument regs
 	cfi_adjust_cfa_offset(16)
-	
+
 #if FFI_EXEC_TRAMPOLINE_TABLE
 	ldr ip, [ip]				@ ip points to the config page, dereference to get the ffi_closure*
 #endif
@@ -358,7 +359,7 @@ ARM_FUNC_END(ffi_closure_ret)
 #if FFI_EXEC_TRAMPOLINE_TABLE
 
 #ifdef __MACH__
-#include <mach/vm_param.h>
+#include <mach/machine/vm_param.h>
 
 .align	PAGE_MAX_SHIFT
 ARM_FUNC_START(ffi_closure_trampoline_table_page)
