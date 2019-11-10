@@ -461,6 +461,8 @@ class EventLoopTestsMixin:
             self._basetest_sock_client_ops(httpd, sock)
 
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_unix_sock_client_ops(self):
         with test_utils.run_test_unix_server() as httpd:
             sock = socket.socket(socket.AF_UNIX)
@@ -597,6 +599,8 @@ class EventLoopTestsMixin:
             self._basetest_create_connection(conn_fut)
 
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_create_unix_connection(self):
         # Issue #20682: On Mac OS X Tiger, getsockname() returns a
         # zero-length address for UNIX socket.
@@ -732,6 +736,8 @@ class EventLoopTestsMixin:
 
     @unittest.skipIf(ssl is None, 'No ssl module')
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_create_ssl_unix_connection(self):
         # Issue #20682: On Mac OS X Tiger, getsockname() returns a
         # zero-length address for UNIX socket.
@@ -960,6 +966,8 @@ class EventLoopTestsMixin:
         return server, path
 
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_create_unix_server(self):
         proto = MyProto(loop=self.loop)
         server, path = self._make_unix_server(lambda: proto)
@@ -988,6 +996,8 @@ class EventLoopTestsMixin:
         server.close()
 
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_create_unix_server_path_socket_error(self):
         proto = MyProto(loop=self.loop)
         sock = socket.socket()
@@ -1057,6 +1067,8 @@ class EventLoopTestsMixin:
 
     @unittest.skipIf(ssl is None, 'No ssl module')
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_create_unix_server_ssl(self):
         proto = MyProto(loop=self.loop)
         server, path = self._make_ssl_unix_server(
@@ -1125,6 +1137,8 @@ class EventLoopTestsMixin:
 
     @unittest.skipIf(ssl is None, 'No ssl module')
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_create_unix_server_ssl_verify_failed(self):
         proto = MyProto(loop=self.loop)
         server, path = self._make_ssl_unix_server(
@@ -1196,6 +1210,8 @@ class EventLoopTestsMixin:
 
     @unittest.skipIf(ssl is None, 'No ssl module')
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_create_unix_server_ssl_verified(self):
         proto = MyProto(loop=self.loop)
         server, path = self._make_ssl_unix_server(
@@ -1866,6 +1882,7 @@ class EventLoopTestsMixin:
             self.loop.add_signal_handler(signal.SIGTERM, func)
 
 
+@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
 class SubprocessTestsMixin:
 
     def check_terminated(self, returncode):

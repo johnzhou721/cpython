@@ -5,6 +5,7 @@ import os
 import queue
 import pickle
 import socket
+import subprocess
 import sys
 import threading
 import unittest
@@ -58,6 +59,8 @@ class StreamReaderTests(test_utils.TestCase):
             self._basetest_open_connection(conn_fut)
 
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_open_unix_connection(self):
         with test_utils.run_test_unix_server() as httpd:
             conn_fut = asyncio.open_unix_connection(httpd.address,
@@ -88,6 +91,8 @@ class StreamReaderTests(test_utils.TestCase):
 
     @unittest.skipIf(ssl is None, 'No ssl module')
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_open_unix_connection_no_loop_ssl(self):
         with test_utils.run_test_unix_server(use_ssl=True) as httpd:
             conn_fut = asyncio.open_unix_connection(
@@ -114,6 +119,8 @@ class StreamReaderTests(test_utils.TestCase):
             self._basetest_open_connection_error(conn_fut)
 
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_open_unix_connection_error(self):
         with test_utils.run_test_unix_server() as httpd:
             conn_fut = asyncio.open_unix_connection(httpd.address,
@@ -635,6 +642,8 @@ class StreamReaderTests(test_utils.TestCase):
         self.assertEqual(msg, b"hello world!\n")
 
     @unittest.skipUnless(hasattr(socket, 'AF_UNIX'), 'No UNIX Sockets')
+    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                     "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_start_unix_server(self):
 
         class MyServer:
@@ -703,6 +712,7 @@ class StreamReaderTests(test_utils.TestCase):
             self.assertEqual(msg, b"hello world!\n")
 
     @unittest.skipIf(sys.platform == 'win32', "Don't have pipes")
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_read_all_from_pipe_reader(self):
         # See asyncio issue 168.  This test is derived from the example
         # subprocess_attach_read_pipe.py, but we configure the

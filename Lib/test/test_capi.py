@@ -51,6 +51,7 @@ class CAPITest(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, inst.testfunction, "attribute", "test")
 
     @unittest.skipUnless(threading, 'Threading required for this test.')
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_no_FatalError_infinite_loop(self):
         with support.SuppressCrashReport():
             p = subprocess.Popen([sys.executable, "-c",

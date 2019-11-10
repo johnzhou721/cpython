@@ -20,6 +20,8 @@
 #  pragma weak statvfs
 #  pragma weak fstatvfs
 
+#  include "TargetConditionals.h"
+
 #endif /* __APPLE__ */
 
 #define PY_SSIZE_T_CLEAN
@@ -197,6 +199,23 @@ corresponding Unix manual entries for more information on calls.");
 #endif  /* _MSC_VER */
 #endif  /* ! __WATCOMC__ || __QNX__ */
 
+// iOS/tvOS/watchOS *define* a number of POSIX functions, but you can't use them
+// because iOS isn't a conventional multiprocess environment.
+#if TARGET_OS_IPHONE
+#  undef HAVE_EXECV
+#  undef HAVE_FORK
+#  undef HAVE_FORK1
+#  undef HAVE_FORKPTY
+#  undef HAVE_GETGROUPS
+#  undef HAVE_SCHED_H
+#  undef HAVE_SENDFILE
+#  undef HAVE_SETPRIORITY
+#  undef HAVE_SPAWNV
+#  undef HAVE_WAIT
+#  undef HAVE_WAIT3
+#  undef HAVE_WAIT4
+#  undef HAVE_WAITPID
+#endif
 
 /*[clinic input]
 # one of the few times we lie about this name!
@@ -1217,7 +1236,9 @@ win32_get_reparse_tag(HANDLE reparse_point_handle, ULONG *reparse_tag)
 #include <crt_externs.h>
 static char **environ;
 #elif !defined(_MSC_VER) && ( !defined(__WATCOMC__) || defined(__QNX__) )
+#if !TARGET_OS_TV && !TARGET_OS_WATCH
 extern char **environ;
+#endif
 #endif /* !_MSC_VER */
 
 static PyObject *
@@ -1268,7 +1289,7 @@ convertenviron(void)
         Py_DECREF(k);
         Py_DECREF(v);
     }
-#else
+#elif !TARGET_OS_TV && !TARGET_OS_WATCH
     if (environ == NULL)
         return d;
     /* This part ignores errors */
@@ -4158,7 +4179,12 @@ os_system_impl(PyObject *module, PyObject *command)
     long result;
     const char *bytes = PyBytes_AsString(command);
     Py_BEGIN_ALLOW_THREADS
+#if TARGET_OS_IPHONE
+    result = -1;
+    errno = ENOTSUP;
+#else
     result = system(bytes);
+#endif
     Py_END_ALLOW_THREADS
     return result;
 }
@@ -4435,7 +4461,7 @@ typedef struct {
 static int
 utime_dir_fd(utime_t *ut, int dir_fd, const char *path, int follow_symlinks)
 {
-#ifdef HAVE_UTIMENSAT
+#if defined(HAVE_UTIMENSAT) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     int flags = follow_symlinks ? 0 : AT_SYMLINK_NOFOLLOW;
     UTIME_TO_TIMESPEC;
     return utimensat(dir_fd, path, time, flags);
@@ -4461,7 +4487,7 @@ utime_dir_fd(utime_t *ut, int dir_fd, const char *path, int follow_symlinks)
 static int
 utime_fd(utime_t *ut, int fd)
 {
-#ifdef HAVE_FUTIMENS
+#if defined(HAVE_FUTIMENS) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     UTIME_TO_TIMESPEC;
     return futimens(fd, time);
 #else
@@ -4484,7 +4510,7 @@ utime_fd(utime_t *ut, int fd)
 static int
 utime_nofollow_symlinks(utime_t *ut, const char *path)
 {
-#ifdef HAVE_UTIMENSAT
+#if defined(HAVE_UTIMENSAT) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     UTIME_TO_TIMESPEC;
     return utimensat(DEFAULT_DIR_FD, path, time, AT_SYMLINK_NOFOLLOW);
 #else
@@ -4500,7 +4526,7 @@ utime_nofollow_symlinks(utime_t *ut, const char *path)
 static int
 utime_default(utime_t *ut, const char *path)
 {
-#ifdef HAVE_UTIMENSAT
+#if defined(HAVE_UTIMENSAT) && (!TARGET_OS_IOS || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
     UTIME_TO_TIMESPEC;
     return utimensat(DEFAULT_DIR_FD, path, time, 0);
 #elif defined(HAVE_UTIMES)

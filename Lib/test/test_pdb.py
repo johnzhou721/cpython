@@ -1139,6 +1139,7 @@ def test_pdb_issue_20766():
 
 class PdbTestCase(unittest.TestCase):
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def run_pdb(self, script, commands):
         """Run 'script' lines with pdb and the pdb 'commands'."""
         filename = 'main.py'
@@ -1187,6 +1188,7 @@ class PdbTestCase(unittest.TestCase):
             ('bar', 4),
         )
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_issue7964(self):
         # open the file as binary so we can force \r\n newline
         with open(support.TESTFN, 'wb') as f:
@@ -1238,6 +1240,7 @@ class PdbTestCase(unittest.TestCase):
             any('main.py(5)foo()->None' in l for l in stdout.splitlines()),
             'Fail to step into the caller after a return')
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_issue13210(self):
         # invoking "continue" on a non-main thread triggered an exception
         # inside signal.signal
