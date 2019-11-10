@@ -7,6 +7,10 @@ import socket
 import urllib.error
 import urllib.request
 import sys
+try:
+    import ssl
+except ImportError:
+    ssl = None
 
 support.requires("network")
 
@@ -156,6 +160,7 @@ class OtherNetworkTests(unittest.TestCase):
 
 ##             self._test_urls(urls, self._extra_handlers()+[bauth, dauth])
 
+    @unittest.skipIf(ssl is None, 'test requires ssl module')
     def test_urlwithfrag(self):
         urlwith_frag = "http://www.pythontest.net/index.html#frag"
         with support.transient_internet(urlwith_frag):
@@ -164,6 +169,7 @@ class OtherNetworkTests(unittest.TestCase):
             self.assertEqual(res.geturl(),
                     "http://www.pythontest.net/index.html#frag")
 
+    @unittest.skipIf(ssl is None, 'test requires ssl module')
     def test_redirect_url_withfrag(self):
         redirect_url_with_frag = "http://www.pythontest.net/redir/with_frag/"
         with support.transient_internet(redirect_url_with_frag):
