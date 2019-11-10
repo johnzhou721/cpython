@@ -18,6 +18,7 @@ class PlatformTest(unittest.TestCase):
         res = platform.architecture()
 
     @support.skip_unless_symlink
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_architecture_via_symlink(self): # issue3762
         with support.PythonSymlink() as py:
             cmd = "-c", "import platform; print(platform.architecture())"
@@ -192,7 +193,7 @@ class PlatformTest(unittest.TestCase):
     def test_mac_ver(self):
         res = platform.mac_ver()
 
-        if platform.uname().system == 'Darwin':
+        if platform.uname().system == 'Darwin' and sys.platform not in ('ios', 'tvos', 'watchos'):
             # We are on a macOS system, check that the right version
             # information is returned
             output = subprocess.check_output(['sw_vers'], text=True)
@@ -220,7 +221,6 @@ class PlatformTest(unittest.TestCase):
                 self.assertIn(res[2], ('i386', 'x86_64'))
             else:
                 self.assertEqual(res[2], 'PowerPC')
-
 
     @unittest.skipUnless(sys.platform == 'darwin', "OSX only test")
     def test_mac_ver_with_fork(self):

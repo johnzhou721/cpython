@@ -16,6 +16,7 @@ from sysconfig import (get_paths, get_platform, get_config_vars,
                        get_scheme_names, get_config_var, _main)
 import _osx_support
 
+
 class TestSysConfig(unittest.TestCase):
 
     def setUp(self):
@@ -229,10 +230,12 @@ class TestSysConfig(unittest.TestCase):
 
     def test_get_scheme_names(self):
         wanted = ('nt', 'nt_user', 'osx_framework_user',
-                  'posix_home', 'posix_prefix', 'posix_user')
+                  'posix_home', 'posix_prefix', 'posix_user',
+                  'tvos', 'watchos')
         self.assertEqual(get_scheme_names(), wanted)
 
     @skip_unless_symlink
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_symlink(self): # Issue 7880
         with PythonSymlink() as py:
             cmd = "-c", "import sysconfig; print(sysconfig.get_platform())"

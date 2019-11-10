@@ -31,6 +31,7 @@ MEMORY_SANITIZER = (
 )
 
 
+
 def expected_traceback(lineno1, lineno2, header, min_count=1):
     regex = header
     regex += '  File "<string>", line %s in func\n' % lineno1
@@ -45,6 +46,7 @@ def skip_segfault_on_android(test):
     return unittest.skipIf(is_android,
                            'raising SIGSEGV on Android is unreliable')(test)
 
+
 @contextmanager
 def temporary_filename():
     filename = tempfile.mktemp()
@@ -52,6 +54,7 @@ def temporary_filename():
         yield filename
     finally:
         support.unlink(filename)
+
 
 class FaultHandlerTests(unittest.TestCase):
     def get_output(self, code, filename=None, fd=None):
@@ -348,6 +351,7 @@ class FaultHandlerTests(unittest.TestCase):
         finally:
             sys.stderr = orig_stderr
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_disabled_by_default(self):
         # By default, the module should be disabled
         code = "import faulthandler; print(faulthandler.is_enabled())"
@@ -356,6 +360,7 @@ class FaultHandlerTests(unittest.TestCase):
         output = subprocess.check_output(args)
         self.assertEqual(output.rstrip(), b"False")
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_sys_xoptions(self):
         # Test python -X faulthandler
         code = "import faulthandler; print(faulthandler.is_enabled())"
@@ -368,6 +373,7 @@ class FaultHandlerTests(unittest.TestCase):
         output = subprocess.check_output(args, env=env)
         self.assertEqual(output.rstrip(), b"True")
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_env_var(self):
         # empty env var
         code = "import faulthandler; print(faulthandler.is_enabled())"

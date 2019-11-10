@@ -56,7 +56,7 @@ Lib/distutils/command/*.pdb
 Lib/lib2to3/*.pickle
 Lib/test/data/*
 !Lib/test/data/README
-/Makefile
+Makefile
 /Makefile.pre
 Misc/python.pc
 Misc/python-embed.pc
@@ -100,7 +100,7 @@ PCbuild/win32/
 /config.status.lineno
 /platform
 /pybuilddir.txt
-/pyconfig.h
+pyconfig.h
 /python-config
 /python-config.py
 /python.bat
@@ -118,3 +118,8 @@ Tools/ssl/win32
 # Ignore ./python binary on Unix but still look into ./Python/ directory.
 /python
 !/Python/
+
+Python.framework
+iOS/_freeze_importlib
+tvOS/_freeze_importlib
+watchOS/_freeze_importlib

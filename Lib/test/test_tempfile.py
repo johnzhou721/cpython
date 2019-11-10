@@ -19,7 +19,7 @@ from test.support import script_helper
 
 
 has_textmode = (tempfile._text_openflags != tempfile._bin_openflags)
-has_spawnl = hasattr(os, 'spawnl')
+has_spawnl = hasattr(os, 'spawnl') and os.allows_subprocesses
 
 # TEST_FILES may need to be tweaked for systems depending on the maximum
 # number of files that can be opened at one time (see ulimit -n)

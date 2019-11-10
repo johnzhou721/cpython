@@ -154,6 +154,7 @@ class ThreadPoolMixin(ExecutorMixin):
     executor_type = futures.ThreadPoolExecutor
 
 
+@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
 class ProcessPoolForkMixin(ExecutorMixin):
     executor_type = futures.ProcessPoolExecutor
     ctx = "fork"
@@ -164,11 +165,13 @@ class ProcessPoolForkMixin(ExecutorMixin):
         return super().get_context()
 
 
+@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
 class ProcessPoolSpawnMixin(ExecutorMixin):
     executor_type = futures.ProcessPoolExecutor
     ctx = "spawn"
 
 
+@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
 class ProcessPoolForkserverMixin(ExecutorMixin):
     executor_type = futures.ProcessPoolExecutor
     ctx = "forkserver"

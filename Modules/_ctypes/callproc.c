@@ -795,6 +795,7 @@ static int _call_function_pointer(int flags,
                                   ffi_type **atypes,
                                   ffi_type *restype,
                                   void *resmem,
+                                  int fixedargcount,
                                   int argcount)
 {
     PyThreadState *_save = NULL; /* For Py_BLOCK_THREADS and Py_UNBLOCK_THREADS */
@@ -818,11 +819,12 @@ static int _call_function_pointer(int flags,
     if ((flags & FUNCFLAG_CDECL) == 0)
         cc = FFI_STDCALL;
 #endif
-    if (FFI_OK != ffi_prep_cif(&cif,
-                               cc,
-                               argcount,
-                               restype,
-                               atypes)) {
+    if (FFI_OK != ffi_prep_cif_var(&cif,
+                                   cc,
+                                   fixedargcount,
+                                   argcount,
+                                   restype,
+                                   atypes)) {
         PyErr_SetString(PyExc_RuntimeError,
                         "ffi_prep_cif failed");
         return -1;
@@ -1180,6 +1182,9 @@ PyObject *_ctypes_callproc(PPROC pProc,
 
     if (-1 == _call_function_pointer(flags, pProc, avalues, atypes,
                                      rtype, resbuf,
+                                     Py_SAFE_DOWNCAST(argtype_count,
+                                                      Py_ssize_t,
+                                                      int),
                                      Py_SAFE_DOWNCAST(argcount,
                                                       Py_ssize_t,
                                                       int)))

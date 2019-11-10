@@ -1189,6 +1189,7 @@ class PdbTestCase(unittest.TestCase):
     def tearDown(self):
         support.unlink(support.TESTFN)
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def _run_pdb(self, pdb_args, commands):
         self.addCleanup(support.rmtree, '__pycache__')
         cmd = [sys.executable, '-m', 'pdb'] + pdb_args
@@ -1255,6 +1256,7 @@ class PdbTestCase(unittest.TestCase):
             ('bar', 4),
         )
 
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     def test_issue7964(self):
         # open the file as binary so we can force \r\n newline
         with open(support.TESTFN, 'wb') as f:

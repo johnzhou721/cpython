@@ -86,6 +86,7 @@ static void more_core(void)
     }
 }
 
+#ifndef __APPLE__
 /******************************************************************/
 
 /* put the item back into the free list */
@@ -114,3 +115,5 @@ void *ffi_closure_alloc(size_t ignored, void** codeloc)
 #endif
     return (void *)item;
 }
+
+#endif
