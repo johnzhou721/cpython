@@ -241,6 +241,7 @@ SKIPPED = -2
 RESOURCE_DENIED = -3
 INTERRUPTED = -4
 CHILD_ERROR = -5   # error in a child process
+TEST_DID_NOT_RUN = -6   # error in a child process
 
 # Minimum duration of a test to display its duration or to mention that
 # the test is running in background
@@ -307,6 +308,7 @@ _FORMAT_TEST_RESULT = {
     RESOURCE_DENIED: '%s skipped (resource denied)',
     INTERRUPTED: '%s interrupted',
     CHILD_ERROR: '%s crashed',
+    TEST_DID_NOT_RUN: '%s run no tests',
 }
 
 
@@ -380,7 +382,7 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
              'runleaks', 'huntrleaks=', 'memlimit=', 'randseed=',
              'multiprocess=', 'slaveargs=', 'forever', 'header', 'pgo',
              'failfast', 'match=', 'testdir=', 'list-tests', 'list-cases',
-             'coverage', 'matchfile=', 'fail-env-changed'])
+             'coverage', 'matchfile=', 'fail-env-changed', 'cleanup'])
     except getopt.error, msg:
         usage(2, msg)
 
@@ -393,6 +395,7 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
     list_tests = False
     list_cases_opt = False
     fail_env_changed = False
+    cleanup_tests = False
     for o, a in opts:
         if o in ('-h', '--help'):
             usage(0)
@@ -495,6 +498,8 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
             list_cases_opt = True
         elif o == '--fail-env-changed':
             fail_env_changed = True
+        elif o == '--cleanup':
+            cleanup_tests = True
         else:
             print >>sys.stderr, ("No handler for option {}.  Please "
                 "report this as a bug at http://bugs.python.org.").format(o)
@@ -532,10 +537,24 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
             print >>sys.stderr, msg
             sys.exit(2)
 
+    if cleanup_tests:
+        import glob
+
+        os.chdir(support.SAVEDCWD)
+        path = os.path.join(TEMPDIR, 'test_python_*')
+        print("Cleanup %s directory" % TEMPDIR)
+        for name in glob.glob(path):
+            if os.path.isdir(name):
+                print("Remove directory: %s" % name)
+                support.rmtree(name)
+            else:
+                print("Remove file: %s" % name)
+                support.unlink(name)
+        sys.exit(0)
+
+
     if slaveargs is not None:
         args, kwargs = json.loads(slaveargs)
-        if kwargs['huntrleaks']:
-            warm_caches()
         if testdir:
             kwargs['testdir'] = testdir
         try:
@@ -546,15 +565,13 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         print json.dumps(result)
         sys.exit(0)
 
-    if huntrleaks:
-        warm_caches()
-
     good = []
     bad = []
     skipped = []
     resource_denieds = []
     environment_changed = []
     rerun = []
+    run_no_tests = []
     first_result = None
     interrupted = False
 
@@ -651,6 +668,8 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
         elif ok == RESOURCE_DENIED:
             skipped.append(test)
             resource_denieds.append(test)
+        elif ok == TEST_DID_NOT_RUN:
+            run_no_tests.append(test)
         elif ok != INTERRUPTED:
             raise ValueError("invalid test result: %r" % ok)
 
@@ -932,6 +951,8 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
             result.append("FAILURE")
         elif fail_env_changed and environment_changed:
             result.append("ENV CHANGED")
+        elif not any((good, bad, skipped, interrupted, environment_changed)):
+            result.append("NO TEST RUN")
 
         if interrupted:
             result.append("INTERRUPTED")
@@ -1001,9 +1022,14 @@ def main(tests=None, testdir=None, verbose=0, quiet=False,
                 print "expected to get skipped on", plat + "."
 
         if rerun:
-            print
+            print("")
             print("%s:" % count(len(rerun), "re-run test"))
             printlist(rerun)
+
+        if run_no_tests:
+            print("")
+            print("%s run no tests:" % count(len(run_no_tests), "test"))
+            printlist(run_no_tests)
 
 
     display_result()
@@ -1116,6 +1142,7 @@ def runtest(test, verbose, quiet,
         ENV_CHANGED      test failed because it changed the execution environment
         FAILED           test failed
         PASSED           test passed
+        EMPTY_TEST_SUITE test ran no subtests.
     """
 
     support.verbose = verbose  # Tell tests to be moderately quiet
@@ -1326,7 +1353,7 @@ def runtest_inner(test, verbose, quiet, huntrleaks=False, pgo=False, testdir=Non
                 indirect_test = getattr(the_module, "test_main", None)
                 if huntrleaks:
                     refleak = dash_R(the_module, test, indirect_test,
-                        huntrleaks)
+                        huntrleaks, quiet)
                 else:
                     if indirect_test is not None:
                         indirect_test()
@@ -1351,6 +1378,8 @@ def runtest_inner(test, verbose, quiet, huntrleaks=False, pgo=False, testdir=Non
             print >>sys.stderr, "test", test, "failed --", msg
         sys.stderr.flush()
         return FAILED, test_time
+    except support.TestDidNotRun:
+        return TEST_DID_NOT_RUN, test_time
     except:
         type, value = sys.exc_info()[:2]
         if not pgo:
@@ -1417,7 +1446,7 @@ def cleanup_test_droppings(testname, verbose):
             print >> sys.stderr, ("%r left behind %s %r and it couldn't be "
                 "removed: %s" % (testname, kind, name, msg))
 
-def dash_R(the_module, test, indirect_test, huntrleaks):
+def dash_R(the_module, test, indirect_test, huntrleaks, quiet):
     """Run a test multiple times, looking for reference leaks.
 
     Returns:
@@ -1429,6 +1458,10 @@ def dash_R(the_module, test, indirect_test, huntrleaks):
     if not hasattr(sys, 'gettotalrefcount'):
         raise Exception("Tracking reference leaks requires a debug build "
                         "of Python")
+
+    # Avoid false positives due to various caches
+    # filling slowly with random data:
+    warm_caches()
 
     # Save current values for dash_R_cleanup() to restore.
     fs = warnings.filters[:]
@@ -1449,6 +1482,14 @@ def dash_R(the_module, test, indirect_test, huntrleaks):
         for obj in abc.__subclasses__() + [abc]:
             abcs[obj] = obj._abc_registry.copy()
 
+    # bpo-31217: Integer pool to get a single integer object for the same
+    # value. The pool is used to prevent false alarm when checking for memory
+    # block leaks. Fill the pool with values in -1000..1000 which are the most
+    # common (reference, memory block, file descriptor) differences.
+    int_pool = {value: value for value in range(-1000, 1000)}
+    def get_pooled_int(value):
+        return int_pool.setdefault(value, value)
+
     if indirect_test:
         def run_the_test():
             indirect_test()
@@ -1459,27 +1500,39 @@ def dash_R(the_module, test, indirect_test, huntrleaks):
     deltas = []
     nwarmup, ntracked, fname = huntrleaks
     fname = os.path.join(support.SAVEDCWD, fname)
-    repcount = nwarmup + ntracked
-    rc_deltas = [0] * ntracked
-    fd_deltas = [0] * ntracked
 
-    print >> sys.stderr, "beginning", repcount, "repetitions"
-    print >> sys.stderr, ("1234567890"*(repcount//10 + 1))[:repcount]
+    # Pre-allocate to ensure that the loop doesn't allocate anything new
+    repcount = nwarmup + ntracked
+    rc_deltas = [0] * repcount
+    fd_deltas = [0] * repcount
+    rep_range = list(range(repcount))
+
+    if not quiet:
+        print >> sys.stderr, "beginning", repcount, "repetitions"
+        print >> sys.stderr, ("1234567890"*(repcount//10 + 1))[:repcount]
+
     dash_R_cleanup(fs, ps, pic, zdc, abcs)
+
     # initialize variables to make pyflakes quiet
     rc_before = fd_before = 0
-    for i in range(repcount):
+
+    for i in rep_range:
         run_the_test()
-        sys.stderr.write('.')
+
+        if not quiet:
+            sys.stderr.write('.')
+
         dash_R_cleanup(fs, ps, pic, zdc, abcs)
+
         rc_after = sys.gettotalrefcount()
         fd_after = support.fd_count()
-        if i >= nwarmup:
-            rc_deltas[i - nwarmup] = rc_after - rc_before
-            fd_deltas[i - nwarmup] = fd_after - fd_before
+        rc_deltas[i] = get_pooled_int(rc_after - rc_before)
+        fd_deltas[i] = get_pooled_int(fd_after - fd_before)
         rc_before = rc_after
         fd_before = fd_after
-    print >> sys.stderr
+
+    if not quiet:
+        print >> sys.stderr
 
     # These checkers return False on success, True on failure
     def check_rc_deltas(deltas):
@@ -1505,6 +1558,7 @@ def dash_R(the_module, test, indirect_test, huntrleaks):
         (rc_deltas, 'references', check_rc_deltas),
         (fd_deltas, 'file descriptors', check_fd_deltas)
     ]:
+        deltas = deltas[nwarmup:]
         if checker(deltas):
             msg = '%s leaked %s %s, sum=%s' % (test, deltas, item_name, sum(deltas))
             print >> sys.stderr, msg
@@ -1639,7 +1693,7 @@ def clear_caches():
         ctypes._reset_cache()
 
     # Collect cyclic trash.
-    gc.collect()
+    support.gc_collect()
 
 def warm_caches():
     """Create explicitly internal singletons which are created on demand

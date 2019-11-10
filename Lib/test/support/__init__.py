@@ -29,7 +29,7 @@ try:
 except ImportError:
     thread = None
 
-__all__ = ["Error", "TestFailed", "ResourceDenied", "import_module",
+__all__ = ["Error", "TestFailed", "TestDidNotRun", "ResourceDenied", "import_module",
            "verbose", "use_resources", "max_memuse", "record_original_stdout",
            "get_original_stdout", "unload", "unlink", "rmtree", "forget",
            "is_resource_enabled", "requires", "requires_mac_ver",
@@ -52,6 +52,9 @@ class Error(Exception):
 
 class TestFailed(Error):
     """Test failed."""
+
+class TestDidNotRun(Error):
+    """Test did not run any subtests."""
 
 class ResourceDenied(unittest.SkipTest):
     """Test skipped because it requested a disallowed resource.
@@ -654,8 +657,12 @@ if have_unicode:
         unichr(0x20AC),
     ):
         try:
-            character.encode(sys.getfilesystemencoding())\
-                     .decode(sys.getfilesystemencoding())
+            # In Windows, 'mbcs' is used, and encode() returns '?'
+            # for characters missing in the ANSI codepage
+            if character.encode(sys.getfilesystemencoding())\
+                        .decode(sys.getfilesystemencoding())\
+                    != character:
+                raise UnicodeError
         except UnicodeError:
             pass
         else:
@@ -712,6 +719,10 @@ else:
 # Disambiguate TESTFN for parallel testing, while letting it remain a valid
 # module name.
 TESTFN = "{}_{}_tmp".format(TESTFN, os.getpid())
+
+# Define the URL of a dedicated HTTP server for the network tests.
+# The URL must use clear-text HTTP: no redirection to encrypted HTTPS.
+TEST_HTTP_URL = "http://www.pythontest.net"
 
 # Save the initial cwd
 SAVEDCWD = os.getcwd()
@@ -1151,6 +1162,9 @@ def transient_internet(resource_name, timeout=30.0, errnos=()):
         ('EHOSTUNREACH', 113),
         ('ENETUNREACH', 101),
         ('ETIMEDOUT', 110),
+        # socket.create_connection() fails randomly with
+        # EADDRNOTAVAIL on Travis CI.
+        ('EADDRNOTAVAIL', 99),
     ]
     default_gai_errnos = [
         ('EAI_AGAIN', -3),
@@ -1533,6 +1547,8 @@ def _run_suite(suite):
         runner = BasicTestRunner()
 
     result = runner.run(suite)
+    if not result.testsRun and not result.skipped:
+        raise TestDidNotRun
     if not result.wasSuccessful():
         if len(result.errors) == 1 and not result.failures:
             err = result.errors[0][1]

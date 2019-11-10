@@ -96,7 +96,7 @@ class StringTestCase(UnicodeTestCase):
         func.argtypes = None
         func.restype = ctypes.c_int
 
-    def test_ascii_replace(self):
+    def test_ascii_strict(self):
         func = self.func
         ctypes.set_conversion_mode("ascii", "strict")
         self.assertEqual(func("abc"), "abc")

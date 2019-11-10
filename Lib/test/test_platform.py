@@ -4,7 +4,7 @@ import unittest
 import platform
 import subprocess
 
-from test import test_support
+from test import support
 
 
 class PlatformTest(unittest.TestCase):
@@ -20,7 +20,7 @@ class PlatformTest(unittest.TestCase):
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                 return p.communicate()
             real = os.path.realpath(sys.executable)
-            link = os.path.abspath(test_support.TESTFN)
+            link = os.path.abspath(support.TESTFN)
             os.symlink(real, link)
             try:
                 self.assertEqual(get(real), get(link))
@@ -165,7 +165,7 @@ class PlatformTest(unittest.TestCase):
         # using it, per
         # http://blogs.msdn.com/david.wang/archive/2006/03/26/HOWTO-Detect-Process-Bitness.aspx
         try:
-            with test_support.EnvironmentVarGuard() as environ:
+            with support.EnvironmentVarGuard() as environ:
                 if 'PROCESSOR_ARCHITEW6432' in environ:
                     del environ['PROCESSOR_ARCHITEW6432']
                 environ['PROCESSOR_ARCHITECTURE'] = 'foo'
@@ -248,7 +248,6 @@ class PlatformTest(unittest.TestCase):
         res = platform.dist()
 
     def test_libc_ver(self):
-        import os
         if os.path.isdir(sys.executable) and \
            os.path.exists(sys.executable+'.exe'):
             # Cygwin horror
@@ -256,6 +255,13 @@ class PlatformTest(unittest.TestCase):
         else:
             executable = sys.executable
         res = platform.libc_ver(executable)
+
+        self.addCleanup(support.unlink, support.TESTFN)
+        with open(support.TESTFN, 'wb') as f:
+            f.write(b'x'*(16384-10))
+            f.write(b'GLIBC_1.23.4\0GLIBC_1.9\0GLIBC_1.21\0')
+        self.assertEqual(platform.libc_ver(support.TESTFN),
+                         ('glibc', '1.23.4'))
 
     def test_parse_release_file(self):
 
@@ -276,7 +282,7 @@ class PlatformTest(unittest.TestCase):
 
 
 def test_main():
-    test_support.run_unittest(
+    support.run_unittest(
         PlatformTest
     )
 

@@ -1135,6 +1135,16 @@ class _TestContainers(BaseTestCase):
         a.append('hello')
         self.assertEqual(f[:], [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'hello']])
 
+    def test_list_iter(self):
+        a = self.list(range(10))
+        it = iter(a)
+        self.assertEqual(list(it), range(10))
+        self.assertEqual(list(it), [])  # exhausted
+        # list modified during iteration
+        it = iter(a)
+        a[0] = 100
+        self.assertEqual(next(it), 100)
+
     def test_dict(self):
         d = self.dict()
         indices = range(65, 70)
@@ -1144,6 +1154,19 @@ class _TestContainers(BaseTestCase):
         self.assertEqual(sorted(d.keys()), indices)
         self.assertEqual(sorted(d.values()), [chr(i) for i in indices])
         self.assertEqual(sorted(d.items()), [(i, chr(i)) for i in indices])
+
+    def test_dict_iter(self):
+        d = self.dict()
+        indices = range(65, 70)
+        for i in indices:
+            d[i] = chr(i)
+        it = iter(d)
+        self.assertEqual(list(it), indices)
+        self.assertEqual(list(it), [])  # exhausted
+        # dictionary changed size during iteration
+        it = iter(d)
+        d.clear()
+        self.assertRaises(RuntimeError, next, it)
 
     def test_namespace(self):
         n = self.Namespace()
@@ -1786,6 +1809,7 @@ class _TestConnection(BaseTestCase):
         p = self.Process(target=self._writefd, args=(child_conn, b"foo"))
         p.daemon = True
         p.start()
+        self.addCleanup(support.unlink, support.TESTFN)
         with open(support.TESTFN, "wb") as f:
             fd = f.fileno()
             if msvcrt:
@@ -1811,6 +1835,7 @@ class _TestConnection(BaseTestCase):
         p = self.Process(target=self._writefd, args=(child_conn, b"bar", True))
         p.daemon = True
         p.start()
+        self.addCleanup(support.unlink, support.TESTFN)
         with open(support.TESTFN, "wb") as f:
             fd = f.fileno()
             for newfd in range(256, MAXFD):
