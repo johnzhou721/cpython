@@ -63,6 +63,10 @@ module math
 /*[clinic end generated code: output=da39a3ee5e6b4b0d input=76bc7002685dd942]*/
 
 
+#ifdef __APPLE__
+#  include "TargetConditionals.h"
+#endif /* __APPLE__ */
+
 /*
    sin(pi*x), giving accurate results for all finite x (especially x
    integral or close to an integer).  This is here for use in the
@@ -2052,6 +2056,16 @@ math_hypot_impl(PyObject *module, double x, double y)
         return PyFloat_FromDouble(fabs(x));
     if (Py_IS_INFINITY(y))
         return PyFloat_FromDouble(fabs(y));
+#if TARGET_OS_IPHONE
+    /* hypot(x, +/-NaN) returns NaN.
+       Most libc implementations get this right, but for some reason,
+       the iOS device implementation doesn't.
+    */
+    if (Py_IS_NAN(x))
+        return PyFloat_FromDouble(fabs(x));
+    if (Py_IS_NAN(y))
+        return PyFloat_FromDouble(fabs(y));
+#endif
     errno = 0;
     PyFPE_START_PROTECT("in math_hypot", return 0);
     r = hypot(x, y);

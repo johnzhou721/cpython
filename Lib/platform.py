@@ -781,7 +781,7 @@ def _syscmd_uname(option, default=''):
 
     """ Interface to the system's uname command.
     """
-    if sys.platform in ('dos', 'win32', 'win16'):
+    if sys.platform in ('dos', 'win32', 'win16', 'ios', 'tvos', 'watchos'):
         # XXX Others too ?
         return default
     try:
@@ -804,7 +804,7 @@ def _syscmd_file(target, default=''):
         default in case the command should fail.
 
     """
-    if sys.platform in ('dos', 'win32', 'win16'):
+    if sys.platform in ('dos', 'win32', 'win16', 'ios', 'tvos', 'watchos'):
         # XXX Others too ?
         return default
     target = _follow_symlinks(target)

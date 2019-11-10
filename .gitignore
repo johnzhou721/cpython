@@ -1,4 +1,4 @@
-# Two-trick pony for OSX and other case insensitive file systems:
+#. Two-trick pony for OSX and other case insensitive file systems:
 # Ignore ./python binary on Unix but still look into ./Python/ directory.
 /python
 !/Python/
@@ -28,7 +28,7 @@ Lib/distutils/command/*.pdb
 Lib/lib2to3/*.pickle
 Lib/test/data/*
 !Lib/test/data/README
-/Makefile
+Makefile
 Makefile.pre
 Misc/python.pc
 Misc/python-config.sh
@@ -89,7 +89,7 @@ libpython*.dylib
 libpython*.dll
 platform
 pybuilddir.txt
-/pyconfig.h
+pyconfig.h
 python-config
 python-config.py
 python.bat
@@ -110,3 +110,7 @@ Tools/ssl/win32
 .vs/
 .vscode/
 gmon.out
+Python.framework
+iOS/_freeze_importlib
+tvOS/_freeze_importlib
+watchOS/_freeze_importlib

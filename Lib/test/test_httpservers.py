@@ -396,7 +396,7 @@ class SimpleHTTPServerTestCase(BaseTestCase):
         with open(os.path.join(self.tempdir, filename), 'wb') as f:
             f.write(support.TESTFN_UNDECODABLE)
         response = self.request(self.base_url + '/')
-        if sys.platform == 'darwin':
+        if sys.platform in ('darwin', 'ios', 'tvos', 'watchos'):
             # On Mac OS the HFS+ filesystem replaces bytes that aren't valid
             # UTF-8 into a percent-encoded value.
             for name in os.listdir(self.tempdir):
@@ -587,6 +587,7 @@ print(os.environ["%s"])
 
 @unittest.skipIf(hasattr(os, 'geteuid') and os.geteuid() == 0,
         "This test can't be run reliably as root (issue #13308).")
+@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
 class CGIHTTPServerTestCase(BaseTestCase):
     class request_handler(NoLogRequestHandler, CGIHTTPRequestHandler):
         pass
@@ -806,6 +807,7 @@ class SocketlessRequestHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
+
 class RejectingSocketlessRequestHandler(SocketlessRequestHandler):
     def handle_expect_100(self):
         self.send_error(HTTPStatus.EXPECTATION_FAILED)
@@ -836,7 +838,7 @@ class BaseHTTPRequestHandlerTestCase(unittest.TestCase):
 
     HTTPResponseMatch = re.compile(b'HTTP/1.[0-9]+ 200 OK')
 
-    def setUp (self):
+    def setUp(self):
         self.handler = SocketlessRequestHandler()
 
     def send_typical_request(self, message):
@@ -1061,6 +1063,7 @@ class BaseHTTPRequestHandlerTestCase(unittest.TestCase):
             year, hh, mm, ss
         )
         self.assertEqual(self.handler.date_time_string(timestamp=now), expected)
+
 
 
 class SimpleHTTPRequestHandlerTestCase(unittest.TestCase):

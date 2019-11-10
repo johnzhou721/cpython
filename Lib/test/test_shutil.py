@@ -33,6 +33,7 @@ try:
 except ImportError:
     UID_GID_SUPPORT = False
 
+
 def _fake_rename(*args, **kwargs):
     # Pretend the destination path is on a different filesystem.
     raise OSError(getattr(errno, 'EXDEV', 18), "Invalid cross-device link")
@@ -1423,6 +1424,8 @@ class TestShutil(unittest.TestCase):
         self.assertEqual(['foo'], os.listdir(rv))
 
 
+@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
+                 "%s doesn't support other executable." % sys.platform)
 class TestWhich(unittest.TestCase):
 
     def setUp(self):
@@ -1942,6 +1945,7 @@ class TermsizeTests(unittest.TestCase):
         self.assertGreaterEqual(size.lines, 0)
 
     @unittest.skipUnless(os.isatty(sys.__stdout__.fileno()), "not on tty")
+    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
     @unittest.skipUnless(hasattr(os, 'get_terminal_size'),
                          'need os.get_terminal_size()')
     def test_stty_match(self):

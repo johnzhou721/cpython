@@ -179,6 +179,11 @@ typedef struct {
 
 #define PyDateTime_CAPSULE_NAME "datetime.datetime_CAPI"
 
+/* Define global variable for the C API and a macro for setting it. */
+static PyDateTime_CAPI *PyDateTimeAPI = NULL;
+
+#define PyDateTime_IMPORT \
+    PyDateTimeAPI = (PyDateTime_CAPI *)PyCapsule_Import(PyDateTime_CAPSULE_NAME, 0)
 
 #ifdef Py_BUILD_CORE
 
@@ -199,12 +204,6 @@ typedef struct {
 #define PyTZInfo_CheckExact(op) (Py_TYPE(op) == &PyDateTime_TZInfoType)
 
 #else
-
-/* Define global variable for the C API and a macro for setting it. */
-static PyDateTime_CAPI *PyDateTimeAPI = NULL;
-
-#define PyDateTime_IMPORT \
-    PyDateTimeAPI = (PyDateTime_CAPI *)PyCapsule_Import(PyDateTime_CAPSULE_NAME, 0)
 
 /* Macro for access to the UTC singleton */
 #define PyDateTime_TimeZone_UTC PyDateTimeAPI->TimeZone_UTC

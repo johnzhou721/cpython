@@ -591,7 +591,7 @@ class IOTest(unittest.TestCase):
         # On Windows and Mac OSX this test consumes large resources; It takes
         # a long time to build the >2 GiB file and takes >2 GiB of disk space
         # therefore the resource must be enabled to run this test.
-        if sys.platform[:3] == 'win' or sys.platform == 'darwin':
+        if sys.platform[:3] == 'win' or sys.platform in ('darwin', 'ios', 'tvos', 'watchos'):
             support.requires(
                 'largefile',
                 'test requires %s bytes and a long time to run' % self.LARGE)
@@ -1006,6 +1006,7 @@ class CIOTest(IOTest):
         del obj
         support.gc_collect()
         self.assertIsNone(wr(), wr)
+
 
 class PyIOTest(IOTest):
     pass
