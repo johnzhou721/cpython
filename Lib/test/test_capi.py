@@ -478,7 +478,6 @@ class EmbeddingTests(unittest.TestCase):
         self.assertEqual(out, '')
         self.assertEqual(err, '')
 
-
 @unittest.skipUnless(threading, 'Threading required for this test.')
 class TestThreadState(unittest.TestCase):
 

@@ -8,7 +8,6 @@ import sys
 import subprocess
 import tempfile
 
-
 class MiscSourceEncodingTest(unittest.TestCase):
 
     def test_pep263(self):

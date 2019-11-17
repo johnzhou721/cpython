@@ -1,8 +1,8 @@
-import ctypes
-import gc
 import os
 import unittest
 from test import support
+import ctypes
+import gc
 
 MyCallback = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int)
 OtherCallback = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_ulonglong)

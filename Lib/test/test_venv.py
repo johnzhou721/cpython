@@ -32,8 +32,6 @@ except ImportError:
 skipInVenv = unittest.skipIf(sys.prefix != sys.base_prefix,
                              'Test not appropriate in a venv')
 
-<<<<<<< HEAD
-=======
 def check_output(cmd, encoding=None):
     p = subprocess.Popen(cmd,
         stdout=subprocess.PIPE,
@@ -44,7 +42,6 @@ def check_output(cmd, encoding=None):
         raise subprocess.CalledProcessError(
             p.returncode, cmd, out, err)
     return out, err
->>>>>>> upstream/3.6
 
 class BaseTest(unittest.TestCase):
     """Base class for venv tests."""

@@ -53,7 +53,6 @@ def tearDownModule():
     sys.path[:] = OLD_SYS_PATH
 
 
-
 class HelperFunctionsTests(unittest.TestCase):
     """Tests for helper functions.
     """

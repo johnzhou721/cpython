@@ -2,8 +2,7 @@
 
 from ctypes import *
 import os
-import sys
-import unittest
+import unittest, sys
 from test import support
 
 import _ctypes_test

@@ -10,7 +10,6 @@ import warnings
 
 from test import support
 
-
 class PlatformTest(unittest.TestCase):
     def test_architecture(self):
         res = platform.architecture()
@@ -247,6 +246,7 @@ class PlatformTest(unittest.TestCase):
                 self.assertIn(res[2], ('i386', 'x86_64'))
             else:
                 self.assertEqual(res[2], 'PowerPC')
+
 
     @unittest.skipUnless(sys.platform == 'darwin', "OSX only test")
     def test_mac_ver_with_fork(self):

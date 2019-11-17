@@ -54,12 +54,11 @@ class PosixTester(unittest.TestCase):
     def testNoArgFunctions(self):
         # test posix functions which take no arguments and have
         # no side-effects which we need to cleanup (e.g., fork, wait, abort)
-        NO_ARG_FUNCTIONS = [
-            "ctermid", "getcwd", "getcwdb", "uname",
-            "times", "getloadavg",
-            "getegid", "geteuid", "getgid",
-            "getpid", "getpgrp", "getppid", "getuid", "sync",
-        ]
+        NO_ARG_FUNCTIONS = [ "ctermid", "getcwd", "getcwdb", "uname",
+                             "times", "getloadavg",
+                             "getegid", "geteuid", "getgid",
+                             "getpid", "getpgrp", "getppid", "getuid", "sync",
+                           ]
 
         if sys.platform not in ('ios', 'tvos', 'watchos'):
             NO_ARG_FUNCTIONS.append("getgroups")
@@ -885,6 +884,7 @@ class PosixTester(unittest.TestCase):
             os.chdir(curdir)
             support.rmtree(base_path)
 
+
     @unittest.skipUnless(hasattr(posix, 'getgrouplist'), "test needs posix.getgrouplist()")
     @unittest.skipUnless(hasattr(pwd, 'getpwuid'), "test needs pwd.getpwuid()")
     @unittest.skipUnless(hasattr(os, 'getuid'), "test needs os.getuid()")
@@ -1323,7 +1323,6 @@ class PosixTester(unittest.TestCase):
         self.assertFalse(os.path.exists(fn))
         open(fn, 'wb').close()
         self.assertRaises(ValueError, os.stat, fn_with_NUL)
-
 
 class PosixGroupsTester(unittest.TestCase):
 

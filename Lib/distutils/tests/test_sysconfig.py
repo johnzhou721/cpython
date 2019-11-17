@@ -11,7 +11,6 @@ from distutils.ccompiler import get_default_compiler
 from distutils.tests import support
 from test.support import TESTFN, run_unittest, check_warnings
 
-
 class SysconfigTestCase(support.EnvironGuard, unittest.TestCase):
     def setUp(self):
         super(SysconfigTestCase, self).setUp()
