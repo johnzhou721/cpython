@@ -1,7 +1,7 @@
 from ctypes import *
 from ctypes.test import need_symbol
-import os
 import unittest
+import os
 
 import _ctypes_test
 

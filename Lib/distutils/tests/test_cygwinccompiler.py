@@ -15,7 +15,6 @@ if sys.platform == 'win32':
                                            get_msvcr)
 from distutils.tests import support
 
-
 class FakePopen(object):
     test_class = None
 

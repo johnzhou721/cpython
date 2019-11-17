@@ -1007,7 +1007,6 @@ class CIOTest(IOTest):
         support.gc_collect()
         self.assertIsNone(wr(), wr)
 
-
 class PyIOTest(IOTest):
     pass
 

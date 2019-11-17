@@ -22,7 +22,6 @@ def find_ready_matching(ready, flag):
             match.append(fd)
     return match
 
-
 class PollTests(unittest.TestCase):
 
     def test_poll1(self):

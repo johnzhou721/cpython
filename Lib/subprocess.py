@@ -254,6 +254,7 @@ PIPE = -1
 STDOUT = -2
 DEVNULL = -3
 
+
 # XXX This function is only used by multiprocessing and the test suite,
 # but it's here so that it can be imported when Python is compiled without
 # threads.

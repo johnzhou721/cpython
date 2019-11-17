@@ -45,14 +45,11 @@ def get_lockdata():
 
 lockdata = get_lockdata()
 
-
 class BadFile:
     def __init__(self, fn):
         self.fn = fn
-
     def fileno(self):
         return self.fn
-
 
 class TestFcntl(unittest.TestCase):
 
