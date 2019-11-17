@@ -809,7 +809,6 @@ class SocketlessRequestHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-
 class RejectingSocketlessRequestHandler(SocketlessRequestHandler):
     def handle_expect_100(self):
         self.send_error(HTTPStatus.EXPECTATION_FAILED)
@@ -840,7 +839,7 @@ class BaseHTTPRequestHandlerTestCase(unittest.TestCase):
 
     HTTPResponseMatch = re.compile(b'HTTP/1.[0-9]+ 200 OK')
 
-    def setUp(self):
+    def setUp (self):
         self.handler = SocketlessRequestHandler()
 
     def send_typical_request(self, message):
@@ -1065,7 +1064,6 @@ class BaseHTTPRequestHandlerTestCase(unittest.TestCase):
             year, hh, mm, ss
         )
         self.assertEqual(self.handler.date_time_string(timestamp=now), expected)
-
 
 
 class SimpleHTTPRequestHandlerTestCase(unittest.TestCase):

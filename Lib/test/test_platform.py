@@ -7,7 +7,6 @@ from unittest import mock
 
 from test import support
 
-
 class PlatformTest(unittest.TestCase):
     def clear_caches(self):
         platform._platform_cache.clear()
@@ -221,6 +220,7 @@ class PlatformTest(unittest.TestCase):
                 self.assertIn(res[2], ('i386', 'x86_64'))
             else:
                 self.assertEqual(res[2], 'PowerPC')
+
 
     @unittest.skipUnless(sys.platform == 'darwin', "OSX only test")
     def test_mac_ver_with_fork(self):

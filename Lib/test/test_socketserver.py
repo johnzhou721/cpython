@@ -29,7 +29,6 @@ requires_unix_sockets = unittest.skipUnless(HAVE_UNIX_SOCKETS,
 HAVE_FORKING = hasattr(os, "fork") and os.allows_subprocesses
 requires_forking = unittest.skipUnless(HAVE_FORKING, 'requires forking')
 
-
 def signal_alarm(n):
     """Call signal.alarm when it exists (i.e. not on Windows)."""
     if hasattr(signal, 'alarm'):

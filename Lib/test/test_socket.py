@@ -645,7 +645,6 @@ class UnixSocketTestBase(SocketTestBase):
         support.bind_unix_socket(sock, path)
         self.addCleanup(support.unlink, path)
 
-
 class UnixStreamBase(UnixSocketTestBase):
     """Base class for Unix-domain SOCK_STREAM tests."""
 

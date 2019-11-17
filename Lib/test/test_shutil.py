@@ -47,7 +47,6 @@ try:
 except ImportError:
     _winapi = None
 
-
 def _fake_rename(*args, **kwargs):
     # Pretend the destination path is on a different filesystem.
     raise OSError(getattr(errno, 'EXDEV', 18), "Invalid cross-device link")

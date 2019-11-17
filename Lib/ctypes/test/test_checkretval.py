@@ -4,7 +4,6 @@ import unittest
 from ctypes import *
 from ctypes.test import need_symbol
 
-
 class CHECKED(c_int):
     def _check_retval_(value):
         # Receives a CHECKED instance.

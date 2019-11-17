@@ -31,7 +31,6 @@ MEMORY_SANITIZER = (
 )
 
 
-
 def expected_traceback(lineno1, lineno2, header, min_count=1):
     regex = header
     regex += '  File "<string>", line %s in func\n' % lineno1
@@ -45,7 +44,6 @@ def skip_segfault_on_android(test):
     # Issue #32138: Raising SIGSEGV on Android may not cause a crash.
     return unittest.skipIf(is_android,
                            'raising SIGSEGV on Android is unreliable')(test)
-
 
 @contextmanager
 def temporary_filename():

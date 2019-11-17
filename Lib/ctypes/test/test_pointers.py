@@ -1,6 +1,5 @@
 import os
-import sys
-import unittest
+import unittest, sys
 
 from ctypes import *
 import _ctypes_test
@@ -9,7 +8,6 @@ ctype_types = [c_byte, c_ubyte, c_short, c_ushort, c_int, c_uint,
                  c_long, c_ulong, c_longlong, c_ulonglong, c_double, c_float]
 python_types = [int, int, int, int, int, int,
                 int, int, int, int, float, float]
-
 
 class PointersTestCase(unittest.TestCase):
 

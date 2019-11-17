@@ -242,7 +242,6 @@ class UnicodeFunctionsTest(UnicodeDatabaseTest):
         self.assertEqual(self.db.ucd_3_2_0.east_asian_width('\u231a'), 'N')
         self.assertEqual(self.db.east_asian_width('\u231a'), 'W')
 
-
 class UnicodeMiscTest(UnicodeDatabaseTest):
 
     @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')

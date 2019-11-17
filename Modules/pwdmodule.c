@@ -337,7 +337,6 @@ pwd_getpwall_impl(PyObject *module)
 }
 #endif
 
-
 static PyMethodDef pwd_methods[] = {
     PWD_GETPWUID_METHODDEF
     PWD_GETPWNAM_METHODDEF

@@ -5,7 +5,6 @@ from ctypes.test import need_symbol
 
 import _ctypes_test
 
-
 @need_symbol('c_wchar')
 class UnicodeTestCase(unittest.TestCase):
     def test_wcslen(self):
