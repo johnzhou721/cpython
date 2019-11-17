@@ -226,6 +226,8 @@ corresponding Unix manual entries for more information on calls.");
 #  undef HAVE_FORK1
 #  undef HAVE_FORKPTY
 #  undef HAVE_GETGROUPS
+#  undef HAVE_POSIX_SPAWN
+#  undef HAVE_POSIX_SPAWNP
 #  undef HAVE_SCHED_H
 #  undef HAVE_SENDFILE
 #  undef HAVE_SETPRIORITY
@@ -1423,6 +1425,7 @@ convertenviron(void)
     if (environ == NULL)
         environ = *_NSGetEnviron();
 #endif
+#if !TARGET_OS_TV && !TARGET_OS_WATCH
 #ifdef MS_WINDOWS
     /* _wenviron must be initialized in this way if the program is started
        through main() instead of wmain(). */
@@ -1473,6 +1476,7 @@ convertenviron(void)
         Py_DECREF(k);
         Py_DECREF(v);
     }
+#endif
     return d;
 }
 
