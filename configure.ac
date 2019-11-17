@@ -379,6 +379,15 @@ then
 	*-*-cygwin*)
 		ac_sys_system=Cygwin
 		;;
+	*-apple-ios)
+		ac_sys_system=iOS
+		;;
+	*-apple-tvos)
+		ac_sys_system=tvOS
+		;;
+	*-apple-watchos)
+		ac_sys_system=watchOS
+		;;
 	*-*-vxworks*)
 	    ac_sys_system=VxWorks
 	    ;;
@@ -428,17 +437,17 @@ if test "$cross_compiling" = yes; then
 	*-*-cygwin*)
 		_host_cpu=
 		;;
+	*-apple-*)
+		case "$host_cpu" in
+		arm*)
+			_host_cpu=arm
+			;;
+		*)
+			_host_cpu=$host_cpu
+		esac
+		;;
 	*-*-vxworks*)
 		_host_cpu=$host_cpu
-		;;
-	*-apple-ios)
-		ac_sys_system=iOS
-		;;
-	*-apple-tvos)
-		ac_sys_system=tvOS
-		;;
-	*-apple-watchos)
-		ac_sys_system=watchOS
 		;;
 	*)
 		# for now, limit cross builds to known configurations
