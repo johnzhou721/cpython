@@ -46,7 +46,6 @@ else:
     def failsOnWindows(f):
         return f
 
-
 class BaseTest(unittest.TestCase):
     """Base class for venv tests."""
 

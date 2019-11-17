@@ -8,7 +8,6 @@ from distutils.spawn import spawn
 from distutils.errors import DistutilsExecError
 from distutils.tests import support
 
-
 class SpawnTestCase(support.TempdirManager,
                     support.LoggingSilencer,
                     unittest.TestCase):
@@ -22,7 +21,8 @@ class SpawnTestCase(support.TempdirManager,
             res = _nt_quote_args(args)
             self.assertEqual(res, wanted)
 
-    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork') and os.allows_subprocesses), "distutils cannot spawn child processes")
+    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork') and os.allows_subprocesses),
+                         "distutils cannot spawn child processes")
     def test_spawn(self):
         tmpdir = self.mkdtemp()
 
@@ -48,7 +48,6 @@ class SpawnTestCase(support.TempdirManager,
 
         os.chmod(exe, 0o777)
         spawn([exe])  # should work without any error
-
 
 def test_suite():
     return unittest.makeSuite(SpawnTestCase)

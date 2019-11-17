@@ -16,7 +16,6 @@ except NameError:
 class POINT(Structure):
     _fields_ = [("x", c_int), ("y", c_int)]
 
-
 class BasicWrapTestCase(unittest.TestCase):
     def wrap(self, param):
         return param

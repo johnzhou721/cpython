@@ -14,7 +14,6 @@ def importable(name):
     except:
         return False
 
-
 class TestUUID(unittest.TestCase):
     def test_UUID(self):
         equal = self.assertEqual

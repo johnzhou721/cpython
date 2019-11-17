@@ -1,9 +1,8 @@
-import os
 import unittest
 from ctypes import *
+import os
 
 import _ctypes_test
-
 
 class ReturnFuncPtrTestCase(unittest.TestCase):
 

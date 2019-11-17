@@ -15,7 +15,6 @@ TESTFN2 = TESTFN + "2"
 # tr a-z A-Z is not portable, so make the ranges explicit
 s_command = 'tr %s %s' % (string.ascii_lowercase, string.ascii_uppercase)
 
-
 class SimplePipeTests(unittest.TestCase):
     def tearDown(self):
         for f in (TESTFN, TESTFN2):

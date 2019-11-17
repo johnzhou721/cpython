@@ -545,7 +545,6 @@ class SkipitemTest(unittest.TestCase):
                           (1,), {}, '|OO', ['a'])
 
 
-
 @unittest.skipUnless(threading, 'Threading required for this test.')
 class TestThreadState(unittest.TestCase):
 

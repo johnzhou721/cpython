@@ -24,7 +24,6 @@ except ImportError:
 
 TIMEOUT = 0.5
 
-
 def expected_traceback(lineno1, lineno2, header, min_count=1):
     regex = header
     regex += '  File "<string>", line %s in func\n' % lineno1
@@ -34,7 +33,6 @@ def expected_traceback(lineno1, lineno2, header, min_count=1):
     else:
         return '^' + regex + '$'
 
-
 @contextmanager
 def temporary_filename():
     filename = tempfile.mktemp()
@@ -42,7 +40,6 @@ def temporary_filename():
         yield filename
     finally:
         support.unlink(filename)
-
 
 class FaultHandlerTests(unittest.TestCase):
     def get_output(self, code, filename=None, fd=None):

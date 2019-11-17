@@ -1,6 +1,6 @@
-import pickle
-import os
 import unittest
+import os
+import pickle
 from ctypes import *
 import _ctypes_test
 

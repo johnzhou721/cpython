@@ -223,7 +223,6 @@ class UnicodeFunctionsTest(UnicodeDatabaseTest):
         self.assertEqual(eaw('\u2010'), 'A')
         self.assertEqual(eaw('\U00020000'), 'W')
 
-
 class UnicodeMiscTest(UnicodeDatabaseTest):
 
     @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')

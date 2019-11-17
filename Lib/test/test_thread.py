@@ -14,7 +14,6 @@ NUMTRIPS = 3
 
 _print_mutex = thread.allocate_lock()
 
-
 def verbose_print(arg):
     """Helper function for printing out debugging output."""
     if support.verbose:

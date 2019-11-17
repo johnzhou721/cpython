@@ -20,7 +20,6 @@ try:
 except ImportError:
     threading = None
 
-
 class SysModuleTest(unittest.TestCase):
 
     def setUp(self):
