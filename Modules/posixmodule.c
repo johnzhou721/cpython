@@ -503,9 +503,7 @@ register_at_forker(PyObject **lst, PyObject *func)
 void
 PyOS_AfterFork(void)
 {
-#ifdef HAVE_FORK
     PyOS_AfterFork_Child();
-#endif
 }
 
 
