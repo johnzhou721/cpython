@@ -187,12 +187,18 @@ itimer_retval(struct itimerval *iv)
 #endif
 
 static int
-is_main(_PyRuntimeState *runtime)
+is_main_interp(_PyRuntimeState *runtime, PyInterpreterState *interp)
 {
     unsigned long thread = PyThread_get_thread_ident();
-    PyInterpreterState *interp = _PyRuntimeState_GetThreadState(runtime)->interp;
     return (thread == runtime->main_thread
             && interp == runtime->interpreters.main);
+}
+
+static int
+is_main(_PyRuntimeState *runtime)
+{
+    PyInterpreterState *interp = _PyRuntimeState_GetThreadState(runtime)->interp;
+    return is_main_interp(runtime, interp);
 }
 
 static PyObject *
@@ -1592,11 +1598,6 @@ PyInit__signal(void)
          goto finally;
 #endif
 
-#ifdef MS_WINDOWS
-    /* Create manual-reset event, initially unset */
-    sigint_event = CreateEvent(NULL, TRUE, FALSE, FALSE);
-#endif
-
     if (PyErr_Occurred()) {
         Py_DECREF(m);
         m = NULL;
@@ -1720,18 +1721,67 @@ PyOS_InitInterrupts(void)
     }
 }
 
+
+static int
+signal_install_handlers(void)
+{
+#ifdef SIGPIPE
+    PyOS_setsig(SIGPIPE, SIG_IGN);
+#endif
+#ifdef SIGXFZ
+    PyOS_setsig(SIGXFZ, SIG_IGN);
+#endif
+#ifdef SIGXFSZ
+    PyOS_setsig(SIGXFSZ, SIG_IGN);
+#endif
+
+    // Import _signal to install the Python SIGINT handler
+    PyObject *module = PyImport_ImportModule("_signal");
+    if (!module) {
+        return -1;
+    }
+    Py_DECREF(module);
+
+    return 0;
+}
+
+
+int
+_PySignal_Init(int install_signal_handlers)
+{
+#ifdef MS_WINDOWS
+    /* Create manual-reset event, initially unset */
+    sigint_event = CreateEvent(NULL, TRUE, FALSE, FALSE);
+    if (sigint_event == NULL) {
+        PyErr_SetFromWindowsErr(0);
+        return -1;
+    }
+#endif
+
+    if (install_signal_handlers) {
+        if (signal_install_handlers() < 0) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+
 void
 PyOS_FiniInterrupts(void)
 {
     finisignal();
 }
 
+
+// The caller doesn't have to hold the GIL
 int
-PyOS_InterruptOccurred(void)
+_PyOS_InterruptOccurred(PyThreadState *tstate)
 {
     if (_Py_atomic_load_relaxed(&Handlers[SIGINT].tripped)) {
         _PyRuntimeState *runtime = &_PyRuntime;
-        if (!is_main(runtime)) {
+        if (!is_main_interp(runtime, tstate->interp)) {
             return 0;
         }
         _Py_atomic_store_relaxed(&Handlers[SIGINT].tripped, 0);
@@ -1739,6 +1789,16 @@ PyOS_InterruptOccurred(void)
     }
     return 0;
 }
+
+
+// The caller must to hold the GIL
+int
+PyOS_InterruptOccurred(void)
+{
+    PyThreadState *tstate = _PyThreadState_GET();
+    return _PyOS_InterruptOccurred(tstate);
+}
+
 
 static void
 _clear_pending_signals(void)

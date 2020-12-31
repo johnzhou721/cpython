@@ -1274,7 +1274,12 @@ _Py_open_impl(const char *pathname, int flags, int gil_held)
 #endif
 
     if (gil_held) {
-        if (PySys_Audit("open", "sOi", pathname, Py_None, flags) < 0) {
+        PyObject *pathname_obj = PyUnicode_DecodeFSDefault(pathname);
+        if (pathname_obj == NULL) {
+            return -1;
+        }
+        if (PySys_Audit("open", "OOi", pathname_obj, Py_None, flags) < 0) {
+            Py_DECREF(pathname_obj);
             return -1;
         }
 
@@ -1284,12 +1289,16 @@ _Py_open_impl(const char *pathname, int flags, int gil_held)
             Py_END_ALLOW_THREADS
         } while (fd < 0
                  && errno == EINTR && !(async_err = PyErr_CheckSignals()));
-        if (async_err)
-            return -1;
-        if (fd < 0) {
-            PyErr_SetFromErrnoWithFilename(PyExc_OSError, pathname);
+        if (async_err) {
+            Py_DECREF(pathname_obj);
             return -1;
         }
+        if (fd < 0) {
+            PyErr_SetFromErrnoWithFilenameObjects(PyExc_OSError, pathname_obj, NULL);
+            Py_DECREF(pathname_obj);
+            return -1;
+        }
+        Py_DECREF(pathname_obj);
     }
     else {
         fd = open(pathname, flags);
@@ -1385,9 +1394,15 @@ _Py_wfopen(const wchar_t *path, const wchar_t *mode)
 FILE*
 _Py_fopen(const char *pathname, const char *mode)
 {
-    if (PySys_Audit("open", "ssi", pathname, mode, 0) < 0) {
+    PyObject *pathname_obj = PyUnicode_DecodeFSDefault(pathname);
+    if (pathname_obj == NULL) {
         return NULL;
     }
+    if (PySys_Audit("open", "Osi", pathname_obj, mode, 0) < 0) {
+        Py_DECREF(pathname_obj);
+        return NULL;
+    }
+    Py_DECREF(pathname_obj);
 
     FILE *f = fopen(pathname, mode);
     if (f == NULL)
@@ -1461,6 +1476,7 @@ _Py_fopen_obj(PyObject *path, const char *mode)
     path_bytes = PyBytes_AS_STRING(bytes);
 
     if (PySys_Audit("open", "Osi", path, mode, 0) < 0) {
+        Py_DECREF(bytes);
         return NULL;
     }
 
@@ -1917,6 +1933,7 @@ _Py_GetLocaleconvNumeric(struct lconv *lc,
     assert(decimal_point != NULL);
     assert(thousands_sep != NULL);
 
+#ifndef MS_WINDOWS
     int change_locale = 0;
     if ((strlen(lc->decimal_point) > 1 || ((unsigned char)lc->decimal_point[0]) > 127)) {
         change_locale = 1;
@@ -1955,14 +1972,20 @@ _Py_GetLocaleconvNumeric(struct lconv *lc,
         }
     }
 
+#define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(lc->ATTR, NULL)
+#else /* MS_WINDOWS */
+/* Use _W_* fields of Windows strcut lconv */
+#define GET_LOCALE_STRING(ATTR) PyUnicode_FromWideChar(lc->_W_ ## ATTR, -1)
+#endif /* MS_WINDOWS */
+
     int res = -1;
 
-    *decimal_point = PyUnicode_DecodeLocale(lc->decimal_point, NULL);
+    *decimal_point = GET_LOCALE_STRING(decimal_point);
     if (*decimal_point == NULL) {
         goto done;
     }
 
-    *thousands_sep = PyUnicode_DecodeLocale(lc->thousands_sep, NULL);
+    *thousands_sep = GET_LOCALE_STRING(thousands_sep);
     if (*thousands_sep == NULL) {
         goto done;
     }
@@ -1970,9 +1993,13 @@ _Py_GetLocaleconvNumeric(struct lconv *lc,
     res = 0;
 
 done:
+#ifndef MS_WINDOWS
     if (loc != NULL) {
         setlocale(LC_CTYPE, oldloc);
     }
     PyMem_Free(oldloc);
+#endif
     return res;
+
+#undef GET_LOCALE_STRING
 }
