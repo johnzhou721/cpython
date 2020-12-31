@@ -635,7 +635,7 @@ if sys.platform == 'ios':
 
             return True
 
-    register("mobilesafari", None, MobileSafari(), -1)
+    register("mobilesafari", None, MobileSafari(), preferred=True)
 
 #
 # Platform support for Windows
