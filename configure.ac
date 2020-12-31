@@ -508,7 +508,7 @@ case $ac_sys_system/$ac_sys_release in
   # has no effect, don't bother defining them
   Darwin/@<:@6789@:>@.*)
     define_xopen_source=no;;
-  Darwin/1@<:@0-9@:>@.*)
+  Darwin/@<:@[12]@:>@@<:@0-9@:>@.*)
     define_xopen_source=no;;
   # On iOS, defining _POSIX_C_SOURCE also disables platform specific features.
   iOS/*)
@@ -2484,6 +2484,9 @@ case $ac_sys_system/$ac_sys_release in
     		;;
     	ppc)
     		MACOSX_DEFAULT_ARCH="ppc64"
+    		;;
+    	arm64)
+    		MACOSX_DEFAULT_ARCH="arm64"
     		;;
     	*)
     		AC_MSG_ERROR([Unexpected output of 'arch' on OSX])
