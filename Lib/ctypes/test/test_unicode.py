@@ -27,7 +27,16 @@ class UnicodeTestCase(unittest.TestCase):
         self.assertEqual(buf[::2], 'a\xe4\xfc')
         self.assertEqual(buf[6:5:-1], "")
 
+    def test_embedded_null(self):
+        class TestStruct(ctypes.Structure):
+            _fields_ = [("unicode", ctypes.c_wchar_p)]
+        t = TestStruct()
+        # This would raise a ValueError:
+        t.unicode = "foo\0bar\0\0"
+
+
 func = ctypes.CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))._testfunc_p_p
+
 
 class StringTestCase(UnicodeTestCase):
     def setUp(self):
