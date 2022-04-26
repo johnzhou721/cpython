@@ -445,6 +445,48 @@ def mac_ver(release='', versioninfo=('', '', ''), machine=''):
     # If that also doesn't work return the default values
     return release, versioninfo, machine
 
+
+def iOS_ver():
+    """ Get iOS/tvOS version information, and return it as a
+        tuple (system, release). All tuple entries are strings.
+
+        Equivalent of:
+        system = [[UIDevice currentDevice].model] UTF8String]
+        release = [[UIDevice currentDevice].systemVersion] UTF8String]
+
+    """
+    from ctypes import cast, cdll, c_void_p, c_char_p
+    from ctypes import util
+    objc = cdll.LoadLibrary(util.find_library(b'objc'))
+    uikit = cdll.LoadLibrary(util.find_library(b'UIKit'))
+
+    objc.objc_getClass.restype = c_void_p
+    objc.objc_getClass.argtypes = [c_char_p]
+    objc.objc_msgSend.restype = c_void_p
+    objc.objc_msgSend.argtypes = [c_void_p, c_void_p]
+    objc.sel_registerName.restype = c_void_p
+    objc.sel_registerName.argtypes = [c_char_p]
+
+    UIDevice = c_void_p(objc.objc_getClass(b'UIDevice'))
+    SEL_currentDevice = c_void_p(objc.sel_registerName(b'currentDevice'))
+    device = c_void_p(objc.objc_msgSend(UIDevice, SEL_currentDevice))
+
+    SEL_systemVersion = c_void_p(objc.sel_registerName(b'systemVersion'))
+    systemVersion = c_void_p(objc.objc_msgSend(device, SEL_systemVersion))
+
+    SEL_systemName = c_void_p(objc.sel_registerName(b'systemName'))
+    systemName = c_void_p(objc.objc_msgSend(device, SEL_systemName))
+
+    # UTF8String returns a const char*;
+    SEL_UTF8String = c_void_p(objc.sel_registerName(b'UTF8String'))
+    objc.objc_msgSend.restype = c_char_p
+
+    system = objc.objc_msgSend(systemName, SEL_UTF8String).decode()
+    release = objc.objc_msgSend(systemVersion, SEL_UTF8String).decode()
+
+    return system, release
+
+
 def _java_getprop(name, default):
 
     from java.lang import System
