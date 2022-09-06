@@ -392,13 +392,13 @@ then
 	*-*-cygwin*)
 		ac_sys_system=Cygwin
 		;;
-	*-apple-ios)
+	*-apple-ios*)
 		ac_sys_system=iOS
 		;;
-	*-apple-tvos)
+	*-apple-tvos*)
 		ac_sys_system=tvOS
 		;;
-	*-apple-watchos)
+	*-apple-watchos*)
 		ac_sys_system=watchOS
 		;;
 	*-*-vxworks*)
@@ -882,7 +882,30 @@ cat >> conftest.c <<EOF
 #elif defined(__gnu_hurd__)
         i386-gnu
 #elif defined(__APPLE__)
-        darwin
+#  include "TargetConditionals.h"
+#  if TARGET_OS_IOS
+#    if TARGET_OS_SIMULATOR
+       iphonesimulator
+#    else
+       iphoneos
+#    endif
+#  elif TARGET_OS_TV
+#    if TARGET_OS_SIMULATOR
+       appletvsimulator
+#    else
+       appletvos
+#    endif
+#  elif TARGET_OS_WATCH
+#    if TARGET_OS_SIMULATOR
+       watchsimulator
+#    else
+       watchos
+#    endif
+#  elif TARGET_OS_OSX
+     darwin
+#  else
+#    error unknown Apple platform
+#  endif
 #elif defined(__VXWORKS__)
         vxworks
 #else
@@ -899,10 +922,17 @@ else
 fi
 rm -f conftest.c conftest.out
 
-if test x$PLATFORM_TRIPLET != xdarwin; then
-  MULTIARCH=$($CC --print-multiarch 2>/dev/null)
-fi
-AC_SUBST(MULTIARCH)
+AC_MSG_CHECKING([for multiarch])
+AS_CASE([$ac_sys_system],
+  [Darwin*], [MULTIARCH=""],
+  [iOS*], [MULTIARCH=""],
+  [tvOS*], [MULTIARCH=""],
+  [watchOS*], [MULTIARCH=""],
+  [FreeBSD*], [MULTIARCH=""],
+  [MULTIARCH=$($CC --print-multiarch 2>/dev/null)]
+)
+AC_SUBST([MULTIARCH])
+AC_MSG_RESULT([$MULTIARCH])
 
 if test x$PLATFORM_TRIPLET != x && test x$MULTIARCH != x; then
   if test x$PLATFORM_TRIPLET != x$MULTIARCH; then
@@ -1227,8 +1257,14 @@ fi
 AC_CHECK_TOOLS([READELF], [readelf], [:])
 if test "$cross_compiling" = yes; then
 	case "$host" in
-	*-apple-*os)
+	*-apple-ios*)
 		# readelf not required for iOS cross builds.
+        	;;
+	*-apple-tvos*)
+		# readelf not required for tvOS cross builds.
+        	;;
+	*-apple-watchos*)
+		# readelf not required for watchOS cross builds.
         	;;
 	*)
     		case "$READELF" in
@@ -1615,6 +1651,8 @@ AC_SUBST(UNIVERSAL_ARCH_FLAGS)
 # tweak BASECFLAGS based on compiler and platform
 case $GCC in
 yes)
+    CFLAGS_NODIST="$CFLAGS_NODIST -std=c99"
+
     AC_MSG_CHECKING(for -Wextra)
      ac_save_cc="$CC"
      CC="$CC -Wextra -Werror"
@@ -2658,6 +2696,10 @@ then
 			BLDSHARED="$LDSHARED"
 		fi
 		;;
+  iOS/*|tvOS/*|watchOS/*)
+    LDSHARED='$(CC) -bundle -undefined dynamic_lookup'
+    LDCXXSHARED='$(CXX) -bundle -undefined dynamic_lookup'
+    ;;
 	Linux*|GNU*|QNX*|VxWorks*)
 		LDSHARED='$(CC) -shared'
 		LDCXXSHARED='$(CXX) -shared';;
@@ -3041,20 +3083,30 @@ then
     esac
     AC_MSG_RESULT($with_system_ffi)
 else
-    AC_MSG_RESULT(yes)
-    if test "$with_system_ffi" != ""
+    if test "$ac_sys_system" = "iOS" || test "$ac_sys_system" = "tvOS" || test "$ac_sys_system" = "watchOS"
     then
-        AC_MSG_WARN([--with(out)-system-ffi is ignored on this platform])
+        AC_MSG_RESULT(no)
+        AC_MSG_WARN([Using user-provided libffi configuration])
+        LIBFFI_LIBDIR="${LIBFFI_LIBDIR}"
+        LIBFFI_LIB="${LIBFFI_LIB}"
+    else
+        AC_MSG_RESULT(yes)
+        if test "$with_system_ffi" != ""
+        then
+            AC_MSG_WARN([--with(out)-system-ffi is ignored on this platform])
+        fi
+        with_system_ffi="yes"
     fi
-    with_system_ffi="yes"
 fi
 
 if test "$with_system_ffi" = "yes" && test -n "$PKG_CONFIG"; then
     LIBFFI_INCLUDEDIR="`"$PKG_CONFIG" libffi --cflags-only-I 2>/dev/null | sed -e 's/^-I//;s/ *$//'`"
 else
-    LIBFFI_INCLUDEDIR=""
+    LIBFFI_INCLUDEDIR="${LIBFFI_INCLUDEDIR}"
 fi
 AC_SUBST(LIBFFI_INCLUDEDIR)
+AC_SUBST(LIBFFI_LIBDIR)
+AC_SUBST(LIBFFI_LIB)
 
 # Check for use of the system libmpdec library
 AC_MSG_CHECKING(for --with-system-libmpdec)
@@ -3586,10 +3638,6 @@ then
 	fi
 	;;
 	hp*|HP*) DYNLOADFILE="dynload_hpux.o";;
-	# Disable dynamic loading on iOS
-	iOS/*) DYNLOADFILE="dynload_stub.o";;
-	tvOS/*) DYNLOADFILE="dynload_stub.o";;
-	watchOS/*) DYNLOADFILE="dynload_stub.o";;
 	*)
 	# use dynload_shlib.c and dlopen() if we have it; otherwise stub
 	# out any dynamic loading
@@ -5722,17 +5770,7 @@ AC_OUTPUT
 echo "creating Modules/Setup.local" >&AS_MESSAGE_FD
 if test ! -f Modules/Setup.local
 then
-    if test ! -f Modules/Setup.$_PYTHON_HOST_PLATFORM
-    then
-        echo "# Edit this file for local setup changes" >Modules/Setup.local
-    else
-        if test -f Modules/Setup.$_PYTHON_HOST_PLATFORM.local
-        then
-            cp Modules/Setup.$_PYTHON_HOST_PLATFORM.local Modules/Setup.local
-        else
-            cat Modules/Setup.embedded Modules/Setup.$_PYTHON_HOST_PLATFORM > Modules/Setup.local
-        fi
-    fi
+	echo "# Edit this file for local setup changes" >Modules/Setup.local
 fi
 
 echo "creating Makefile" >&AS_MESSAGE_FD
@@ -5749,3 +5787,4 @@ if test "$Py_OPT" = 'false' -a "$Py_DEBUG" != 'true'; then
     echo "" >&AS_MESSAGE_FD
     echo "" >&AS_MESSAGE_FD
 fi
+

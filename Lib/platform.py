@@ -448,43 +448,29 @@ def mac_ver(release='', versioninfo=('', '', ''), machine=''):
 
 def iOS_ver():
     """ Get iOS/tvOS version information, and return it as a
-        tuple (system, release). All tuple entries are strings.
-
+        tuple (system, release, model). All tuple entries are strings.
         Equivalent of:
-        system = [[UIDevice currentDevice].model] UTF8String]
+        system = [[UIDevice currentDevice].systemName] UTF8String]
         release = [[UIDevice currentDevice].systemVersion] UTF8String]
-
+        model = [[UIDevice currentDevice].model] UTF8String]
     """
-    from ctypes import cast, cdll, c_void_p, c_char_p
-    from ctypes import util
-    objc = cdll.LoadLibrary(util.find_library(b'objc'))
-    uikit = cdll.LoadLibrary(util.find_library(b'UIKit'))
+    import _ios_support
+    return _ios_support.get_platform_ios()
 
-    objc.objc_getClass.restype = c_void_p
-    objc.objc_getClass.argtypes = [c_char_p]
-    objc.objc_msgSend.restype = c_void_p
-    objc.objc_msgSend.argtypes = [c_void_p, c_void_p]
-    objc.sel_registerName.restype = c_void_p
-    objc.sel_registerName.argtypes = [c_char_p]
+def is_simulator():
+    """Determine if the current platform is a device simulator.
+    Only useful when working with iOS, tvOS or watchOS, because
+    Apple provides simulator platforms for those devices.
+    If the platform is actual hardware, returns False. Will also
+    return False for device *emulators*, which are indistinguishable
+    from actual devices because they are reproducing actual device
+    properties.
+    """
+    if sys.platform in ('ios', 'tvos', 'watchos'):
+        return sys.implementation._multiarch.endswith('simulator')
 
-    UIDevice = c_void_p(objc.objc_getClass(b'UIDevice'))
-    SEL_currentDevice = c_void_p(objc.sel_registerName(b'currentDevice'))
-    device = c_void_p(objc.objc_msgSend(UIDevice, SEL_currentDevice))
-
-    SEL_systemVersion = c_void_p(objc.sel_registerName(b'systemVersion'))
-    systemVersion = c_void_p(objc.objc_msgSend(device, SEL_systemVersion))
-
-    SEL_systemName = c_void_p(objc.sel_registerName(b'systemName'))
-    systemName = c_void_p(objc.objc_msgSend(device, SEL_systemName))
-
-    # UTF8String returns a const char*;
-    SEL_UTF8String = c_void_p(objc.sel_registerName(b'UTF8String'))
-    objc.objc_msgSend.restype = c_char_p
-
-    system = objc.objc_msgSend(systemName, SEL_UTF8String).decode()
-    release = objc.objc_msgSend(systemVersion, SEL_UTF8String).decode()
-
-    return system, release
+    # All other platforms aren't simulators.
+    return False
 
 
 def _java_getprop(name, default):
@@ -895,6 +881,18 @@ def uname():
                 processor = 'Alpha'
             else:
                 processor = 'VAX'
+
+    # Apple mobile platforms
+    if sys.platform in ("ios", "tvos"):
+        system, release, model = iOS_ver()
+        # Simulator devices report as "arm64" or "x86_64";
+        # use the model as the basis for the normalized machine name.
+        if sys.implementation._multiarch.endswith("simulator"):
+            machine = f"{model} Simulator"
+            processor = os.uname().machine
+        else:
+            processor = "arm64"
+
     if not processor:
         # Get processor information from the uname system command
         processor = _syscmd_uname('-p', '')
@@ -918,8 +916,10 @@ def uname():
         system = 'Windows'
         release = 'Vista'
 
+    # Replace 'unknown' values with the more portable ''
     _uname_cache = uname_result(system, node, release, version,
                                 machine, processor)
+
     return _uname_cache
 
 ### Direct interfaces to some of the uname() return values
@@ -1229,11 +1229,14 @@ def platform(aliased=0, terse=0):
         system, release, version = system_alias(system, release, version)
 
     if system == 'Darwin':
-        # macOS (darwin kernel)
-        macos_release = mac_ver()[0]
-        if macos_release:
-            system = 'macOS'
-            release = macos_release
+        # macOS/iOS/tvOS/watchOS (darwin kernel)
+        if sys.platform in ('ios', 'tvos'):
+            system, release, model = iOS_ver()
+        else:
+            macos_release = mac_ver()[0]
+            if macos_release:
+                system = 'macOS'
+                release = macos_release
 
     if system == 'Windows':
         # MS platforms

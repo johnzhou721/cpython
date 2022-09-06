@@ -294,6 +294,8 @@ IO_OBJS=	\
 ##########################################################################
 
 LIBFFI_INCLUDEDIR=	@LIBFFI_INCLUDEDIR@
+LIBFFI_LIBDIR=	@LIBFFI_LIBDIR@
+LIBFFI_LIB=@LIBFFI_LIB@
 
 ##########################################################################
 # Parser
