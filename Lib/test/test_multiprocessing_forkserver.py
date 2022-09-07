@@ -1,7 +1,7 @@
-import os
 import unittest
+from test.support import has_subprocess_support
 
-if not os.allows_subprocesses:
+if not has_subprocess_support:
     raise unittest.SkipTest('Test requires support for subprocesses.')
 
 import test._test_multiprocessing

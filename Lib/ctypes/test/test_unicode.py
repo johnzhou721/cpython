@@ -1,4 +1,3 @@
-import os
 import unittest
 import ctypes
 from ctypes.test import need_symbol
@@ -8,7 +7,7 @@ import _ctypes_test
 @need_symbol('c_wchar')
 class UnicodeTestCase(unittest.TestCase):
     def test_wcslen(self):
-        dll = ctypes.CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+        dll = ctypes.CDLL(_ctypes_test.__file__)
         wcslen = dll.my_wcslen
         wcslen.argtypes = [ctypes.c_wchar_p]
 
@@ -35,8 +34,7 @@ class UnicodeTestCase(unittest.TestCase):
         t.unicode = "foo\0bar\0\0"
 
 
-func = ctypes.CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))._testfunc_p_p
-
+func = ctypes.CDLL(_ctypes_test.__file__)._testfunc_p_p
 
 class StringTestCase(UnicodeTestCase):
     def setUp(self):

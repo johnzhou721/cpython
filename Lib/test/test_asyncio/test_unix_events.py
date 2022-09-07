@@ -15,6 +15,7 @@ import threading
 import unittest
 from unittest import mock
 from test import support
+from test.support import is_apple_mobile, has_subprocess_support
 
 if sys.platform == 'win32':
     raise unittest.SkipTest('UNIX only')
@@ -266,8 +267,7 @@ class SelectorEventLoopSignalTests(test_utils.TestCase):
 
 @unittest.skipUnless(hasattr(socket, 'AF_UNIX'),
                      'UNIX Sockets are not supported')
-@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                 "%s doesn't fully support UNIX sockets." % sys.platform)
+@unittest.skipIf(is_apple_mobile, "%s doesn't fully support UNIX sockets." % sys.platform)
 class SelectorEventLoopUnixSocketTests(test_utils.TestCase):
 
     def setUp(self):
@@ -1135,7 +1135,7 @@ WaitPidMocks = collections.namedtuple("WaitPidMocks",
                                        ))
 
 
-@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+@unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
 class ChildWatcherTestsMixin:
 
     ignore_warnings = mock.patch.object(log.logger, "warning")

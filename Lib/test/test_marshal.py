@@ -1,4 +1,5 @@
 from test import support
+from test.support import is_apple_mobile
 import array
 import io
 import marshal
@@ -240,7 +241,7 @@ class BugsTestCase(unittest.TestCase):
         if os.name == 'nt':
             MAX_MARSHAL_STACK_DEPTH = 1000
         else:
-            if sys.platform in ('ios', 'tvos', 'watchos'):
+            if is_apple_mobile:
                 MAX_MARSHAL_STACK_DEPTH = 1500
             else:
                 MAX_MARSHAL_STACK_DEPTH = 2000

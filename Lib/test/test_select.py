@@ -4,9 +4,9 @@ import select
 import sys
 import unittest
 from test import support
+from test.support import has_subprocess_support
 
-
-@unittest.skipIf((sys.platform[:3] == 'win'),
+@unittest.skipIf((sys.platform[:3]=='win'),
                  "can't easily test on this system")
 class SelectTestCase(unittest.TestCase):
 
@@ -45,7 +45,7 @@ class SelectTestCase(unittest.TestCase):
         self.assertIsNot(r, x)
         self.assertIsNot(w, x)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_select(self):
         cmd = 'for i in 0 1 2 3 4 5 6 7 8 9; do echo testing...; sleep 1; done'
         with os.popen(cmd) as p:

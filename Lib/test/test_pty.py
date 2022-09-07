@@ -1,4 +1,4 @@
-from test.support import verbose, import_module, reap_children
+from test.support import verbose, import_module, reap_children, has_subprocess_support
 
 # Skip these tests if termios is not available
 import_module('termios')
@@ -138,7 +138,7 @@ class PtyTest(unittest.TestCase):
         # to ignore this signal.
         os.close(master_fd)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_fork(self):
         debug("calling pty.fork()")
         pid, master_fd = pty.fork()

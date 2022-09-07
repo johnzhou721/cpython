@@ -30,7 +30,7 @@ except ImportError:
     posix = None
 
 from test import support
-from test.support import TESTFN, FakePath
+from test.support import TESTFN, FakePath, has_subprocess_support
 
 TESTFN2 = TESTFN + "2"
 TESTFN_SRC = TESTFN + "_SRC"
@@ -1662,8 +1662,7 @@ class TestShutil(unittest.TestCase):
         self.assertEqual(['pol'], os.listdir(rv))
 
 
-@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                 "%s doesn't support other executable." % sys.platform)
+@unittest.skipIf(support.has_subprocess_support, 'Test requires support for subprocesses.')
 class TestWhich(unittest.TestCase):
 
     def setUp(self):
@@ -2552,7 +2551,7 @@ class TermsizeTests(unittest.TestCase):
         self.assertGreaterEqual(size.lines, 0)
 
     @unittest.skipUnless(os.isatty(sys.__stdout__.fileno()), "not on tty")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     @unittest.skipUnless(hasattr(os, 'get_terminal_size'),
                          'need os.get_terminal_size()')
     def test_stty_match(self):

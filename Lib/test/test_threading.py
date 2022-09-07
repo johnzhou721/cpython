@@ -4,7 +4,7 @@ Tests for the threading module.
 
 import test.support
 from test.support import (verbose, import_module, cpython_only,
-                          requires_type_collecting)
+                          requires_type_collecting, is_apple_mobile)
 from test.support.script_helper import assert_python_ok, assert_python_failure
 
 import random
@@ -929,8 +929,7 @@ class ThreadJoinOnShutdown(BaseTestCase):
 
 class SubinterpThreadingTests(BaseTestCase):
 
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't have os.pipe" % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't have os.pipe" % sys.platform)
     def test_threads_join(self):
         # Non-daemon threads should be joined at subinterpreter shutdown
         # (issue #18808)
@@ -961,8 +960,7 @@ class SubinterpThreadingTests(BaseTestCase):
         # The thread was joined properly.
         self.assertEqual(os.read(r, 1), b"x")
 
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't have os.pipe" % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't have os.pipe" % sys.platform)
     def test_threads_join_2(self):
         # Same as above, but a delay gets introduced after the thread's
         # Python code returned but before the thread state is deleted.

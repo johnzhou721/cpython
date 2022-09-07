@@ -1,11 +1,8 @@
 import unittest
-import os
 import pickle
 from ctypes import *
 import _ctypes_test
-
-
-dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+dll = CDLL(_ctypes_test.__file__)
 
 class X(Structure):
     _fields_ = [("a", c_int), ("b", c_double)]

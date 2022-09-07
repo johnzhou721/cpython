@@ -9,6 +9,7 @@ from unittest.case import _Outcome
 
 from unittest.test.support import (LoggingResult,
                                    ResultWithNoStartTestRunStopTestRun)
+from test.support import has_subprocess_support
 
 
 def resultFactory(*_):
@@ -935,7 +936,7 @@ class Test_TextTestRunner(unittest.TestCase):
         expectedresult = (runner.stream, DESCRIPTIONS, VERBOSITY)
         self.assertEqual(runner._makeResult(), expectedresult)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_warnings(self):
         """
         Check that warnings argument of TextTestRunner correctly affects the

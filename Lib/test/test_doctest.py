@@ -3,6 +3,7 @@ Test script for doctest.
 """
 
 from test import support
+from test.support import is_apple_mobile
 import doctest
 import functools
 import os
@@ -2823,7 +2824,7 @@ Check doctest with a non-ascii filename:
     TestResults(failed=1, attempted=1)
     """
 
-if sys.platform in ('iOS', 'tvos', 'watchos'):
+if is_apple_mobile:
     # Mobile platforms can't invoke doctest from the command line,
     # so skip this test.
     pass

@@ -5,7 +5,6 @@ import os
 import queue
 import pickle
 import socket
-import subprocess
 import sys
 import threading
 import unittest
@@ -18,6 +17,7 @@ except ImportError:
 
 import asyncio
 from test.test_asyncio import utils as test_utils
+from test.support import is_apple_mobile, has_subprocess_support
 
 
 def tearDownModule():
@@ -68,8 +68,7 @@ class StreamTests(test_utils.TestCase):
             self._basetest_open_connection(conn_fut)
 
     @support.skip_unless_bind_unix_socket
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't fully support UNIX sockets." % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_open_unix_connection(self):
         with test_utils.run_test_unix_server() as httpd:
             conn_fut = asyncio.open_unix_connection(httpd.address,
@@ -104,8 +103,7 @@ class StreamTests(test_utils.TestCase):
 
     @support.skip_unless_bind_unix_socket
     @unittest.skipIf(ssl is None, 'No ssl module')
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't fully support UNIX sockets." % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_open_unix_connection_no_loop_ssl(self):
         with test_utils.run_test_unix_server(use_ssl=True) as httpd:
             conn_fut = asyncio.open_unix_connection(
@@ -136,8 +134,7 @@ class StreamTests(test_utils.TestCase):
             self._basetest_open_connection_error(conn_fut)
 
     @support.skip_unless_bind_unix_socket
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't fully support UNIX sockets." % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_open_unix_connection_error(self):
         with test_utils.run_test_unix_server() as httpd:
             conn_fut = asyncio.open_unix_connection(httpd.address,
@@ -663,8 +660,7 @@ class StreamTests(test_utils.TestCase):
         self.assertEqual(messages, [])
 
     @support.skip_unless_bind_unix_socket
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't fully support UNIX sockets." % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_start_unix_server(self):
 
         class MyServer:
@@ -741,7 +737,7 @@ class StreamTests(test_utils.TestCase):
         self.assertEqual(messages, [])
 
     @unittest.skipIf(sys.platform == 'win32', "Don't have pipes")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_read_all_from_pipe_reader(self):
         # See asyncio issue 168.  This test is derived from the example
         # subprocess_attach_read_pipe.py, but we configure the

@@ -1,6 +1,8 @@
 "Test posix functions"
 
 from test import support
+from test.support import has_subprocess_support
+from test.support import is_apple_mobile
 from test.support.script_helper import assert_python_ok
 
 # Skip these tests if there is no posix module.
@@ -63,7 +65,8 @@ class PosixTester(unittest.TestCase):
                              "getpid", "getpgrp", "getppid", "getuid", "sync",
                            ]
 
-        if sys.platform not in ('ios', 'tvos', 'watchos'):
+        # getgroups can't be invoked on iOS/tvOS/watchOS.
+        if is_apple_mobile:
             NO_ARG_FUNCTIONS.append("getgroups")
 
         for name in NO_ARG_FUNCTIONS:
@@ -750,7 +753,7 @@ class PosixTester(unittest.TestCase):
             check_stat(uid, gid)
             self.assertRaises(OSError, chown_func, first_param, 0, -1)
             check_stat(uid, gid)
-            if hasattr(os, 'getgroups') and sys.platform not in ('ios', 'tvos', 'watchos'):
+            if hasattr(os, 'getgroups') and not is_apple_mobile:
                 if 0 not in os.getgroups():
                     self.assertRaises(OSError, chown_func, first_param, -1, 0)
                     check_stat(uid, gid)
@@ -1027,7 +1030,6 @@ class PosixTester(unittest.TestCase):
             os.chdir(curdir)
             support.rmtree(base_path)
 
-
     @unittest.skipUnless(hasattr(posix, 'getgrouplist'), "test needs posix.getgrouplist()")
     @unittest.skipUnless(hasattr(pwd, 'getpwuid'), "test needs pwd.getpwuid()")
     @unittest.skipUnless(hasattr(os, 'getuid'), "test needs os.getuid()")
@@ -1036,8 +1038,9 @@ class PosixTester(unittest.TestCase):
         group = pwd.getpwuid(os.getuid())[3]
         self.assertIn(group, posix.getgrouplist(user, group))
 
+
     @unittest.skipUnless(hasattr(os, 'getegid'), "test needs os.getegid()")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_getgroups(self):
         with os.popen('id -G 2>/dev/null') as idg:
             groups = idg.read().strip()
@@ -1295,7 +1298,7 @@ class PosixTester(unittest.TestCase):
         self.assertIsInstance(hi, int)
         self.assertGreaterEqual(hi, lo)
         # OSX evidently just returns 15 without checking the argument.
-        if sys.platform not in ('darwin', 'ios', 'tvos', 'watchos'):
+        if sys.platform != 'darwin' and not is_apple_mobile:
             self.assertRaises(OSError, posix.sched_get_priority_min, -23)
             self.assertRaises(OSError, posix.sched_get_priority_max, -23)
 

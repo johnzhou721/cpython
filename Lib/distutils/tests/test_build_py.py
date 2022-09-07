@@ -9,7 +9,7 @@ from distutils.core import Distribution
 from distutils.errors import DistutilsFileError
 
 from distutils.tests import support
-from test.support import run_unittest
+from test.support import run_unittest, has_subprocess_support
 
 
 class BuildPyTestCase(support.TempdirManager,
@@ -106,8 +106,7 @@ class BuildPyTestCase(support.TempdirManager,
                          ['boiledeggs.%s.pyc' % sys.implementation.cache_tag])
 
     @unittest.skipIf(sys.dont_write_bytecode, 'byte-compile disabled')
-    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork') and os.allows_subprocesses),
-                         "distutils cannot spawn child processes")
+    @unittest.skipUnless(has_subprocess_support, "distutils cannot spawn child processes")
     def test_byte_compile_optimized(self):
         project_dir, dist = self.create_dist(py_modules=['boiledeggs'])
         os.chdir(project_dir)

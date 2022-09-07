@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from test import support
+from test.support import has_subprocess_support
 from test.support.script_helper import (
     spawn_python, kill_python, assert_python_ok, assert_python_failure,
     interpreter_requires_environment
@@ -66,7 +67,7 @@ class CmdLineTest(unittest.TestCase):
         rc, out, err = assert_python_ok('-vv')
         self.assertNotIn(b'stack overflow', err)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     @unittest.skipIf(interpreter_requires_environment(),
                      'Cannot run -E tests when PYTHON env vars are required.')
     def test_xoptions(self):
@@ -85,7 +86,7 @@ class CmdLineTest(unittest.TestCase):
         opts = get_xoptions('-Xa', '-Xb=c,d=e')
         self.assertEqual(opts, {'a': True, 'b': 'c,d=e'})
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_showrefcount(self):
         def run_python(*args):
             # this is similar to assert_python_ok but doesn't strip
@@ -159,7 +160,7 @@ class CmdLineTest(unittest.TestCase):
     # arguments as unicode (using wmain() instead of main()).
     @unittest.skipIf(sys.platform == 'win32',
                      'Windows has a native unicode API')
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_undecodable_code(self):
         undecodable = b"\xff"
         env = os.environ.copy()
@@ -260,7 +261,7 @@ class CmdLineTest(unittest.TestCase):
         self.assertEqual(stdout, expected)
         self.assertEqual(p.returncode, 0)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_unbuffered_output(self):
         # Test expected operation of the '-u' switch
         for stream in ('stdout', 'stderr'):
@@ -319,7 +320,7 @@ class CmdLineTest(unittest.TestCase):
         # for empty and unset PYTHONPATH
         self.assertEqual(out1, out2)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_displayhook_unencodable(self):
         for encoding in ('ascii', 'latin-1', 'utf-8'):
             env = os.environ.copy()
@@ -338,7 +339,7 @@ class CmdLineTest(unittest.TestCase):
             escaped = repr(text).encode(encoding, 'backslashreplace')
             self.assertIn(escaped, data)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def check_input(self, code, expected):
         with tempfile.NamedTemporaryFile("wb+") as stdin:
             sep = os.linesep.encode('ASCII')
@@ -414,7 +415,7 @@ class CmdLineTest(unittest.TestCase):
     @unittest.skipIf(os.name != 'posix', "test needs POSIX semantics")
     @unittest.skipIf(sys.platform == "vxworks",
                          "test needs preexec support in subprocess.Popen")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def _test_no_stdio(self, streams):
         code = """if 1:
             import os, sys

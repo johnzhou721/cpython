@@ -10,7 +10,7 @@ import unittest
 from distutils import sysconfig
 from distutils.ccompiler import get_default_compiler
 from distutils.tests import support
-from test.support import TESTFN, run_unittest, check_warnings, swap_item
+from test.support import TESTFN, run_unittest, check_warnings, swap_item, has_subprocess_support
 
 class SysconfigTestCase(support.EnvironGuard, unittest.TestCase):
     def setUp(self):
@@ -244,7 +244,7 @@ class SysconfigTestCase(support.EnvironGuard, unittest.TestCase):
         self.assertIsNotNone(vars['SO'])
         self.assertEqual(vars['SO'], vars['EXT_SUFFIX'])
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_customize_compiler_before_get_config_vars(self):
         # Issue #21923: test that a Distribution compiler
         # instance can be called without an explicit call to

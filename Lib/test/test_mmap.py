@@ -1,5 +1,5 @@
 from test.support import (TESTFN, import_module, unlink,
-                          requires, _2G, _4G, gc_collect, cpython_only)
+                          requires, _2G, _4G, gc_collect, cpython_only, is_apple_mobile)
 import unittest
 import os
 import re
@@ -230,7 +230,7 @@ class MmapTests(unittest.TestCase):
         with open(TESTFN, "r+b") as f:
             self.assertRaises(ValueError, mmap.mmap, f.fileno(), mapsize, access=4)
 
-        if os.name == "posix" and sys.platform not in ('iOS', 'tvos', 'watchos'):
+        if os.name == "posix" and not is_apple_mobile:
             # Try incompatible flags, prot and access parameters.
             with open(TESTFN, "r+b") as f:
                 self.assertRaises(ValueError, mmap.mmap, f.fileno(), mapsize,
@@ -769,7 +769,7 @@ class LargeMmapTests(unittest.TestCase):
         unlink(TESTFN)
 
     def _make_test_file(self, num_zeroes, tail):
-        if sys.platform[:3] == 'win' or sys.platform in ('darwin', 'ios', 'tvos', 'watchos'):
+        if sys.platform[:3] == 'win' or sys.platform == 'darwin' or is_apple_mobile:
             requires('largefile',
                 'test requires %s bytes and a long time to run' % str(0x180000000))
         f = open(TESTFN, 'w+b')

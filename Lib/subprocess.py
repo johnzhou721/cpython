@@ -91,6 +91,8 @@ else:
                     "CREATE_NO_WINDOW", "DETACHED_PROCESS",
                     "CREATE_DEFAULT_ERROR_MODE", "CREATE_BREAKAWAY_FROM_JOB"])
 
+# Some platforms do not support processes
+_can_fork_exec = sys.platform not in {"ios", "tvos", "watchos"}
 
 # Exception classes used by this module.
 class SubprocessError(Exception): pass
@@ -741,7 +743,7 @@ class Popen(object):
                  restore_signals=True, start_new_session=False,
                  pass_fds=(), *, encoding=None, errors=None, text=None):
         """Create new Popen instance."""
-        if not os.allows_subprocesses:
+        if not _can_fork_exec:
             raise RuntimeError(f"Subprocesses are not supported on {sys.platform}")
 
         _cleanup()

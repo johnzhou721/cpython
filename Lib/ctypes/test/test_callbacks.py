@@ -1,5 +1,4 @@
 import functools
-import os
 import unittest
 from test import support
 
@@ -161,7 +160,7 @@ class SampleCallbacksTestCase(unittest.TestCase):
 
     def test_integrate(self):
         # Derived from some then non-working code, posted by David Foster
-        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+        dll = CDLL(_ctypes_test.__file__)
 
         # The function prototype called by 'integrate': double func(double);
         CALLBACK = CFUNCTYPE(c_double, c_double)
@@ -212,7 +211,7 @@ class SampleCallbacksTestCase(unittest.TestCase):
     def test_callback_register_int(self):
         # Issue #8275: buggy handling of callback args under Win64
         # NOTE: should be run on release builds as well
-        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+        dll = CDLL(_ctypes_test.__file__)
         CALLBACK = CFUNCTYPE(c_int, c_int, c_int, c_int, c_int, c_int)
         # All this function does is call the callback with its args squared
         func = dll._testfunc_cbk_reg_int
@@ -228,7 +227,7 @@ class SampleCallbacksTestCase(unittest.TestCase):
     def test_callback_register_double(self):
         # Issue #8275: buggy handling of callback args under Win64
         # NOTE: should be run on release builds as well
-        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+        dll = CDLL(_ctypes_test.__file__)
         CALLBACK = CFUNCTYPE(c_double, c_double, c_double, c_double,
                              c_double, c_double)
         # All this function does is call the callback with its args squared

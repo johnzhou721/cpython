@@ -7,6 +7,7 @@ executing have not been removed.
 import unittest
 import test.support
 from test import support
+from test.support import has_subprocess_support
 from test.support import (captured_stderr, TESTFN, EnvironmentVarGuard,
                           change_cwd)
 import builtins
@@ -197,7 +198,7 @@ class HelperFunctionsTests(unittest.TestCase):
 
     @unittest.skipUnless(site.ENABLE_USER_SITE, "requires access to PEP 370 "
                           "user-site (site.ENABLE_USER_SITE)")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_s_option(self):
         # (ncoghlan) Change this to use script_helper...
         usersite = site.USER_SITE
@@ -465,7 +466,7 @@ class ImportSideEffectTests(unittest.TestCase):
 
 class StartupImportTests(unittest.TestCase):
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_startup_imports(self):
         # Get sys.path in isolated mode (python3 -I)
         popen = subprocess.Popen([sys.executable, '-I', '-c',

@@ -18,6 +18,7 @@ import shutil
 import threading
 import gc
 import textwrap
+from test.support import has_subprocess_support
 from test.support import FakePath
 
 try:
@@ -31,7 +32,7 @@ if support.PGO:
 
 mswindows = (sys.platform == "win32")
 
-if not os.allows_subprocesses:
+if not has_subprocess_support:
     raise unittest.SkipTest('Test requires support for subprocesses.')
 
 #

@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-# generated automatically by aclocal 1.16.2 -*- Autoconf -*-
-||||||| parent of ecef6a1474 (Backport dynamic loading changes from 3.11 branch.)
-# generated automatically by aclocal 1.16.3 -*- Autoconf -*-
-=======
 # generated automatically by aclocal 1.16.5 -*- Autoconf -*-
->>>>>>> ecef6a1474 (Backport dynamic loading changes from 3.11 branch.)
 
 # Copyright (C) 1996-2021 Free Software Foundation, Inc.
 

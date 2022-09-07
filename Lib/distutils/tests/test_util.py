@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 from copy import copy
-from test.support import run_unittest
+from test.support import run_unittest, has_subprocess_support
 from unittest import mock
 
 from distutils.errors import DistutilsPlatformError, DistutilsByteCompileError
@@ -233,8 +233,7 @@ class UtilTestCase(support.EnvironGuard, unittest.TestCase):
 
         # XXX platforms to be covered: mac
 
-    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork') and os.allows_subprocesses),
-                         "distutils cannot spawn child processes")
+    @unittest.skipUnless(has_subprocess_support, "distutils cannot spawn child processes")
     def test_check_environ(self):
         util._environ_checked = 0
         os.environ.pop('HOME', None)

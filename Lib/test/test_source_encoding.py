@@ -1,7 +1,7 @@
 # -*- coding: koi8-r -*-
 
 import unittest
-from test.support import TESTFN, unlink, unload, rmtree, script_helper, captured_stdout
+from test.support import TESTFN, unlink, unload, rmtree, script_helper, captured_stdout, has_subprocess_support
 import importlib
 import os
 import sys
@@ -12,11 +12,11 @@ class MiscSourceEncodingTest(unittest.TestCase):
 
     def test_pep263(self):
         self.assertEqual(
-            "Питон".encode("utf-8"),
+            "О©╫О©╫О©╫О©╫О©╫".encode("utf-8"),
             b'\xd0\x9f\xd0\xb8\xd1\x82\xd0\xbe\xd0\xbd'
         )
         self.assertEqual(
-            "\П".encode("utf-8"),
+            "\О©╫".encode("utf-8"),
             b'\\\xd0\x9f'
         )
 
@@ -60,7 +60,7 @@ class MiscSourceEncodingTest(unittest.TestCase):
         # two bytes in common with the UTF-8 BOM
         self.assertRaises(SyntaxError, eval, b'\xef\xbb\x20')
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_20731(self):
         sub = subprocess.Popen([sys.executable,
                         os.path.join(os.path.dirname(__file__),

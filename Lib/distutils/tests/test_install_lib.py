@@ -8,7 +8,7 @@ from distutils.command.install_lib import install_lib
 from distutils.extension import Extension
 from distutils.tests import support
 from distutils.errors import DistutilsOptionError
-from test.support import run_unittest
+from test.support import run_unittest, has_subprocess_support
 
 
 class InstallLibTestCase(support.TempdirManager,
@@ -35,8 +35,7 @@ class InstallLibTestCase(support.TempdirManager,
         self.assertEqual(cmd.optimize, 2)
 
     @unittest.skipIf(sys.dont_write_bytecode, 'byte-compile disabled')
-    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork') and os.allows_subprocesses),
-                         "distutils cannot spawn child processes")
+    @unittest.skipUnless(has_subprocess_support, "distutils cannot spawn child processes")
     def test_byte_compile(self):
         project_dir, dist = self.create_dist()
         os.chdir(project_dir)

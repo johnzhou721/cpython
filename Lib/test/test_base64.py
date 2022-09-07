@@ -4,7 +4,7 @@ import base64
 import binascii
 import os
 from array import array
-from test.support import script_helper
+from test.support import script_helper, has_subprocess_support
 
 
 class LegacyBase64TestCase(unittest.TestCase):
@@ -652,7 +652,8 @@ class BaseXYTestCase(unittest.TestCase):
     def test_ErrorHeritage(self):
         self.assertTrue(issubclass(binascii.Error, ValueError))
 
-@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+
+@unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
 class TestMain(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(support.TESTFN):

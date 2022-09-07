@@ -133,7 +133,7 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 
 		# Output DEFS in reverse order so first definition overrides
 		case $line in
-		[A-Z]*=*)	DEFS="$line$NL$DEFS"; continue;;
+		*=*)	DEFS="$line$NL$DEFS"; continue;;
 		'include '*)	DEFS="$line$NL$DEFS"; continue;;
 		'*noobjects*')
 			case $noobjects in
@@ -162,12 +162,9 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 			esac
 			case $arg in
 			-framework)	libs="$libs $arg"; skip=libs;
-				        # OSX/iOS/Darwin framework
+				        # OSX/OSXS/Darwin framework link cmd
 					;;
-			-F*)	libs="$libs $arg"; skip=libs;
-				        # OSX/iOS/Darwin framework directory
-					;;
-			-[IDUCf]*)	cpps="$cpps $arg";;
+			-[IDUCfF]*)	cpps="$cpps $arg";;
 			-Xcompiler)	skip=cpps;;
 			-Xlinker)	libs="$libs $arg"; skip=libs;;
 			-rpath)		libs="$libs $arg"; skip=libs;;
@@ -185,7 +182,6 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 			*.c++)		srcs="$srcs $arg";;
 			*.cxx)		srcs="$srcs $arg";;
 			*.cpp)		srcs="$srcs $arg";;
-			*.S)		srcs="$srcs $arg";;
 			\$*)		libs="$libs $arg"
 					cpps="$cpps $arg";;
 			*.*)		echo 1>&2 "bad word $arg in $line"
@@ -223,7 +219,6 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 			*.C)   obj=`basename $src .C`.o; cc='$(CXX)';;
 			*.cxx) obj=`basename $src .cxx`.o; cc='$(CXX)';;
 			*.cpp) obj=`basename $src .cpp`.o; cc='$(CXX)';;
-			*.S)   obj=`basename $src .S`.o; cc='$(CC)';; # Assembly
 			*.m)   obj=`basename $src .m`.o; cc='$(CC)';; # Obj-C
 			*)     continue;;
 			esac

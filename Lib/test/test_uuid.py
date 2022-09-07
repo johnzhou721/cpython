@@ -1,5 +1,6 @@
 import unittest.mock
 from test import support
+from test.support import has_subprocess_support
 import builtins
 import contextlib
 import copy
@@ -636,7 +637,7 @@ class BaseTestUUID:
             equal(str(u), v)
 
     @unittest.skipUnless(os.name == 'posix', 'requires Posix')
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def testIssue8621(self):
         # On at least some versions of OSX self.uuid.uuid4 generates
         # the same sequence of UUIDs in the parent and any
@@ -676,7 +677,7 @@ class BaseTestInternals:
     _uuid = py_uuid
 
     @unittest.skipUnless(os.name == 'posix', 'requires Posix')
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_find_mac(self):
         data = '''
 fake hwaddr
@@ -711,7 +712,7 @@ eth0      Link encap:Ethernet  HWaddr 12:34:56:78:90:ab
 
     @unittest.skipUnless(_uuid._ifconfig_getnode in _uuid._GETTERS,
         "ifconfig is not used for introspection on this platform")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_ifconfig_getnode(self):
         node = self.uuid._ifconfig_getnode()
         self.check_node(node, 'ifconfig')
@@ -724,7 +725,7 @@ eth0      Link encap:Ethernet  HWaddr 12:34:56:78:90:ab
 
     @unittest.skipUnless(_uuid._arp_getnode in _uuid._GETTERS,
         "arp is not used for introspection on this platform")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_arp_getnode(self):
         node = self.uuid._arp_getnode()
         self.check_node(node, 'arp')
@@ -737,7 +738,7 @@ eth0      Link encap:Ethernet  HWaddr 12:34:56:78:90:ab
 
     @unittest.skipUnless(_uuid._netstat_getnode in _uuid._GETTERS,
         "netstat is not used for introspection on this platform")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_netstat_getnode(self):
         node = self.uuid._netstat_getnode()
         self.check_node(node, 'netstat')

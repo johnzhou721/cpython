@@ -7,7 +7,6 @@ Later...
 
 from ctypes import *
 from ctypes.test import need_symbol
-import os
 import sys, unittest
 
 try:
@@ -17,9 +16,7 @@ except NameError:
     WINFUNCTYPE = CFUNCTYPE
 
 import _ctypes_test
-
-
-dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+dll = CDLL(_ctypes_test.__file__)
 if sys.platform == "win32":
     windll = WinDLL(_ctypes_test.__file__)
 

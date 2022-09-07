@@ -102,7 +102,7 @@ __all__ = [
     "check__all__", "skip_unless_bind_unix_socket", "skip_if_buggy_ucrt_strfptime",
     "ignore_warnings",
     # sys
-    "is_jython", "is_android", "check_impl_detail", "unix_shell",
+    "is_jython", "is_android", "is_apple_mobile", "check_impl_detail", "unix_shell",
     "setswitchinterval",
     # network
     "HOST", "IPV6_ENABLED", "find_unused_port", "bind_port", "open_urlresource",
@@ -855,10 +855,23 @@ is_jython = sys.platform.startswith('java')
 
 is_android = hasattr(sys, 'getandroidapilevel')
 
-if sys.platform != 'win32':
+if sys.platform not in ('win32', 'vxworks', 'ios', 'tvos', 'watchos'):
     unix_shell = '/system/bin/sh' if is_android else '/bin/sh'
 else:
     unix_shell = None
+
+# Apple mobile platforms (iOS/tvOS/watchOS) are POSIX-like but do not
+# have subprocess or fork support.
+is_apple_mobile = sys.platform in ('ios', 'tvos', 'watchos')
+
+has_fork_support = (
+    hasattr(os, "fork")
+    and not is_apple_mobile
+)
+
+has_subprocess_support = (
+    not is_apple_mobile
+)
 
 # Filename used for testing
 if os.name == 'java':

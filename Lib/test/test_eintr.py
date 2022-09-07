@@ -5,11 +5,11 @@ import sys
 import unittest
 
 from test import support
-from test.support import script_helper
+from test.support import script_helper, has_subprocess_support
 
 
 @unittest.skipUnless(os.name == "posix", "only supported on Unix")
-@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+@unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
 class EINTRTests(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(signal, "setitimer"), "requires setitimer()")

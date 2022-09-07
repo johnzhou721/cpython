@@ -122,7 +122,7 @@ class CygwinCCompilerTestCase(support.TempdirManager,
     def test_get_msvcr(self):
 
         # none
-        sys.version = ('2.6.1 (r261:67515, Dec  6 2008, 16:42:21) '
+        sys.version  = ('2.6.1 (r261:67515, Dec  6 2008, 16:42:21) '
                         '\n[GCC 4.0.1 (Apple Computer, Inc. build 5370)]')
         self.assertEqual(get_msvcr(), None)
 

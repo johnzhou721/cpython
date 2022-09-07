@@ -4,6 +4,7 @@ import copy
 import sys
 import test.support
 import unittest
+from test.support import is_apple_mobile
 
 # Location of mailcap file
 MAILCAPFILE = test.support.findfile("mailcap.txt")
@@ -213,8 +214,7 @@ class FindmatchTest(unittest.TestCase):
         ]
         self._run_cases(cases)
 
-    @unittest.skipUnless(os.name == "posix" and sys.platform not in('ios', 'tvos', 'watchos'),
-                         "Requires 'test' command on system")
+    @unittest.skipUnless(os.name == "posix" and not is_apple_mobile, "Requires 'test' command on system")
     def test_test(self):
         # findmatch() will automatically check any "test" conditions and skip
         # the entry if the check fails.

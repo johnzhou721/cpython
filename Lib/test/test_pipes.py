@@ -4,11 +4,12 @@ import string
 import sys
 import unittest
 import shutil
-from test.support import TESTFN, run_unittest, unlink, reap_children
+from test.support import TESTFN, run_unittest, unlink, reap_children, is_apple_mobile
 
 if os.name != 'posix':
     raise unittest.SkipTest('pipes module only works on posix')
-if sys.platform in ('ios', 'tvos', 'watchos'):
+
+if is_apple_mobile:
     raise unittest.SkipTest('pipes tests cannot run on %s' % sys.platform)
 
 TESTFN2 = TESTFN + "2"

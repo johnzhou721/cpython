@@ -2,7 +2,7 @@
 import unittest
 import os
 import sys
-from test.support import run_unittest, missing_compiler_executable
+from test.support import run_unittest, missing_compiler_executable, has_subprocess_support
 
 from distutils.command.config import dump_file, config
 from distutils.tests import support
@@ -38,7 +38,7 @@ class ConfigTestCase(support.LoggingSilencer,
         self.assertEqual(len(self._logs), numlines+1)
 
     @unittest.skipIf(sys.platform == 'win32', "can't test on Windows")
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_search_cpp(self):
         import shutil
         cmd = missing_compiler_executable(['preprocessor'])

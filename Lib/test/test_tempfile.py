@@ -15,11 +15,12 @@ from unittest import mock
 
 import unittest
 from test import support
+from test_support import has_subprocess_support
 from test.support import script_helper
 
 
 has_textmode = (tempfile._text_openflags != tempfile._bin_openflags)
-has_spawnl = hasattr(os, 'spawnl') and os.allows_subprocesses
+has_spawnl = hasattr(os, 'spawnl') and has_subprocess_support
 
 # TEST_FILES may need to be tweaked for systems depending on the maximum
 # number of files that can be opened at one time (see ulimit -n)

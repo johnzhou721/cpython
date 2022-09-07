@@ -14,6 +14,7 @@ import time
 import unittest
 from test import support
 from test.support import MISSING_C_DOCSTRINGS
+from test.support import has_subprocess_support
 from test.support.script_helper import assert_python_failure, assert_python_ok
 try:
     import _posixsubprocess
@@ -49,7 +50,7 @@ class CAPITest(unittest.TestCase):
         self.assertEqual(testfunction.attribute, "test")
         self.assertRaises(AttributeError, setattr, inst.testfunction, "attribute", "test")
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_no_FatalError_infinite_loop(self):
         with support.SuppressCrashReport():
             p = subprocess.Popen([sys.executable, "-c",

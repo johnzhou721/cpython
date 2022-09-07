@@ -13,6 +13,7 @@ import textwrap
 from contextlib import ExitStack
 from io import StringIO
 from test import support
+from test.support import has_subprocess_support
 # This little helper class is essential for testing pdb under doctest.
 from test.test_doctest import _FakeInput
 from unittest.mock import patch
@@ -1235,7 +1236,7 @@ class PdbTestCase(unittest.TestCase):
     def tearDown(self):
         support.unlink(support.TESTFN)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def _run_pdb(self, pdb_args, commands):
         self.addCleanup(support.rmtree, '__pycache__')
         cmd = [sys.executable, '-m', 'pdb'] + pdb_args
@@ -1327,7 +1328,7 @@ def bœr():
             ('bœr', 1),
         )
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_issue7964(self):
         # open the file as binary so we can force \r\n newline
         with open(support.TESTFN, 'wb') as f:

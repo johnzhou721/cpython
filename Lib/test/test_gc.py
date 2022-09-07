@@ -2,7 +2,7 @@ import unittest
 from test.support import (verbose, refcount_test, run_unittest,
                           strip_python_stderr, cpython_only, start_threads,
                           temp_dir, requires_type_collecting, TESTFN, unlink,
-                          import_module)
+                          import_module, has_subprocess_support)
 from test.support.script_helper import assert_python_ok, make_script
 
 import gc
@@ -658,7 +658,7 @@ class GCTests(unittest.TestCase):
             gc.set_debug(%s)
         """
 
-        @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+        @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
         def run_command(code):
             p = subprocess.Popen([sys.executable, "-Wd", "-c", code],
                 stdout=subprocess.PIPE,

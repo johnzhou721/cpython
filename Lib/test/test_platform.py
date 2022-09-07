@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from test import support
+from test.support import has_subprocess_support, is_apple_mobile
 
 class PlatformTest(unittest.TestCase):
     def clear_caches(self):
@@ -17,7 +18,7 @@ class PlatformTest(unittest.TestCase):
         res = platform.architecture()
 
     @support.skip_unless_symlink
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_architecture_via_symlink(self): # issue3762
         with support.PythonSymlink() as py:
             cmd = "-c", "import platform; print(platform.architecture())"
@@ -192,7 +193,7 @@ class PlatformTest(unittest.TestCase):
     def test_mac_ver(self):
         res = platform.mac_ver()
 
-        if platform.uname().system == 'Darwin' and sys.platform not in ('ios', 'tvos', 'watchos'):
+        if platform.uname().system == 'Darwin' and not is_apple_mobile:
             # We are on a macOS system, check that the right version
             # information is returned
             output = subprocess.check_output(['sw_vers'], text=True)
@@ -224,6 +225,9 @@ class PlatformTest(unittest.TestCase):
             else:
                 self.assertEqual(res[2], 'PowerPC')
 
+    @unittest.skipUnless(is_apple_mobile, "iOS/tvOS/watchOS only test")
+    def test_ios_ver(self):
+        res = platform.ios_ver()
 
     @unittest.skipUnless(sys.platform == 'darwin', "OSX only test")
     def test_mac_ver_with_fork(self):

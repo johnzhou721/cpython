@@ -4,7 +4,7 @@ import stat
 import sys
 import unittest
 from unittest import mock
-from test.support import run_unittest, unix_shell
+from test.support import run_unittest, unix_shell, has_subprocess_support
 from test import support as test_support
 
 from distutils.spawn import find_executable
@@ -26,8 +26,9 @@ class SpawnTestCase(support.TempdirManager,
             res = _nt_quote_args(args)
             self.assertEqual(res, wanted)
 
-    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork') and os.allows_subprocesses),
-                         "distutils cannot spawn child processes")
+
+    @unittest.skipUnless(os.name in ('nt', 'posix') and has_subprocess_support,
+                         'Runs only under posix or nt')
     def test_spawn(self):
         tmpdir = self.mkdtemp()
 

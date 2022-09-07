@@ -1,11 +1,9 @@
-import os
 import unittest
 from ctypes import *
 from ctypes.test import need_symbol
 import _ctypes_test
 
-
-dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+dll = CDLL(_ctypes_test.__file__)
 
 try:
     CALLBACK_FUNCTYPE = WINFUNCTYPE

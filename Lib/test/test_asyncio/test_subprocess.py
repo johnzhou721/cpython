@@ -1,4 +1,3 @@
-import os
 import signal
 import sys
 import unittest
@@ -10,6 +9,7 @@ from asyncio import base_subprocess
 from asyncio import subprocess
 from test.test_asyncio import utils as test_utils
 from test import support
+from test.support import has_subprocess_support
 
 if sys.platform != 'win32':
     from asyncio import unix_events
@@ -103,7 +103,7 @@ class SubprocessTransportTests(test_utils.TestCase):
         transport.close()
 
 
-@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+@unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
 class SubprocessMixin:
 
     def test_stdin_stdout(self):

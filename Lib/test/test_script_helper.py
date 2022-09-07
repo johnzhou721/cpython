@@ -1,10 +1,9 @@
 """Unittests for test.support.script_helper.  Who tests the test helper?"""
 
-import os
 import subprocess
 import sys
 import os
-from test.support import script_helper
+from test.support import script_helper, has_subprocess_support
 import unittest
 from unittest import mock
 
@@ -36,7 +35,7 @@ class TestScriptHelper(unittest.TestCase):
         self.assertIn('import sys; sys.exit(0)', error_msg,
                       msg='unexpected command line.')
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     @mock.patch('subprocess.Popen')
     def test_assert_python_isolated_when_env_not_required(self, mock_popen):
         with mock.patch.object(script_helper,
@@ -55,7 +54,7 @@ class TestScriptHelper(unittest.TestCase):
             self.assertIn('-I', popen_command)
             self.assertNotIn('-E', popen_command)  # -I overrides this
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     @mock.patch('subprocess.Popen')
     def test_assert_python_not_isolated_when_env_is_required(self, mock_popen):
         """Ensure that -I is not passed when the environment is required."""
@@ -85,7 +84,7 @@ class TestScriptHelperEnvironment(unittest.TestCase):
         # Reset the private cached state.
         script_helper.__dict__['__cached_interp_requires_environment'] = None
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     @mock.patch('subprocess.check_call')
     def test_interpreter_requires_environment_true(self, mock_check_call):
         with mock.patch.dict(os.environ):
@@ -95,7 +94,7 @@ class TestScriptHelperEnvironment(unittest.TestCase):
             self.assertTrue(script_helper.interpreter_requires_environment())
             self.assertEqual(1, mock_check_call.call_count)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     @mock.patch('subprocess.check_call')
     def test_interpreter_requires_environment_false(self, mock_check_call):
         with mock.patch.dict(os.environ):
@@ -105,7 +104,7 @@ class TestScriptHelperEnvironment(unittest.TestCase):
             self.assertFalse(script_helper.interpreter_requires_environment())
             self.assertEqual(1, mock_check_call.call_count)
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     @mock.patch('subprocess.check_call')
     def test_interpreter_requires_environment_details(self, mock_check_call):
         with mock.patch.dict(os.environ):

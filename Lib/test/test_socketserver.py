@@ -15,7 +15,7 @@ import unittest
 import socketserver
 
 import test.support
-from test.support import reap_children, reap_threads, verbose
+from test.support import reap_children, reap_threads, verbose, has_subprocess_support, is_apple_mobile
 
 
 test.support.requires("network")
@@ -26,7 +26,7 @@ HOST = test.support.HOST
 HAVE_UNIX_SOCKETS = hasattr(socket, "AF_UNIX")
 requires_unix_sockets = unittest.skipUnless(HAVE_UNIX_SOCKETS,
                                             'requires Unix sockets')
-HAVE_FORKING = hasattr(os, "fork") and os.allows_subprocesses
+HAVE_FORKING = hasattr(os, "fork") and has_subprocess_support
 requires_forking = unittest.skipUnless(HAVE_FORKING, 'requires forking')
 
 def signal_alarm(n):
@@ -196,16 +196,14 @@ class SocketServerTest(unittest.TestCase):
                             self.stream_examine)
 
     @requires_unix_sockets
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't fully support UNIX sockets." % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_UnixStreamServer(self):
         self.run_server(socketserver.UnixStreamServer,
                         socketserver.StreamRequestHandler,
                         self.stream_examine)
 
     @requires_unix_sockets
-    @unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                     "%s doesn't fully support UNIX sockets." % sys.platform)
+    @unittest.skipIf(is_apple_mobile, "%s doesn't fully support UNIX sockets." % sys.platform)
     def test_ThreadingUnixStreamServer(self):
         self.run_server(socketserver.ThreadingUnixStreamServer,
                         socketserver.StreamRequestHandler,

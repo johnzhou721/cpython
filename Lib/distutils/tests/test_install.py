@@ -5,7 +5,7 @@ import sys
 import unittest
 import site
 
-from test.support import captured_stdout, run_unittest
+from test.support import captured_stdout, run_unittest, has_subprocess_support
 
 from distutils import sysconfig
 from distutils.command.install import install
@@ -196,8 +196,7 @@ class InstallTestCase(support.TempdirManager,
                     'UNKNOWN-0.0.0-py%s.%s.egg-info' % sys.version_info[:2]]
         self.assertEqual(found, expected)
 
-    @unittest.skipUnless(os.name == 'nt' or (os.name == 'posix' and hasattr(os, 'fork') and os.allows_subprocesses),
-                         "distutils cannot spawn child processes")
+    @unittest.skipUnless(has_subprocess_support, "distutils cannot spawn child processes")
     def test_record_extensions(self):
         cmd = test_support.missing_compiler_executable()
         if cmd is not None:

@@ -6,11 +6,10 @@
 
 """
 
-import os
 import sys
 import unittest
 import hashlib
-from test.support import script_helper
+from test.support import script_helper, has_subprocess_support
 
 encoding = 'utf-8'
 errors = 'surrogatepass'
@@ -244,7 +243,7 @@ class UnicodeFunctionsTest(UnicodeDatabaseTest):
 
 class UnicodeMiscTest(UnicodeDatabaseTest):
 
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_failed_import_during_compiling(self):
         # Issue 4367
         # Decoding \N escapes requires the unicodedata module. If it can't be

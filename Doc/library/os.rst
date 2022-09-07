@@ -3148,13 +3148,6 @@ features:
 
    .. versionadded:: 3.8
 
-.. data:: allows_subprocesses
-
-   Boolean that describes whether subprocesses can be by the operating system.
-   Some platforms (e.g., iOS mobile devices) *implement* calls like
-   :func:`execv` and :func:`spawnv`, but will raise errors or break if
-   called. Calls to create subprocesses should only be invoked if
-   :data:`os.allows_subprocesses` is `True`.
 
 .. data:: MFD_CLOEXEC
           MFD_ALLOW_SEALING

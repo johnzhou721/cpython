@@ -1,7 +1,6 @@
 # Windows specific tests
 
 from ctypes import *
-import os
 import unittest, sys
 from test import support
 
@@ -103,7 +102,7 @@ class Structures(unittest.TestCase):
                         ("right", c_long),
                         ("bottom", c_long)]
 
-        dll = CDLL(getattr(_ctypes_test, '__file__', os.environ['TEST_EXECUTABLE']))
+        dll = CDLL(_ctypes_test.__file__)
 
         pt = POINT(15, 25)
         left = c_long.in_dll(dll, 'left')

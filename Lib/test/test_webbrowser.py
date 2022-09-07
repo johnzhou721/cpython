@@ -6,8 +6,9 @@ import subprocess
 from unittest import mock
 import sys
 from test import support
+from test.support import is_apple_mobile
 
-if sys.platform in ('ios', 'tvos', 'watchos'):
+if is_apple_mobile:
     raise unittest.SkipTest("Can't run webbrowser tests on %s" % sys.platform)
 
 URL = 'http://www.example.com'

@@ -5,6 +5,7 @@
 
 import unittest
 from test import support
+from test.support import has_subprocess_support
 import os, sys
 
 # Test that command-lines get down as we expect.
@@ -16,8 +17,7 @@ python = sys.executable
 if ' ' in python:
     python = '"' + python + '"'     # quote embedded space for cmdline
 
-
-@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+@unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
 class PopenTest(unittest.TestCase):
 
     def _do_test_commandline(self, cmdline, expected):

@@ -7,7 +7,7 @@ from copy import copy
 
 from test.support import (import_module, TESTFN, unlink, check_warnings,
                           captured_stdout, skip_unless_symlink, change_cwd,
-                          PythonSymlink)
+                          PythonSymlink, has_subprocess_support)
 
 import sysconfig
 from sysconfig import (get_paths, get_platform, get_config_vars,
@@ -234,7 +234,7 @@ class TestSysConfig(unittest.TestCase):
         self.assertEqual(get_scheme_names(), wanted)
 
     @skip_unless_symlink
-    @unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+    @unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
     def test_symlink(self): # Issue 7880
         with PythonSymlink() as py:
             cmd = "-c", "import sysconfig; print(sysconfig.get_platform())"

@@ -29,6 +29,8 @@ from io import BytesIO
 
 import unittest
 from test import support
+from test.support import is_apple_mobile
+from test.support import has_subprocess_support
 
 
 class NoLogRequestHandler:
@@ -397,7 +399,7 @@ class SimpleHTTPServerTestCase(BaseTestCase):
         with open(os.path.join(self.tempdir, filename), 'wb') as f:
             f.write(support.TESTFN_UNDECODABLE)
         response = self.request(self.base_url + '/')
-        if sys.platform in ('darwin', 'ios', 'tvos', 'watchos'):
+        if sys.platform == 'darwin' or is_apple_mobile:
             # On Mac OS the HFS+ filesystem replaces bytes that aren't valid
             # UTF-8 into a percent-encoded value.
             for name in os.listdir(self.tempdir):
@@ -588,7 +590,7 @@ print(os.environ["%s"])
 
 @unittest.skipIf(hasattr(os, 'geteuid') and os.geteuid() == 0,
         "This test can't be run reliably as root (issue #13308).")
-@unittest.skipUnless(os.allows_subprocesses, 'Test requires support for subprocesses.')
+@unittest.skipUnless(has_subprocess_support, 'Test requires support for subprocesses.')
 class CGIHTTPServerTestCase(BaseTestCase):
     class request_handler(NoLogRequestHandler, CGIHTTPRequestHandler):
         pass

@@ -11,8 +11,6 @@ import importlib.util
 import importlib
 from test.support.script_helper import assert_python_failure
 
-@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                 '%s does not support dynamic loading' % sys.platform)
 class LoaderTests(abc.LoaderTests):
 
     """Test load_module() for extension modules."""
@@ -84,9 +82,6 @@ class LoaderTests(abc.LoaderTests):
  Source_LoaderTests
  ) = util.test_both(LoaderTests, machinery=machinery)
 
-
-@unittest.skipIf(sys.platform in ('ios', 'tvos', 'watchos'),
-                 '%s does not support dynamic loading' % sys.platform)
 class MultiPhaseExtensionModuleTests(abc.LoaderTests):
     """Test loading extension modules with multi-phase initialization (PEP 489)
     """

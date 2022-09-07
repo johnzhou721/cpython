@@ -171,8 +171,7 @@ class CompileallTestsBase:
         compileall.compile_dir(self.directory, quiet=True, workers=5)
         self.assertTrue(pool_mock.called)
 
-    @mock.patch('compileall.ProcessPoolExecutor')
-    def test_compile_workers_non_positive(self, pool_mock):
+    def test_compile_workers_non_positive(self):
         with self.assertRaisesRegex(ValueError,
                                     "workers must be greater or equal to 0"):
             compileall.compile_dir(self.directory, workers=-1)
