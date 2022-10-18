@@ -118,16 +118,20 @@ def sysroot_paths(make_vars, subdirs):
     for var_name in make_vars:
         var = sysconfig.get_config_var(var_name)
         if var is not None:
-            m = re.search(r'--sysroot=([^"]\S*|"[^"]+")', var)
-            if m is not None:
-                sysroot = m.group(1).strip('"')
-                for subdir in subdirs:
-                    if os.path.isabs(subdir):
-                        subdir = subdir[1:]
-                    path = os.path.join(sysroot, subdir)
-                    if os.path.isdir(path):
-                        dirs.append(path)
-                break
+            for pattern in [
+                r'-isysroot\s*([^"]\S*|"[^"]+")',
+                r'--sysroot=([^"]\S*|"[^"]+")',
+            ]:
+                m = re.search(pattern, var)
+                if m is not None:
+                    sysroot = m.group(1).strip('"')
+                    for subdir in subdirs:
+                        if os.path.isabs(subdir):
+                            subdir = subdir[1:]
+                        path = os.path.join(sysroot, subdir)
+                        if os.path.isdir(path):
+                            dirs.append(path)
+                    break
     return dirs
 
 MACOS_SDK_ROOT = None
