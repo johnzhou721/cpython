@@ -126,10 +126,25 @@ jobs:
     runs-on: macos-latest
     needs: check_source
     if: needs.check_source.outputs.run_tests == 'true'
+    env:
+      HOMEBREW_NO_ANALYTICS: 1
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
     steps:
     - uses: actions/checkout@v2
+    - name: Install Homebrew dependencies
+      run: brew install pkg-config openssl@3.0 xz gdbm tcl-tk
     - name: Configure CPython
-      run: ./configure --with-pydebug --with-openssl=/usr/local/opt/openssl --prefix=/opt/python-dev
+      run: |
+        SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX12.sdk \
+        CC=clang \
+        CPPFLAGS="-I$(brew --prefix gdbm)/include -I$(brew --prefix xz)/include" \
+        LDFLAGS="-L$(brew --prefix gdbm)/lib -L$(brew --prefix xz)/lib" \
+        ./configure --prefix=/opt/python-dev \
+            --with-pydebug \
+            --with-openssl="$(brew --prefix openssl@3.0)" \
+            --with-tcltk-libs="$(pkg-config --libs tk)" \
+            --with-tcltk-includes="$(pkg-config --cflags tk)"
     - name: Build CPython
       run: make -j4
     - name: Display build info
@@ -143,7 +158,7 @@ jobs:
     needs: check_source
     if: needs.check_source.outputs.run_tests == 'true'
     env:
-      OPENSSL_VER: 1.1.1n
+      OPENSSL_VER: 1.1.1v
     steps:
     - uses: actions/checkout@v2
     - name: Install Dependencies
@@ -184,7 +199,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        openssl_ver: [1.0.2u, 1.1.0l, 1.1.1l]
+        openssl_ver: [1.0.2u, 1.1.1v, 3.0.10, 3.1.2]
     env:
       OPENSSL_VER: ${{ matrix.openssl_ver }}
       MULTISSL_DIR: ${{ github.workspace }}/multissl
@@ -201,7 +216,7 @@ jobs:
         echo "LD_LIBRARY_PATH=${GITHUB_WORKSPACE}/multissl/openssl/${OPENSSL_VER}/lib" >> $GITHUB_ENV
     - name: 'Restore OpenSSL build'
       id: cache-openssl
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v3
       with:
         path: ./multissl/openssl/${{ env.OPENSSL_VER }}
         key: ${{ runner.os }}-multissl-openssl-${{ env.OPENSSL_VER }}
@@ -212,7 +227,7 @@ jobs:
       run: |
         echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
     - name: Configure ccache action
-      uses: hendrikmuhs/ccache-action@v1
+      uses: hendrikmuhs/ccache-action@v1.2
     - name: Configure CPython
       run: ./configure --with-pydebug --with-openssl=$OPENSSL_DIR
     - name: Build CPython
