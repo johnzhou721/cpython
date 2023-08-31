@@ -2604,6 +2604,7 @@ if test -z "$SHLIB_SUFFIX"; then
 		esac
 		;;
 	CYGWIN*)   SHLIB_SUFFIX=.dll;;
+	iOS|tvOS|watchOS)   SHLIB_SUFFIX=.dylib;;
 	*)	   SHLIB_SUFFIX=.so;;
 	esac
 fi
@@ -2697,8 +2698,8 @@ then
 		fi
 		;;
   iOS/*|tvOS/*|watchOS/*)
-    LDSHARED='$(CC) -bundle -undefined dynamic_lookup'
-    LDCXXSHARED='$(CXX) -bundle -undefined dynamic_lookup'
+    LDSHARED='$(CC) -dynamiclib -undefined dynamic_lookup'
+    LDCXXSHARED='$(CXX) -dynamiclib -undefined dynamic_lookup'
     ;;
 	Linux*|GNU*|QNX*|VxWorks*)
 		LDSHARED='$(CC) -shared'

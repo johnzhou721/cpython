@@ -1599,6 +1599,59 @@ class FileFinder:
         return 'FileFinder({!r})'.format(self.path)
 
 
+class AppleFrameworkLoader(ExtensionFileLoader):
+    """A loader for modules that have been packaged as Apple Frameworks for
+    compatibility with Apple's App Store policies.
+
+    For compatibility with the App Store, *all* binary modules must be in .dylibs,
+    contained in a Framework, in the ``Frameworks`` folder of the packaged app. If
+    you're trying to run "from foo import _bar", and _bar is implemented with the binary
+    module "foo/_bar.abi3.dylib" (or any other .dylib extension), this loader will look
+    for "{sys.executable}/Frameworks/foo__bar.framework/_bar.abi3.dylib" (forming the
+    package name by taking the full path of the library, and replacing ``/`` with
+    ``_``). The app packaging tool is responsible for putting the library in this
+    location.
+
+    However, the ``__file__`` attribute of the _bar module will report as the original
+    location inside the ``foo`` directory. This so that code that depends on walking
+    directory trees will continue to work as expected based on the *original* file
+    location.
+    """
+    def __init__(self, fullname, dylib_file, path):
+        super().__init__(fullname, dylib_file)
+        self.parent_paths = path
+
+    def create_module(self, spec):
+        mod = super().create_module(spec)
+        if self.parent_paths:
+            for parent_path in self.parent_paths:
+                if _path_isdir(parent_path):
+                    mod.__file__ = _path_join(parent_path, _path_split(self.path)[-1])
+                    continue
+        return mod
+
+
+class AppleFrameworkFinder:
+    """A finder for modules that have been packaged as Apple Frameworks
+    for compatibility with Apple's App Store policies.
+
+    See AppleFrameworkLoader for details.
+    """
+    def __init__(self, path):
+        self.frameworks_path = path
+
+    def find_spec(self, fullname, path, target=None):
+        name = fullname.split(".")[-1]
+        framework_name = "_".join(fullname.split("."))
+
+        for extension in EXTENSION_SUFFIXES:
+            dylib_file = _path_join(self.frameworks_path, f"{framework_name}.framework", f"{name}{extension}")
+            if _path_isfile(dylib_file):
+                loader = AppleFrameworkLoader(fullname, dylib_file, path)
+                return _bootstrap.spec_from_loader(fullname, loader)
+
+        return None
+
 # Import setup ###############################################################
 
 def _fix_up_module(ns, name, pathname, cpathname=None):
@@ -1706,3 +1759,9 @@ def _install(_bootstrap_module):
     supported_loaders = _get_supported_file_loaders()
     sys.path_hooks.extend([FileFinder.path_hook(*supported_loaders)])
     sys.meta_path.append(PathFinder)
+    if sys.platform == "ios":
+        sys.meta_path.append(
+            AppleFrameworkFinder(
+                _path_join(_path_split(sys.executable)[0], "Frameworks")
+            )
+        )
