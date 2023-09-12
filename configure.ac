@@ -441,33 +441,93 @@ if test "$cross_compiling" = yes; then
 	*-*-linux*)
 		case "$host_cpu" in
 		arm*)
-			_host_cpu=arm
+			_host_ident=arm
 			;;
 		*)
-			_host_cpu=$host_cpu
+			_host_ident=$host_cpu
 		esac
 		;;
 	*-*-cygwin*)
-		_host_cpu=
+		_host_ident=
 		;;
+  *-apple-ios*-simulator)
+    _host_os_min_version=`echo $host | cut -d '-' -f3`
+		case "$host_cpu" in
+		aarch64)
+			_host_ident=${_host_os_min_version:3}-iphonesimulator-arm64
+			;;
+		*)
+			_host_ident=${_host_os_min_version:3}-iphonesimulator-$host_cpu
+    esac
+    ;;
+  *-apple-ios*)
+    _host_os_min_version=`echo $host | cut -d '-' -f3`
+		case "$host_cpu" in
+		aarch64)
+			_host_ident=${_host_os_min_version:3}-iphoneos-arm64
+			;;
+		*)
+			_host_ident=${_host_os_min_version:3}-iphoneos-$host_cpu
+    esac
+    ;;
+  *-apple-tvos*-simulator)
+    _host_os_min_version=`echo $host | cut -d '-' -f3`
+		case "$host_cpu" in
+		aarch64)
+			_host_ident=${_host_os_min_version:3}-appletvsimulator-arm64
+			;;
+		*)
+			_host_ident=${_host_os_min_version:3}-appletvsimulator-$host_cpu
+    esac
+    ;;
+  *-apple-tvos*)
+    _host_os_min_version=`echo $host | cut -d '-' -f3`
+		case "$host_cpu" in
+		aarch64)
+			_host_ident=${_host_os_min_version:3}-appletvos-arm64
+			;;
+		*)
+			_host_ident=${_host_os_min_version:3}-appletvos-$host_cpu
+    esac
+    ;;
+  *-apple-watchos*-simulator)
+    _host_os_min_version=`echo $host | cut -d '-' -f3`
+		case "$host_cpu" in
+		aarch64)
+			_host_ident=${_host_os_min_version:3}-watchsimualtor-arm64
+			;;
+		*)
+			_host_ident=${_host_os_min_version:3}-watchsimualtor-$host_cpu
+    esac
+    ;;
+  *-apple-watchos*)
+    _host_os_min_version=`echo $host | cut -d '-' -f3`
+		case "$host_cpu" in
+		aarch64)
+			_host_ident=${_host_os_min_version:3}-watchosos-arm64_32
+			;;
+		*)
+			_host_ident=${_host_os_min_version:3}-watchosos-$host_cpu
+    esac
+    ;;
 	*-apple-*)
 		case "$host_cpu" in
 		arm*)
-			_host_cpu=arm
+			_host_ident=arm
 			;;
 		*)
-			_host_cpu=$host_cpu
+			_host_ident=$host_cpu
 		esac
 		;;
 	*-*-vxworks*)
-		_host_cpu=$host_cpu
+		_host_ident=$host_cpu
 		;;
 	*)
 		# for now, limit cross builds to known configurations
 		MACHDEP="unknown"
 		AC_MSG_ERROR([cross build not supported for $host])
 	esac
-	_PYTHON_HOST_PLATFORM="$MACHDEP${_host_cpu:+-$_host_cpu}"
+	_PYTHON_HOST_PLATFORM="$MACHDEP${_host_ident:+-$_host_ident}"
 fi
 
 # Some systems cannot stand _XOPEN_SOURCE being defined at all; they
@@ -885,21 +945,33 @@ cat >> conftest.c <<EOF
 #  include "TargetConditionals.h"
 #  if TARGET_OS_IOS
 #    if TARGET_OS_SIMULATOR
-       iphonesimulator
+#      if __x86_64__
+         iphonesimulator-x86_64
+#      else
+         iphonesimulator-arm64
+#      endif
 #    else
-       iphoneos
+       iphoneos-arm64
 #    endif
 #  elif TARGET_OS_TV
 #    if TARGET_OS_SIMULATOR
-       appletvsimulator
+#      if __x86_64__
+         appletvsimulator-x86_64
+#      else
+         appletvsimulator-arm64
+#      endif
 #    else
-       appletvos
+       appletvos-arm64
 #    endif
 #  elif TARGET_OS_WATCH
 #    if TARGET_OS_SIMULATOR
-       watchsimulator
+#      if __x86_64__
+         watchsimulator-x86_64
+#      else
+         watchsimulator-arm64
+#      endif
 #    else
-       watchos
+       watchos-arm64_32
 #    endif
 #  elif TARGET_OS_OSX
      darwin
@@ -925,14 +997,13 @@ rm -f conftest.c conftest.out
 AC_MSG_CHECKING([for multiarch])
 AS_CASE([$ac_sys_system],
   [Darwin*], [MULTIARCH=""],
-  [iOS*], [MULTIARCH=""],
-  [tvOS*], [MULTIARCH=""],
-  [watchOS*], [MULTIARCH=""],
+  [iOS], [MULTIARCH=""],
+  [tvOS], [MULTIARCH=""],
+  [watchOS], [MULTIARCH=""],
   [FreeBSD*], [MULTIARCH=""],
   [MULTIARCH=$($CC --print-multiarch 2>/dev/null)]
 )
 AC_SUBST([MULTIARCH])
-AC_MSG_RESULT([$MULTIARCH])
 
 if test x$PLATFORM_TRIPLET != x && test x$MULTIARCH != x; then
   if test x$PLATFORM_TRIPLET != x$MULTIARCH; then
@@ -942,6 +1013,13 @@ elif test x$PLATFORM_TRIPLET != x && test x$MULTIARCH = x; then
   MULTIARCH=$PLATFORM_TRIPLET
 fi
 AC_SUBST(PLATFORM_TRIPLET)
+AC_MSG_RESULT([$MULTIARCH])
+
+AS_CASE([$ac_sys_system],
+  [iOS|tvOS|watchOS], [SOABI_PLATFORM=`echo "$PLATFORM_TRIPLET" | cut -d '-' -f1`],
+  [SOABI_PLATFORM=$PLATFORM_TRIPLET]
+)
+
 if test x$MULTIARCH != x; then
   MULTIARCH_CPPFLAGS="-DMULTIARCH=\\\"$MULTIARCH\\\""
 fi
@@ -4774,14 +4852,14 @@ AC_SUBST(SOABI)
 AC_MSG_CHECKING(ABIFLAGS)
 AC_MSG_RESULT($ABIFLAGS)
 AC_MSG_CHECKING(SOABI)
-SOABI='cpython-'`echo $VERSION | tr -d .`${ABIFLAGS}${PLATFORM_TRIPLET:+-$PLATFORM_TRIPLET}
+SOABI='cpython-'`echo $VERSION | tr -d .`${ABIFLAGS}${SOABI_PLATFORM:+-$SOABI_PLATFORM}
 AC_MSG_RESULT($SOABI)
 
 # Release and debug (Py_DEBUG) ABI are compatible, but not Py_TRACE_REFS ABI
 if test "$Py_DEBUG" = 'true' -a "$with_trace_refs" != "yes"; then
   # Similar to SOABI but remove "d" flag from ABIFLAGS
   AC_SUBST(ALT_SOABI)
-  ALT_SOABI='cpython-'`echo $VERSION | tr -d .``echo $ABIFLAGS | tr -d d`${PLATFORM_TRIPLET:+-$PLATFORM_TRIPLET}
+  ALT_SOABI='cpython-'`echo $VERSION | tr -d .``echo $ABIFLAGS | tr -d d`${SOABI_PLATFORM:+-$SOABI_PLATFORM}
   AC_DEFINE_UNQUOTED(ALT_SOABI, "${ALT_SOABI}",
             [Alternative SOABI used in debug build to load C extensions built in release mode])
 fi
@@ -5788,4 +5866,3 @@ if test "$Py_OPT" = 'false' -a "$Py_DEBUG" != 'true'; then
     echo "" >&AS_MESSAGE_FD
     echo "" >&AS_MESSAGE_FD
 fi
-

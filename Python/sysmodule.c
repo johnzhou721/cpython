@@ -41,6 +41,10 @@ extern void *PyWin_DLLhModule;
 extern const char *PyWin_DLLVersionString;
 #endif
 
+#if defined(__APPLE__)
+#include "TargetConditionals.h"
+#endif
+
 /*[clinic input]
 module sys
 [clinic start generated code]*/
@@ -2682,6 +2686,15 @@ make_impl_info(PyObject *version_info)
         goto error;
 #endif
 
+#if TARGET_OS_IPHONE
+#  if TARGET_OS_SIMULATOR
+    res = PyDict_SetItemString(impl_info, "_simulator", Py_True);
+#  else
+    res = PyDict_SetItemString(impl_info, "_simulator", Py_False);
+#  endif
+    if (res < 0)
+        goto error;
+#endif
     /* dict ready */
 
     ns = _PyNamespace_New(impl_info);

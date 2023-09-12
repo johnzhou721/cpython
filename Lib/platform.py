@@ -447,12 +447,8 @@ def mac_ver(release='', versioninfo=('', '', ''), machine=''):
 
 
 def iOS_ver():
-    """ Get iOS/tvOS version information, and return it as a
-        tuple (system, release, model). All tuple entries are strings.
-        Equivalent of:
-        system = [[UIDevice currentDevice].systemName] UTF8String]
-        release = [[UIDevice currentDevice].systemVersion] UTF8String]
-        model = [[UIDevice currentDevice].model] UTF8String]
+    """Get iOS/tvOS version information, and return it as a
+    tuple (system, release, model). All tuple entries are strings.
     """
     import _ios_support
     return _ios_support.get_platform_ios()
@@ -466,11 +462,7 @@ def is_simulator():
     from actual devices because they are reproducing actual device
     properties.
     """
-    if sys.platform in ('ios', 'tvos', 'watchos'):
-        return sys.implementation._multiarch.endswith('simulator')
-
-    # All other platforms aren't simulators.
-    return False
+    return getattr(sys.implementation, "_multiarch", False)
 
 
 def _java_getprop(name, default):
@@ -916,6 +908,16 @@ def uname():
         system = 'Windows'
         release = 'Vista'
 
+    # Normalize responses on Apple mobile platforms
+    if sys.platform in ('ios', 'tvos'):
+        system, release, model = iOS_ver()
+
+        # On iOS/tvOS simulators, os.uname() reports the machine as something
+        # like "arm64" or "x86_64".
+        if getattr(sys.implementation, "_simulator", False):
+            machine = f'{model}Simulator'
+
+    vals = system, node, release, version, machine
     # Replace 'unknown' values with the more portable ''
     _uname_cache = uname_result(system, node, release, version,
                                 machine, processor)
@@ -1231,7 +1233,7 @@ def platform(aliased=0, terse=0):
     if system == 'Darwin':
         # macOS/iOS/tvOS/watchOS (darwin kernel)
         if sys.platform in ('ios', 'tvos'):
-            system, release, model = iOS_ver()
+            system, release, _ = iOS_ver()
         else:
             macos_release = mac_ver()[0]
             if macos_release:

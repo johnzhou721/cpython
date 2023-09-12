@@ -723,7 +723,7 @@ def get_platform():
     elif osname[:6] == "darwin":
         if sys.platform in ("ios", "tvos", "watchos"):
             import _ios_support
-            _, release, model = _ios_support.get_platform_ios()
+            _, release, _ = _ios_support.get_platform_ios()
             osname = sys.platform
             machine = sys.implementation._multiarch
         else:
