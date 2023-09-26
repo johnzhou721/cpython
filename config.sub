@@ -1529,11 +1529,11 @@ case $os in
 		;;
 	-nacl*)
 		;;
-	-ios | -ios-simulator)
+	-ios* | -ios*-simulator)
 		;;
-	-tvos | -tvos-simulator)
+	-tvos* | -tvos*-simulator)
 		;;
-	-watchos | -watchos-simulator)
+	-watchos* | -watchos*-simulator)
 		;;
 	-none)
 		;;
