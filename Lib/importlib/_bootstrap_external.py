@@ -1646,6 +1646,7 @@ class AppleFrameworkFinder:
 
         for extension in EXTENSION_SUFFIXES:
             dylib_file = _path_join(self.frameworks_path, f"{framework_name}.framework", f"{name}{extension}")
+            _bootstrap._verbose_message('Looking for Apple Framework dylib {}', dylib_file)
             if _path_isfile(dylib_file):
                 loader = AppleFrameworkLoader(fullname, dylib_file, path)
                 return _bootstrap.spec_from_loader(fullname, loader)
@@ -1759,9 +1760,7 @@ def _install(_bootstrap_module):
     supported_loaders = _get_supported_file_loaders()
     sys.path_hooks.extend([FileFinder.path_hook(*supported_loaders)])
     sys.meta_path.append(PathFinder)
-    if sys.platform == "ios":
-        sys.meta_path.append(
-            AppleFrameworkFinder(
-                _path_join(_path_split(sys.executable)[0], "Frameworks")
-            )
-        )
+    if sys.platform in {"ios", "tvos", "watchos"}:
+        frameworks_folder = _path_join(_path_split(sys.executable)[0], "Frameworks")
+        _bootstrap._verbose_message('Adding Apple Framework dylib finder at {}', frameworks_folder)
+        sys.meta_path.append(AppleFrameworkFinder(frameworks_folder))
