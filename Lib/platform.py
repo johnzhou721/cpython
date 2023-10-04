@@ -462,7 +462,7 @@ def is_simulator():
     from actual devices because they are reproducing actual device
     properties.
     """
-    return getattr(sys.implementation, "_multiarch", False)
+    return getattr(sys.implementation, "_simulator", False)
 
 
 def _java_getprop(name, default):
@@ -879,7 +879,7 @@ def uname():
         system, release, model = iOS_ver()
         # Simulator devices report as "arm64" or "x86_64";
         # use the model as the basis for the normalized machine name.
-        if sys.implementation._multiarch.endswith("simulator"):
+        if getattr(sys.implementation, "_simulator", False):
             machine = f"{model} Simulator"
             processor = os.uname().machine
         else:
