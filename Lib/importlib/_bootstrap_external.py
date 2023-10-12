@@ -1642,10 +1642,9 @@ class AppleFrameworkFinder:
 
     def find_spec(self, fullname, path, target=None):
         name = fullname.split(".")[-1]
-        framework_name = "_".join(fullname.split("."))
 
         for extension in EXTENSION_SUFFIXES:
-            dylib_file = _path_join(self.frameworks_path, f"{framework_name}.framework", f"{name}{extension}")
+            dylib_file = _path_join(self.frameworks_path, f"{fullname}.framework", f"{name}{extension}")
             _bootstrap._verbose_message('Looking for Apple Framework dylib {}', dylib_file)
             if _path_isfile(dylib_file):
                 loader = AppleFrameworkLoader(fullname, dylib_file, path)
