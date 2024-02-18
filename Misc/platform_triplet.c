@@ -241,6 +241,12 @@ PLATFORM_TRIPLET=x86_64-iphonesimulator
 #      else
 PLATFORM_TRIPLET=arm64-iphonesimulator
 #      endif
+#    elif TARGET_OS_MACCATALYST
+#      if __x86_64__
+PLATFORM_TRIPLET=x86_64-catalyst
+#      else
+PLATFORM_TRIPLET=arm64-catalyst
+#      endif
 #    else
 PLATFORM_TRIPLET=arm64-iphoneos
 #    endif

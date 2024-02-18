@@ -4,6 +4,7 @@
 
 # shellcheck disable=SC2006,SC2268 # see below for rationale
 
+# Patched 2024-02-16 to include catalyst support.
 # Patched 2024-02-03 to include support for arm64_32 and iOS/tvOS/watchOS simulators
 timestamp='2024-01-01'
 
@@ -1743,7 +1744,7 @@ case $os in
 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
 	     | hiux* | abug | nacl* | netware* | windows* \
-	     | os9* | macos* | osx* | ios* | tvos* | watchos* \
+	     | os9* | macos* | osx* | ios* | tvos* | watchos* | macabi \
 	     | mpw* | magic* | mmixware* | mon960* | lnews* \
 	     | amigaos* | amigados* | msdos* | newsos* | unicos* | aof* \
 	     | aos* | aros* | cloudabi* | sortix* | twizzler* \
@@ -1867,7 +1868,7 @@ case $kernel-$os-$obj in
 		;;
 	*-eabi*- | *-gnueabi*-)
 		;;
-	ios*-simulator- | tvos*-simulator- | watchos*-simulator- )
+	ios*-simulator- | tvos*-simulator- | watchos*-simulator- | ios*-macabi-)
 		;;
 	none--*)
 		# None (no kernel, i.e. freestanding / bare metal),
