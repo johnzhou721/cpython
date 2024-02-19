@@ -586,18 +586,31 @@ AC_ARG_ENABLE([framework],
 				AC_CONFIG_FILES([Mac/Resources/app/Info.plist])
 				;;
 			iOS) :
-				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
-				FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
-				FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKPYTHONW=
-				INSTALLTARGETS="libinstall inclinstall sharedinstall"
+                                if $CPP $CPPFLAGS Misc/platform_triplet.c | grep '^PLATFORM_TRIPLET=' | tr -d ' ' | awk -F'-' '{print $NF}' | grep catalyst; then
+                                        FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure"
+					FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
+					FRAMEWORKINSTALLLAST=""
+					FRAMEWORKALTINSTALLLAST=""
+					FRAMEWORKPYTHONW=
+					INSTALLTARGETS="libinstall inclinstall sharedinstall"
 
-				prefix=$PYTHONFRAMEWORKPREFIX
-				PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
-				RESSRCDIR=iOS/Resources
+					prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
+					PYTHONFRAMEWORKINSTALLNAMEPREFIX=${prefix}
+					RESSRCDIR=iOS/Resources
+				else
+					FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
+					FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
+					FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
+					FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
+					FRAMEWORKPYTHONW=
+					INSTALLTARGETS="libinstall inclinstall sharedinstall"
 
-				AC_CONFIG_FILES([iOS/Resources/Info.plist])
+					prefix=$PYTHONFRAMEWORKPREFIX
+					PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
+					RESSRCDIR=iOS/Resources
+	
+					AC_CONFIG_FILES([iOS/Resources/Info.plist])
+				fi
 				;;
 			*)
 				AC_MSG_ERROR([Unknown platform for framework build])
