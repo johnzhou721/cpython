@@ -21,7 +21,14 @@ Compilers for building on iOS
 Building for iOS requires the use of Apple's Xcode tooling. It is strongly
 recommended that you use the most recent stable release of Xcode. This will
 require the use of the most (or second-most) recently released macOS version,
-as Apple does not maintain Xcode for older macOS versions.
+as Apple does not maintain Xcode for older macOS versions. The Xcode Command
+Line Tools are not sufficient for iOS development; you need a *full* Xcode
+install.
+
+If you want to run your code on the iOS simulator, you'll also need to install
+an iOS Simulator Platform. You should be prompted to select an iOS Simulator
+Platform when you first run Xcode. Alternatively, you can add an iOS Simulator
+Platform by selecting an open the Platforms tab of the Xcode Settings panel.
 
 iOS specific arguments to configure
 ===================================
@@ -109,6 +116,16 @@ In this invocation:
   definition without spaces, and without user- or version-specific paths, while
   retaining the ability to adapt to the local Xcode install. These scripts are
   included in the ``bin`` directory of an iOS install.
+
+  These scripts will, by default, use the currently active Xcode installation.
+  If you want to use a different Xcode installation, you can use
+  ``xcode-select`` to set a new default Xcode globally, or you can use the
+  ``DEVELOPER_DIR`` environment variable to specify an Xcode install. The
+  scripts will use the default ``iphoneos``/``iphonesimulator`` SDK version for
+  the select Xcode install; if you want to use a different SDK, you can set the
+  ``IOS_SDK_VERSION`` environment variable. (e.g, setting
+  ``IOS_SDK_VERSION=17.1`` would cause the scripts to use the ``iphoneos17.1``
+  and ``iphonesimulator17.1`` SDKs, regardless of the Xcode default.)
 
   The path has also been cleared of any user customizations. A common source of
   bugs is for tools like Homebrew to accidentally leak macOS binaries into an iOS
