@@ -315,3 +315,14 @@ populate the new brewpoint with the following details:
 All other details can be left blank. When the process executes the
 ``UIApplicationMain`` entry point, the breakpoint will trigger, run the debugger
 commands to disable the automatic breakpoints, and automatically resume.
+
+-----
+Catalyst Config: 
+``./configure \
+        --enable-framework=/Users/johnzhou/Desktop/beeware/cpython/iOS/testbed/Python.xcframework/ios-arm64_x86_64-maccatalyst  \
+        --host=arm64-apple-ios-macabi \
+        --build=arm64-apple-darwin \
+        --with-build-python=../cpython-macos/python.exe \
+CC=arm64-apple-ios-macabi-clang CPP=arm64-apple-ios-macabi-cpp LD=arm64-apple-ios-macabi-ld AR=arm64-apple-ios-macabi-ar \
+--enable-ipv6
+``

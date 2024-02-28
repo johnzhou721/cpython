@@ -63,7 +63,11 @@
     }
 
     // Set the home for the Python interpreter
+#if TARGET_OS_MACCATALYST
+    python_home = [NSString stringWithFormat:@"%@/../Frameworks/Python.framework/Versions/3.13", resourcePath, nil];
+#else
     python_home = [NSString stringWithFormat:@"%@/python", resourcePath, nil];
+#endif
     NSLog(@"PythonHome: %@", python_home);
     wtmp_str = Py_DecodeLocale([python_home UTF8String], NULL);
     status = PyConfig_SetString(&config, &config.home, wtmp_str);
@@ -75,7 +79,11 @@
     PyMem_RawFree(wtmp_str);
 
     // Set the stdlib location for the Python interpreter
+#if TARGET_OS_MACCATALYST
+    path = [NSString stringWithFormat:@"%@/../Frameworks/Python.framework/Versions/3.13/lib/python%@", resourcePath, py_version_string, nil];
+#else
     path = [NSString stringWithFormat:@"%@/python/lib/python%@", resourcePath, py_version_string, nil];
+#endif
     NSLog(@"Stdlib dir: %@", path);
     wtmp_str = Py_DecodeLocale([path UTF8String], NULL);
     status = PyConfig_SetString(&config, &config.stdlib_dir, wtmp_str);
