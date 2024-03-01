@@ -60,7 +60,7 @@
 
     // Set the home for the Python interpreter
 #if TARGET_OS_MACCATALYST
-    python_home = [NSString stringWithFormat:@"%@/../Frameworks/Python.framework/Versions/3.13", resourcePath, nil];
+    python_home = [NSString stringWithFormat:@"%@/../Frameworks/Python.framework/Versions/Current", resourcePath, nil];
 #else
     python_home = [NSString stringWithFormat:@"%@/python", resourcePath, nil];
 #endif
@@ -74,12 +74,6 @@
     }
     PyMem_RawFree(wtmp_str);
 
-    // Set the stdlib location for the Python interpreter
-#if TARGET_OS_MACCATALYST
-    path = [NSString stringWithFormat:@"%@/../Frameworks/Python.framework/Versions/3.13/lib/python%@", resourcePath, py_version_string, nil];
-#else
-    path = [NSString stringWithFormat:@"%@/python/lib/python%@", resourcePath, py_version_string, nil];
-#endif
     // Read the site config
     status = PyConfig_Read(&config);
     if (PyStatus_Exception(status)) {

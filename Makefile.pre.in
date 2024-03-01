@@ -2003,7 +2003,7 @@ testios: install
 	platform=
 	# Copy the testbed project into the build folder
 	cp -r $(srcdir)/iOS/testbed $(XCFOLDER)
-	if $(CPP) $(CPPFLAGS) Misc/platform_triplet.c | grep '^PLATFORM_TRIPLET=' | tr -d ' ' | awk -F'-' '{print $$NF}'; then \
+	if $(CPP) $(CPPFLAGS) Misc/platform_triplet.c | grep '^PLATFORM_TRIPLET=' | tr -d ' ' | awk -F'-' '{print $$NF}' | grep catalyst; then \
 		cp -R $(PYTHONFRAMEWORKPREFIX)/* $(XCFOLDER)/Python.xcframework/ios-arm64_x86_64-maccatalyst; \
 		if ! xcodebuild test -project $(XCFOLDER)/iOSTestbed.xcodeproj -scheme "iOSTestbed" -destination "platform=Mac Catalyst" -resultBundlePath $(XCRESULT) ; then \
 			xcrun xcresulttool get --path $(XCRESULT) --id $$(xcrun xcresulttool get --path $(XCRESULT) --format json | $(PYTHON_FOR_BUILD) -c "import sys, json; result = json.load(sys.stdin); print(result['actions']['_values'][0]['actionResult']['logRef']['id']['_value'])"); \
@@ -2066,6 +2066,10 @@ install: @FRAMEWORKINSTALLFIRST@ @INSTALLTARGETS@ @FRAMEWORKINSTALLLAST@
 		esac; \
 		$(RUNSHARED) $(PYTHON_FOR_BUILD) -m ensurepip \
 			$$ensurepip --root=$(DESTDIR)/ ; \
+	fi
+	if $(CPP) $(CPPFLAGS) Misc/platform_triplet.c | grep '^PLATFORM_TRIPLET=' | tr -d ' ' | awk -F'-' '{print $$NF}' | grep catalyst; then \
+		install_name_tool -id "@rpath/Python.framework/Versions/3.13/Python" "$(DESTDIR)$(PYTHONFRAMEWORKPREFIX)/Python.framework/Versions/@VERSION@/Python"; \
+		otool -L "$(DESTDIR)$(PYTHONFRAMEWORKPREFIX)/Python.framework/Versions/@VERSION@/Python"; \
 	fi
 
 .PHONY: altinstall
