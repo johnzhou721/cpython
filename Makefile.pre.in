@@ -2004,19 +2004,19 @@ testios: install
 	# Copy the testbed project into the build folder
 	cp -r $(srcdir)/iOS/testbed $(XCFOLDER)
 	if $(CPP) $(CPPFLAGS) Misc/platform_triplet.c | grep '^PLATFORM_TRIPLET=' | tr -d ' ' | awk -F'-' '{print $$NF}'; then \
-			cp -r $(PYTHONFRAMEWORKPREFIX)/* $(XCFOLDER)/Python.xcframework/ios-arm64_x86_64-maccatalyst \
+		cp -R $(PYTHONFRAMEWORKPREFIX)/* $(XCFOLDER)/Python.xcframework/ios-arm64_x86_64-maccatalyst; \
 		if ! xcodebuild test -project $(XCFOLDER)/iOSTestbed.xcodeproj -scheme "iOSTestbed" -destination "platform=Mac Catalyst" -resultBundlePath $(XCRESULT) ; then \
 			xcrun xcresulttool get --path $(XCRESULT) --id $$(xcrun xcresulttool get --path $(XCRESULT) --format json | $(PYTHON_FOR_BUILD) -c "import sys, json; result = json.load(sys.stdin); print(result['actions']['_values'][0]['actionResult']['logRef']['id']['_value'])"); \
 			echo ; \
 			exit 1; \
-		fi \
+		fi; \
 	else \
-		cp -r $(PYTHONFRAMEWORKPREFIX)/* $(XCFOLDER)/Python.xcframework/ios-arm64_x86_64-simulator \
+		cp -r $(PYTHONFRAMEWORKPREFIX)/* $(XCFOLDER)/Python.xcframework/ios-arm64_x86_64-simulator; \
 		if ! xcodebuild test -project $(XCFOLDER)/iOSTestbed.xcodeproj -scheme "iOSTestbed" -destination "platform=iOS Simulator,name=iPhone SE (3rd Generation)" -resultBundlePath $(XCRESULT) ; then \
 			xcrun xcresulttool get --path $(XCRESULT) --id $$(xcrun xcresulttool get --path $(XCRESULT) --format json | $(PYTHON_FOR_BUILD) -c "import sys, json; result = json.load(sys.stdin); print(result['actions']['_values'][0]['actionResult']['logRef']['id']['_value'])"); \
 			echo ; \
 			exit 1; \
-		fi \
+		fi; \
 	fi
 
 # Like test, but using --slow-ci which enables all test resources and use
