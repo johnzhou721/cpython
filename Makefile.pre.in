@@ -1994,19 +1994,29 @@ testuniversal: all
 	$(RUNSHARED) /usr/libexec/oah/translate \
 		./$(BUILDPYTHON) -E -m test -j 0 -u all $(TESTOPTS)
 
-# Run the test suite on the iOS simulator.
-# Must be run on a macOS machine with a full Xcode install that has an iPhone SE
-# (3rd edition) simulator available, after running `make install` on a configuration
-# with --enable-framework="./iOS/testbed/Python.xcframework/ios-arm64_x86_64-simulator"
-XCRESULT=$(srcdir)/build/$(MULTIARCH).$(shell date +%s).xcresult
-.PHONY: testiOS
-testiOS:
-	# Run the test suite for the Xcode project, targeting the iOS simulator.
-	# If the suite fails, extract and print the console output, then re-raise the failure
-	if ! xcodebuild test -project $(srcdir)/iOS/testbed/iOSTestbed.xcodeproj -scheme "iOSTestbed" -destination "platform=iOS Simulator,name=iPhone SE (3rd Generation)" -resultBundlePath $(XCRESULT) ; then \
-		xcrun xcresulttool get --path $(XCRESULT) --id $$(xcrun xcresulttool get --path $(XCRESULT) --format json | $(PYTHON_FOR_BUILD) -c "import sys, json; result = json.load(sys.stdin); print(result['actions']['_values'][0]['actionResult']['logRef']['id']['_value'])"); \
-		echo ; \
-		exit 1; \
+# Run the test suite on the iOS simulator. Must be run on a macOS machine with
+# a full Xcode install that has an iPhone SE (3rd edition) simulator available.
+XCFOLDER=$(srcdir)/build/iOSTestbed.$(MULTIARCH).$(shell date +%s)
+XCRESULT=$(XCFOLDER)/$(MULTIARCH).xcresult
+.PHONY: testios
+testios: install
+	platform=
+	# Copy the testbed project into the build folder
+	cp -r $(srcdir)/iOS/testbed $(XCFOLDER)
+	if $(CPP) $(CPPFLAGS) Misc/platform_triplet.c | grep '^PLATFORM_TRIPLET=' | tr -d ' ' | awk -F'-' '{print $$NF}'; then \
+			cp -r $(PYTHONFRAMEWORKPREFIX)/* $(XCFOLDER)/Python.xcframework/ios-arm64_x86_64-maccatalyst \
+		if ! xcodebuild test -project $(XCFOLDER)/iOSTestbed.xcodeproj -scheme "iOSTestbed" -destination "platform=Mac Catalyst" -resultBundlePath $(XCRESULT) ; then \
+			xcrun xcresulttool get --path $(XCRESULT) --id $$(xcrun xcresulttool get --path $(XCRESULT) --format json | $(PYTHON_FOR_BUILD) -c "import sys, json; result = json.load(sys.stdin); print(result['actions']['_values'][0]['actionResult']['logRef']['id']['_value'])"); \
+			echo ; \
+			exit 1; \
+		fi \
+	else \
+		cp -r $(PYTHONFRAMEWORKPREFIX)/* $(XCFOLDER)/Python.xcframework/ios-arm64_x86_64-simulator \
+		if ! xcodebuild test -project $(XCFOLDER)/iOSTestbed.xcodeproj -scheme "iOSTestbed" -destination "platform=iOS Simulator,name=iPhone SE (3rd Generation)" -resultBundlePath $(XCRESULT) ; then \
+			xcrun xcresulttool get --path $(XCRESULT) --id $$(xcrun xcresulttool get --path $(XCRESULT) --format json | $(PYTHON_FOR_BUILD) -c "import sys, json; result = json.load(sys.stdin); print(result['actions']['_values'][0]['actionResult']['logRef']['id']['_value'])"); \
+			echo ; \
+			exit 1; \
+		fi \
 	fi
 
 # Like test, but using --slow-ci which enables all test resources and use
@@ -2892,6 +2902,7 @@ clobber: clean
 		config.cache config.log pyconfig.h Modules/config.c
 	-rm -rf build platform
 	-rm -rf $(PYTHONFRAMEWORKDIR)
+	-rm -rf iOS/Frameworks
 	-rm -f python-config.py python-config
 	-rm -rf cross-build
 
