@@ -2005,9 +2005,11 @@ testios:
 		echo "Cannot run the iOS testbed for a non-iOS build."; \
 		exit 1;\
 	fi
-	@if test "$(findstring -iphonesimulator,$(MULTIARCH))" != "-iphonesimulator"; then \
-		echo "Cannot run the iOS testbed for non-simulator builds."; \
-		exit 1;\
+	if test "$(findstring -iphonesimulator,$(MULTIARCH))" != "-iphonesimulator"; then \
+		if test "$(findstring catalyst,$(MULTIARCH))" != "catalyst"; then \
+			echo "Cannot run the iOS testbed for non-simulator builds."; \
+			exit 1;\
+		fi; \
 	fi
 	@if test $(PYTHONFRAMEWORK) != "Python"; then \
 		echo "Cannot run the iOS testbed with a non-default framework name."; \
