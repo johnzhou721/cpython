@@ -52,7 +52,7 @@ _pathseps_with_colon = {f':{s}' for s in path_separators}
 
 # Bootstrap-related code ######################################################
 _CASE_INSENSITIVE_PLATFORMS_STR_KEY = 'win',
-_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY = 'cygwin', 'darwin'
+_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY = 'cygwin', 'darwin', 'ios', 'tvos', 'watchos'
 _CASE_INSENSITIVE_PLATFORMS =  (_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY
                                 + _CASE_INSENSITIVE_PLATFORMS_STR_KEY)
 
@@ -465,6 +465,7 @@ _code_type = type(_write_atomic.__code__)
 #     Python 3.13a1 3566 (Emit JUMP_NO_INTERRUPT instead of JUMP for non-loop no-lineno cases)
 #     Python 3.13a1 3567 (Reimplement line number propagation by the compiler)
 #     Python 3.13a1 3568 (Change semantics of END_FOR)
+#     Python 3.13a5 3569 (Specialize CONTAINS_OP)
 
 #     Python 3.14 will start with 3600
 
@@ -481,7 +482,7 @@ _code_type = type(_write_atomic.__code__)
 # Whenever MAGIC_NUMBER is changed, the ranges in the magic_values array
 # in PC/launcher.c must also be updated.
 
-MAGIC_NUMBER = (3568).to_bytes(2, 'little') + b'\r\n'
+MAGIC_NUMBER = (3569).to_bytes(2, 'little') + b'\r\n'
 
 _RAW_MAGIC_NUMBER = int.from_bytes(MAGIC_NUMBER, 'little')  # For import.c
 
@@ -1710,6 +1711,78 @@ class FileFinder:
         return f'FileFinder({self.path!r})'
 
 
+class AppleFrameworkLoader(ExtensionFileLoader):
+    """A loader for modules that have been packaged as frameworks for
+    compatibility with Apple's iOS App Store policies.
+
+    For compatibility with the iOS App Store, *all* binary modules in an iOS
+    app must be .dylib objects, contained in a framework with appropriate
+    metadata, stored in the ``Frameworks`` folder of the packaged app. There
+    can be only a single binary per framework, and there can be no executable
+    binary material outside the Frameworks folder.
+
+    If you're trying to run ``from foo.bar import _whiz``, and ``_whiz`` is
+    implemented with the binary module ``foo/bar/_whiz.abi3.dylib`` (or any
+    other ABI .dylib extension), this loader will look for
+    ``{sys.executable}/Frameworks/foo.bar._whiz.framework/_whiz.abi3.dylib``
+    (forming the package name by taking the full import path of the library,
+    and replacing ``/`` with ``.``).
+
+    However, the ``__file__`` attribute of the ``_whiz`` module will report as
+    the original location inside the ``foo/bar`` subdirectory. This so that
+    code that depends on walking directory trees will continue to work as
+    expected based on the *original* file location.
+
+    The Xcode project building the app is responsible for converting any
+    ``.dylib`` files from wherever they exist in the ``PYTHONPATH`` into
+    frameworks in the ``Frameworks`` folder (including the addition of
+    framework metadata, and signing the resulting framework). This will usually
+    be done with a build step in the Xcode project; see the iOS documentation
+    for details on how to construct this build step.
+    """
+    def __init__(self, fullname, dylib_file, parent_paths=None):
+        super().__init__(fullname, dylib_file)
+        self.parent_paths = parent_paths
+
+    def create_module(self, spec):
+        mod = super().create_module(spec)
+        if self.parent_paths:
+            for parent_path in self.parent_paths:
+                if _path_isdir(parent_path):
+                    mod.__file__ = _path_join(
+                        parent_path,
+                        _path_split(self.path)[-1],
+                    )
+                    break
+        return mod
+
+
+class AppleFrameworkFinder:
+    """A finder for modules that have been packaged as Apple Frameworks
+    for compatibility with Apple's App Store policies.
+
+    See AppleFrameworkLoader for details.
+    """
+    def __init__(self, frameworks_path):
+        self.frameworks_path = frameworks_path
+
+    def find_spec(self, fullname, paths, target=None):
+        name = fullname.split(".")[-1]
+
+        for extension in EXTENSION_SUFFIXES:
+            dylib_file = _path_join(
+                self.frameworks_path,
+                f"{fullname}.framework", f"{name}{extension}"
+            )
+            _bootstrap._verbose_message("Looking for Apple Framework dylib {}", dylib_file)
+
+            dylib_exists = _path_isfile(dylib_file)
+            if dylib_exists:
+                loader = AppleFrameworkLoader(fullname, dylib_file, paths)
+                return _bootstrap.spec_from_loader(fullname, loader)
+
+        return None
+
 # Import setup ###############################################################
 
 def _fix_up_module(ns, name, pathname, cpathname=None):
@@ -1759,3 +1832,7 @@ def _install(_bootstrap_module):
     supported_loaders = _get_supported_file_loaders()
     sys.path_hooks.extend([FileFinder.path_hook(*supported_loaders)])
     sys.meta_path.append(PathFinder)
+    if sys.platform in {"ios", "tvos", "watchos"}:
+        frameworks_folder = _path_join(_path_split(sys.executable)[0], "Frameworks")
+        _bootstrap._verbose_message("Adding Apple Framework dylib finder at {}", frameworks_folder)
+        sys.meta_path.append(AppleFrameworkFinder(frameworks_folder))

@@ -2000,7 +2000,7 @@ testuniversal: all
 XCFOLDER=iOSTestbed.$(MULTIARCH).$(shell date +%s)
 XCRESULT=$(XCFOLDER)/$(MULTIARCH).xcresult
 .PHONY: testios
-testios: 
+testios:
 	@if test "$(MACHDEP)" != "ios"; then \
 		echo "Cannot run the iOS testbed for a non-iOS build."; \
 		exit 1;\
