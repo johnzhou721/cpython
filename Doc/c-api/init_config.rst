@@ -666,6 +666,15 @@ PyConfig
 
       If greater than 0, use :ref:`environment variables <using-on-envvars>`.
 
+   .. c:member:: int use_system_logger
+
+      If non-zero, ``stdout`` and ``stderr`` will be redirected to the system
+      log.
+
+      Only available on macOS 10.12 and later, and on iOS.
+
+      Default: ``0`` (don't use system log).
+
    .. c:member:: int user_site_directory
 
       If non-zero, add user site directory to :data:`sys.path`.
