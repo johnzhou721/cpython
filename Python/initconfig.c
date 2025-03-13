@@ -652,9 +652,6 @@ _PyConfig_InitCompatConfig(PyConfig *config)
     config->legacy_windows_stdio = -1;
 #endif
     config->_use_peg_parser = 1;
-#ifdef __APPLE__
-    config->use_system_logger = 0;
-#endif
 }
 
 /* Excluded from public struct PyConfig for backporting reasons. */
@@ -683,9 +680,6 @@ config_init_defaults(PyConfig *config)
     config->pathconfig_warnings = 1;
 #ifdef MS_WINDOWS
     config->legacy_windows_stdio = 0;
-#endif
-#ifdef __APPLE__
-    config->use_system_logger = 0;
 #endif
 }
 
@@ -718,9 +712,6 @@ PyConfig_InitIsolatedConfig(PyConfig *config)
     config->pathconfig_warnings = 0;
 #ifdef MS_WINDOWS
     config->legacy_windows_stdio = 0;
-#endif
-#ifdef __APPLE__
-    config->use_system_logger = 0;
 #endif
 }
 

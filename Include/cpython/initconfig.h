@@ -362,9 +362,6 @@ typedef struct {
 
        See PEP 552 "Deterministic pycs" for more details. */
     wchar_t *check_hash_pycs_mode;
-#ifdef __APPLE__
-    int use_system_logger;
-#endif
 
     /* --- Path configuration inputs ------------ */
 
