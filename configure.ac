@@ -731,16 +731,9 @@ AC_ARG_ENABLE([framework],
 						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
 						FRAMEWORKINSTALLLAST="frameworkinstallmaclib frameworkinstallunixtools"
 						FRAMEWORKALTINSTALLLAST="frameworkinstallmaclib frameworkaltinstallunixtools"
-						FRAMEWORKPYTHONW="frameworkpythonw"
-						FRAMEWORKINSTALLAPPSPREFIX="/Applications"
-						INSTALLTARGETS="commoninstall bininstall maninstall"
+						FRAMEWORKPYTHONW=
+						INSTALLTARGETS="bininstall"
 
-						if test "x${prefix}" = "xNONE" ; then
-							FRAMEWORKUNIXTOOLSPREFIX="${ac_default_prefix}"
-
-						else
-							FRAMEWORKUNIXTOOLSPREFIX="${prefix}"
-						fi
 						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
 						PYTHONFRAMEWORKINSTALLNAMEPREFIX=${prefix}
 						RESSRCDIR=MacCatalyst/Resources
