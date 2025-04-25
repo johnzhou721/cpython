@@ -732,7 +732,7 @@ AC_ARG_ENABLE([framework],
 						FRAMEWORKINSTALLLAST="frameworkinstallmaclib frameworkinstallunixtools"
 						FRAMEWORKALTINSTALLLAST="frameworkinstallmaclib frameworkaltinstallunixtools"
 						FRAMEWORKPYTHONW=
-						INSTALLTARGETS=
+						INSTALLTARGETS="libinstall inclinstall sharedinstall"
 
 						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
 						PYTHONFRAMEWORKINSTALLNAMEPREFIX=${prefix}
