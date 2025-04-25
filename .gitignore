@@ -74,6 +74,7 @@ Lib/test/data/*
 /visionOSTestbed.*
 iOS/Frameworks/
 iOS/Resources/Info.plist
+MacCatalyst/Resources/Info.plist
 iOS/testbed/build
 iOS/testbed/Python.xcframework/ios-*/bin
 iOS/testbed/Python.xcframework/ios-*/include

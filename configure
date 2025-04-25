@@ -4213,8 +4213,10 @@ fi
 if test -z "$AR"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) AR=arm64-apple-ios-simulator-ar ;;
+		aarch64-apple-ios*-macabi) AR=arm64-apple-ios-macabi-ar ;;
 		aarch64-apple-ios*)           AR=arm64-apple-ios-ar ;;
 		x86_64-apple-ios*-simulator)  AR=x86_64-apple-ios-simulator-ar ;;
+		x86_64-apple-ios*-macabi) AR=x86_64-apple-ios-macabi-ar ;;
 
 		aarch64-apple-tvos*-simulator) AR=arm64-apple-tvos-simulator-ar ;;
 		aarch64-apple-tvos*)           AR=arm64-apple-tvos-ar ;;
@@ -4232,8 +4234,10 @@ fi
 if test -z "$CC"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) CC=arm64-apple-ios-simulator-clang ;;
+		aarch64-apple-ios*-macabi) CC=arm64-apple-ios-macabi-clang ;;
 		aarch64-apple-ios*)           CC=arm64-apple-ios-clang ;;
 		x86_64-apple-ios*-simulator)  CC=x86_64-apple-ios-simulator-clang ;;
+		x86_64-apple-ios*-macabi) CC=x86_64-apple-ios-macabi-clang ;;
 
 		aarch64-apple-tvos*-simulator) CC=arm64-apple-tvos-simulator-clang ;;
 		aarch64-apple-tvos*)           CC=arm64-apple-tvos-clang ;;
@@ -4251,8 +4255,10 @@ fi
 if test -z "$CPP"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) CPP=arm64-apple-ios-simulator-cpp ;;
+		aarch64-apple-ios*-macabi) CPP=arm64-apple-ios-macabi-cpp ;;
 		aarch64-apple-ios*)           CPP=arm64-apple-ios-cpp ;;
 		x86_64-apple-ios*-simulator)  CPP=x86_64-apple-ios-simulator-cpp ;;
+		x86_64-apple-ios*-macabi) CPP=x86_64-apple-ios-macabi-cpp ;;
 
 		aarch64-apple-tvos*-simulator) CPP=arm64-apple-tvos-simulator-cpp ;;
 		aarch64-apple-tvos*)           CPP=arm64-apple-tvos-cpp ;;
@@ -4270,8 +4276,10 @@ fi
 if test -z "$CXX"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) CXX=arm64-apple-ios-simulator-clang++ ;;
+		aarch64-apple-ios*-macabi) CXX=arm64-apple-ios-macabi-clang++ ;;
 		aarch64-apple-ios*)           CXX=arm64-apple-ios-clang++ ;;
 		x86_64-apple-ios*-simulator)  CXX=x86_64-apple-ios-simulator-clang++ ;;
+		x86_64-apple-ios*-macabi) CXX=x86_64-apple-ios-macabi-clang++ ;;
 
 		aarch64-apple-tvos*-simulator) CXX=arm64-apple-tvos-simulator-clang++ ;;
 		aarch64-apple-tvos*)           CXX=arm64-apple-tvos-clang++ ;;
@@ -4514,19 +4522,48 @@ then :
 
 				;;
 			iOS) :
-				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
-				FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
-				FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKPYTHONW=
-				INSTALLTARGETS="libinstall inclinstall sharedinstall"
+				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
+				case $_flag_ios_catalyst in
+					macabi)
+						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
+						FRAMEWORKINSTALLLAST="frameworkinstallmaclib frameworkinstallunixtools"
+						FRAMEWORKALTINSTALLLAST="frameworkinstallmaclib frameworkaltinstallunixtools"
+						FRAMEWORKPYTHONW="frameworkpythonw"
+						FRAMEWORKINSTALLAPPSPREFIX="/Applications"
+						INSTALLTARGETS="commoninstall bininstall maninstall"
 
-				prefix=$PYTHONFRAMEWORKPREFIX
-				PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
-				RESSRCDIR=iOS/Resources
+						if test "x${prefix}" = "xNONE" ; then
+							FRAMEWORKUNIXTOOLSPREFIX="${ac_default_prefix}"
 
-				ac_config_files="$ac_config_files iOS/Resources/Info.plist"
+						else
+							FRAMEWORKUNIXTOOLSPREFIX="${prefix}"
+						fi
+						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX=${prefix}
+						RESSRCDIR=MacCatalyst/Resources
 
+						# Add files for Mac Catalyst specific code to the list of output
+						# files:
+						ac_config_files="$ac_config_files MacCatalyst/Resources/Info.plist"
+
+						;;
+					*)
+						FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
+						FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKPYTHONW=
+						INSTALLTARGETS="libinstall inclinstall sharedinstall"
+
+						prefix=$PYTHONFRAMEWORKPREFIX
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
+						RESSRCDIR=iOS/Resources
+
+						ac_config_files="$ac_config_files iOS/Resources/Info.plist"
+
+					;;
+				esac
 				;;
 			tvOS) :
 				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
@@ -4694,6 +4731,28 @@ if test "$cross_compiling" = yes; then
 		;;
 	*-*-cygwin*)
 		_host_ident=
+		;;
+	*-apple-ios*-macabi)
+		_host_os=`echo $host | cut -d '-' -f3`
+		_host_device=`echo $host | cut -d '-' -f4`   # should be macabi
+		_host_device=${_host_device:=os}
+
+		# IPHONEOS_DEPLOYMENT_TARGET is the minimum supported iOS version
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking iOS deployment target" >&5
+printf %s "checking iOS deployment target... " >&6; }
+		IPHONEOS_DEPLOYMENT_TARGET=$(echo ${_host_os} | cut -c4-)
+		IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:=14.0}  # else it returns invalid version number
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $IPHONEOS_DEPLOYMENT_TARGET" >&5
+printf "%s\n" "$IPHONEOS_DEPLOYMENT_TARGET" >&6; }
+
+		case "$host_cpu" in
+			aarch64)
+				_host_ident=${IPHONEOS_DEPLOYMENT_TARGET}-arm64-iphoneos-${_host_device}   # platform_triplet.c uses iphoneos-macabi
+				;;
+			*)
+				_host_ident=${IPHONEOS_DEPLOYMENT_TARGET}-$host_cpu-iphoneos-${_host_device}
+				;;
+		esac
 		;;
 	*-apple-ios*)
 		_host_os=`echo $host | cut -d '-' -f3`
@@ -7454,6 +7513,10 @@ case $host/$ac_cv_cc_name in #(
     aarch64-apple-ios*/clang) :
     PY_SUPPORT_TIER=3 ;; #(
     aarch64-apple-tvos*-simulator/clang) :
+    PY_SUPPORT_TIER=3 ;; #(
+    aarch64-apple-ios*-macabi/clang) :
+    PY_SUPPORT_TIER=3 ;; #(
+    x86_64-apple-ios*-macabi/clang) :
     PY_SUPPORT_TIER=3 ;; #(
     aarch64-apple-tvos*/clang) :
     PY_SUPPORT_TIER=3 ;; #(
@@ -34836,6 +34899,7 @@ do
     "Mac/PythonLauncher/Makefile") CONFIG_FILES="$CONFIG_FILES Mac/PythonLauncher/Makefile" ;;
     "Mac/Resources/framework/Info.plist") CONFIG_FILES="$CONFIG_FILES Mac/Resources/framework/Info.plist" ;;
     "Mac/Resources/app/Info.plist") CONFIG_FILES="$CONFIG_FILES Mac/Resources/app/Info.plist" ;;
+    "MacCatalyst/Resources/Info.plist") CONFIG_FILES="$CONFIG_FILES MacCatalyst/Resources/Info.plist" ;;
     "iOS/Resources/Info.plist") CONFIG_FILES="$CONFIG_FILES iOS/Resources/Info.plist" ;;
     "tvOS/Resources/Info.plist") CONFIG_FILES="$CONFIG_FILES tvOS/Resources/Info.plist" ;;
     "watchOS/Resources/Info.plist") CONFIG_FILES="$CONFIG_FILES watchOS/Resources/Info.plist" ;;

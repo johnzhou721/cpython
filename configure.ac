@@ -427,8 +427,10 @@ AC_SUBST([host_exec_prefix])
 if test -z "$AR"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) AR=arm64-apple-ios-simulator-ar ;;
+		aarch64-apple-ios*-macabi) AR=arm64-apple-ios-macabi-ar ;;
 		aarch64-apple-ios*)           AR=arm64-apple-ios-ar ;;
 		x86_64-apple-ios*-simulator)  AR=x86_64-apple-ios-simulator-ar ;;
+		x86_64-apple-ios*-macabi) AR=x86_64-apple-ios-macabi-ar ;;
 
 		aarch64-apple-tvos*-simulator) AR=arm64-apple-tvos-simulator-ar ;;
 		aarch64-apple-tvos*)           AR=arm64-apple-tvos-ar ;;
@@ -446,8 +448,10 @@ fi
 if test -z "$CC"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) CC=arm64-apple-ios-simulator-clang ;;
+		aarch64-apple-ios*-macabi) CC=arm64-apple-ios-macabi-clang ;;
 		aarch64-apple-ios*)           CC=arm64-apple-ios-clang ;;
 		x86_64-apple-ios*-simulator)  CC=x86_64-apple-ios-simulator-clang ;;
+		x86_64-apple-ios*-macabi) CC=x86_64-apple-ios-macabi-clang ;;
 
 		aarch64-apple-tvos*-simulator) CC=arm64-apple-tvos-simulator-clang ;;
 		aarch64-apple-tvos*)           CC=arm64-apple-tvos-clang ;;
@@ -465,8 +469,10 @@ fi
 if test -z "$CPP"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) CPP=arm64-apple-ios-simulator-cpp ;;
+		aarch64-apple-ios*-macabi) CPP=arm64-apple-ios-macabi-cpp ;;
 		aarch64-apple-ios*)           CPP=arm64-apple-ios-cpp ;;
 		x86_64-apple-ios*-simulator)  CPP=x86_64-apple-ios-simulator-cpp ;;
+		x86_64-apple-ios*-macabi) CPP=x86_64-apple-ios-macabi-cpp ;;
 
 		aarch64-apple-tvos*-simulator) CPP=arm64-apple-tvos-simulator-cpp ;;
 		aarch64-apple-tvos*)           CPP=arm64-apple-tvos-cpp ;;
@@ -484,8 +490,10 @@ fi
 if test -z "$CXX"; then
 	case "$host" in
 		aarch64-apple-ios*-simulator) CXX=arm64-apple-ios-simulator-clang++ ;;
+		aarch64-apple-ios*-macabi) CXX=arm64-apple-ios-macabi-clang++ ;;
 		aarch64-apple-ios*)           CXX=arm64-apple-ios-clang++ ;;
 		x86_64-apple-ios*-simulator)  CXX=x86_64-apple-ios-simulator-clang++ ;;
+		x86_64-apple-ios*-macabi) CXX=x86_64-apple-ios-macabi-clang++ ;;
 
 		aarch64-apple-tvos*-simulator) CXX=arm64-apple-tvos-simulator-clang++ ;;
 		aarch64-apple-tvos*)           CXX=arm64-apple-tvos-clang++ ;;
@@ -716,18 +724,46 @@ AC_ARG_ENABLE([framework],
 				AC_CONFIG_FILES([Mac/Resources/app/Info.plist])
 				;;
 			iOS) :
-				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
-				FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
-				FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKPYTHONW=
-				INSTALLTARGETS="libinstall inclinstall sharedinstall"
+				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
+				case $_flag_ios_catalyst in
+					macabi)
+						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
+						FRAMEWORKINSTALLLAST="frameworkinstallmaclib frameworkinstallunixtools"
+						FRAMEWORKALTINSTALLLAST="frameworkinstallmaclib frameworkaltinstallunixtools"
+						FRAMEWORKPYTHONW="frameworkpythonw"
+						FRAMEWORKINSTALLAPPSPREFIX="/Applications"
+						INSTALLTARGETS="commoninstall bininstall maninstall"
 
-				prefix=$PYTHONFRAMEWORKPREFIX
-				PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
-				RESSRCDIR=iOS/Resources
+						if test "x${prefix}" = "xNONE" ; then
+							FRAMEWORKUNIXTOOLSPREFIX="${ac_default_prefix}"
 
-				AC_CONFIG_FILES([iOS/Resources/Info.plist])
+						else
+							FRAMEWORKUNIXTOOLSPREFIX="${prefix}"
+						fi
+						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX=${prefix}
+						RESSRCDIR=MacCatalyst/Resources
+
+						# Add files for Mac Catalyst specific code to the list of output
+						# files:
+						AC_CONFIG_FILES([MacCatalyst/Resources/Info.plist])
+						;;
+					*)
+						FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
+						FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKPYTHONW=
+						INSTALLTARGETS="libinstall inclinstall sharedinstall"
+
+						prefix=$PYTHONFRAMEWORKPREFIX
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
+						RESSRCDIR=iOS/Resources
+
+						AC_CONFIG_FILES([iOS/Resources/Info.plist])
+					;;
+				esac
 				;;
 			tvOS) :
 				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
@@ -879,6 +915,26 @@ if test "$cross_compiling" = yes; then
 		;;
 	*-*-cygwin*)
 		_host_ident=
+		;;
+	*-apple-ios*-macabi)
+		_host_os=`echo $host | cut -d '-' -f3`
+		_host_device=`echo $host | cut -d '-' -f4`   # should be macabi
+		_host_device=${_host_device:=os}
+
+		# IPHONEOS_DEPLOYMENT_TARGET is the minimum supported iOS version
+		AC_MSG_CHECKING([iOS deployment target])
+		IPHONEOS_DEPLOYMENT_TARGET=$(echo ${_host_os} | cut -c4-)
+		IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:=14.0}  # else it returns invalid version number
+		AC_MSG_RESULT([$IPHONEOS_DEPLOYMENT_TARGET])
+
+		case "$host_cpu" in
+			aarch64)
+				_host_ident=${IPHONEOS_DEPLOYMENT_TARGET}-arm64-iphoneos-${_host_device}   # platform_triplet.c uses iphoneos-macabi
+				;;
+			*)
+				_host_ident=${IPHONEOS_DEPLOYMENT_TARGET}-$host_cpu-iphoneos-${_host_device}
+				;;
+		esac
 		;;
 	*-apple-ios*)
 		_host_os=`echo $host | cut -d '-' -f3`
@@ -1421,6 +1477,8 @@ AS_CASE([$host/$ac_cv_cc_name],
   [aarch64-apple-ios*-simulator/clang],   [PY_SUPPORT_TIER=3], dnl iOS Simulator on arm64
   [aarch64-apple-ios*/clang],             [PY_SUPPORT_TIER=3], dnl iOS on ARM64
   [aarch64-apple-tvos*-simulator/clang],  [PY_SUPPORT_TIER=3], dnl tvOS Simulator on arm64
+  [aarch64-apple-ios*-macabi/clang],  [PY_SUPPORT_TIER=3], dnl MacCatalyst on arm64
+  [x86_64-apple-ios*-macabi/clang],  [PY_SUPPORT_TIER=3], dnl MacCatalyst on x86_64
   [aarch64-apple-tvos*/clang],            [PY_SUPPORT_TIER=3], dnl tvOS on ARM64
   [aarch64-apple-watchos*-simulator/clang],   [PY_SUPPORT_TIER=3], dnl watchOS Simulator on arm64
   [arm64_32-apple-watchos*/clang],            [PY_SUPPORT_TIER=3], dnl watchOS on ARM64
