@@ -738,7 +738,7 @@ AC_ARG_ENABLE([framework],
 						FRAMEWORKPYTHONW=
 						INSTALLTARGETS="libinstall inclinstall sharedinstall"
 						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
-						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR/Contents/Versions/$VERSION"
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR/Versions/$VERSION"
 						RESSRCDIR=MacCatalyst/Resources
 						AC_CONFIG_FILES([MacCatalyst/Resources/Info.plist])
 						;;

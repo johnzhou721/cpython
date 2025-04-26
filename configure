@@ -4536,7 +4536,7 @@ then :
 						FRAMEWORKPYTHONW=
 						INSTALLTARGETS="libinstall inclinstall sharedinstall"
 						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
-						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR/Contents/Versions/$VERSION"
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR/Versions/$VERSION"
 						RESSRCDIR=MacCatalyst/Resources
 						ac_config_files="$ac_config_files MacCatalyst/Resources/Info.plist"
 
