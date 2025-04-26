@@ -728,27 +728,34 @@ AC_ARG_ENABLE([framework],
 				AC_CONFIG_FILES([Mac/Resources/app/Info.plist])
 				;;
 			iOS) :
-				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
-				FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
-				FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKPYTHONW=
-				INSTALLTARGETS="libinstall inclinstall sharedinstall"
-				prefix=$PYTHONFRAMEWORKPREFIX
-				PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
-
-				is_mac_catalyst=`echo $host | cut -d '-' -f4`
-				case $is_mac_catalyst in
+				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
+				case $_flag_ios_catalyst in
 					macabi)
+						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
+						FRAMEWORKINSTALLLAST=""
+						FRAMEWORKALTINSTALLLAST=""
+						FRAMEWORKPYTHONW=
+						INSTALLTARGETS="libinstall inclinstall sharedinstall"
+						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR/Contents/Versions/$VERSION"
 						RESSRCDIR=MacCatalyst/Resources
 						AC_CONFIG_FILES([MacCatalyst/Resources/Info.plist])
 						;;
 					*)
+						FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
+						FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKPYTHONW=
+						INSTALLTARGETS="libinstall inclinstall sharedinstall"
+						prefix=$PYTHONFRAMEWORKPREFIX
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
 						RESSRCDIR=iOS/Resources
 						AC_CONFIG_FILES([iOS/Resources/Info.plist])
 					;;
 				esac
-				;;
+
 			tvOS) :
 				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
 				FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
