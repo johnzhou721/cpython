@@ -729,8 +729,8 @@ AC_ARG_ENABLE([framework],
 					macabi)
 						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure"
 						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
-						FRAMEWORKINSTALLLAST="frameworkinstallmaclib frameworkinstallunixtools"
-						FRAMEWORKALTINSTALLLAST="frameworkinstallmaclib frameworkaltinstallunixtools"
+						FRAMEWORKINSTALLLAST=""
+						FRAMEWORKALTINSTALLLAST=""
 						FRAMEWORKPYTHONW=
 						INSTALLTARGETS="libinstall inclinstall sharedinstall"
 
