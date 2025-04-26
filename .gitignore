@@ -88,9 +88,9 @@ MacCatalyst/testbed/Python.xcframework/ios-*/bin
 MacCatalyst/testbed/Python.xcframework/ios-*/include
 MacCatalyst/testbed/Python.xcframework/ios-*/lib
 MacCatalyst/testbed/Python.xcframework/ios-*/Python.framework
-MacCatalyst/testbed/iOSTestbed.xcodeproj/project.xcworkspace
-MacCatalyst/testbed/iOSTestbed.xcodeproj/xcuserdata
-MacCatalyst/testbed/iOSTestbed.xcodeproj/xcshareddata
+MacCatalyst/testbed/CatalystTestbed.xcodeproj/project.xcworkspace
+MacCatalyst/testbed/CatalystTestbed.xcodeproj/xcuserdata
+MacCatalyst/testbed/CatalystTestbed.xcodeproj/xcshareddata
 visionOS/testbed/Python.xcframework/xr*-*/bin
 visionOS/testbed/Python.xcframework/xr*-*/include
 visionOS/testbed/Python.xcframework/xr*-*/lib

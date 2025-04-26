@@ -1,6 +1,6 @@
 //
 //  AppDelegate.m
-//  iOSTestbed
+//  CatalystTestbed
 //
 
 #import "AppDelegate.h"
