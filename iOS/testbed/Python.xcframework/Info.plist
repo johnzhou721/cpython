@@ -6,6 +6,23 @@
 	<array>
 		<dict>
 			<key>BinaryPath</key>
+			<string>Python.framework/Versions/3.14/Python</string>
+			<key>LibraryIdentifier</key>
+			<string>ios-arm64_x86_64-maccatalyst</string>
+			<key>LibraryPath</key>
+			<string>python.framework</string>
+			<key>SupportedArchitectures</key>
+			<array>
+				<string>x86_64</string>
+				<string>arm64</string>
+			</array>
+			<key>SupportedPlatform</key>
+			<string>ios</string>
+			<key>SupportedPlatformVariant</key>
+			<string>maccatalyst</string>
+		</dict>
+		<dict>
+			<key>BinaryPath</key>
 			<string>Python.framework/Python</string>
 			<key>LibraryIdentifier</key>
 			<string>ios-arm64</string>

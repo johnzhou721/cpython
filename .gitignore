@@ -83,14 +83,6 @@ iOS/testbed/iOSTestbed.xcodeproj/project.xcworkspace
 iOS/testbed/iOSTestbed.xcodeproj/xcuserdata
 iOS/testbed/iOSTestbed.xcodeproj/xcshareddata
 MacCatalyst/Resources/Info.plist
-MacCatalyst/testbed/build
-MacCatalyst/testbed/Python.xcframework/ios-*/bin
-MacCatalyst/testbed/Python.xcframework/ios-*/include
-MacCatalyst/testbed/Python.xcframework/ios-*/lib
-MacCatalyst/testbed/Python.xcframework/ios-*/Python.framework
-MacCatalyst/testbed/CatalystTestbed.xcodeproj/project.xcworkspace
-MacCatalyst/testbed/CatalystTestbed.xcodeproj/xcuserdata
-MacCatalyst/testbed/CatalystTestbed.xcodeproj/xcshareddata
 visionOS/testbed/Python.xcframework/xros-*/bin
 visionOS/testbed/Python.xcframework/xros-*/include
 visionOS/testbed/Python.xcframework/xros-*/lib
