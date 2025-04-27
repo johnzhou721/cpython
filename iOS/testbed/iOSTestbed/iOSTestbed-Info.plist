@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>org.python.iOSTestbed</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -24,13 +24,6 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UIApplicationSupportsMultipleScenes</key>
-		<false/>
-		<key>UISceneConfigurations</key>
-		<dict/>
-	</dict>
 	<key>UIRequiresFullScreen</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -50,11 +43,22 @@
 	</array>
 	<key>TestArgs</key>
 	<array>
-		<string>test</string>
-		<string>-uall</string>
-		<string>--single-process</string>
-		<string>--rerun</string>
-		<string>-W</string>
-	</array>
+		<string>test</string> <!-- Invoke "python -m test" -->
+        <string>-uall</string> <!-- Enable all resources -->
+        <string>--single-process</string> <!-- always run all tests sequentially in a single process -->
+        <string>--rerun</string> <!-- Re-run failed tests in verbose mode -->
+        <string>-W</string> <!-- Display test output on failure -->
+		<!-- To run a subset of tests, add the test names below; e.g.,
+        <string>test_os</string>
+        <string>test_sys</string>
+		-->
+    </array>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict/>
+	</dict>
 </dict>
 </plist>
