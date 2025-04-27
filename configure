@@ -978,6 +978,7 @@ LDFLAGS
 CFLAGS
 CC
 HAS_XCRUN
+CATALYST_MACOS_VERSION
 EXPORT_XROS_DEPLOYMENT_TARGET
 XROS_DEPLOYMENT_TARGET
 WATCHOS_DEPLOYMENT_TARGET
@@ -1085,6 +1086,7 @@ with_universal_archs
 with_framework_name
 enable_framework
 with_app_store_compliance
+with_catalyst_macos_version
 enable_wasm_dynamic_linking
 enable_wasm_pthreads
 with_suffix
@@ -1872,6 +1874,9 @@ Optional Packages:
                           Enable any patches required for compiliance with app
                           stores. Optional PATCH-FILE specifies the custom
                           patch to apply.
+  --with-catalyst-macos-version=VER
+                          The minimum macOS version a Catalyst build can run
+                          on (only valid for *-apple-ios*-macabi targets)
   --with-suffix=SUFFIX    set executable suffix to SUFFIX (default is empty,
                           yes is mapped to '.exe')
   --without-static-libpython
@@ -4706,6 +4711,36 @@ fi
 
 
 
+
+
+# Check whether --with-catalyst-macos-version was given.
+if test ${with_catalyst_macos_version+y}
+then :
+  withval=$with_catalyst_macos_version; case "$host" in
+    *-apple-ios*-macabi)
+      CATALYST_MACOS_VERSION="$withval"
+      ;;
+    *)
+      as_fn_error $? "--with-catalyst-macos-version is only valid when targeting Mac Catalyst (*-apple-ios*-macabi)." "$LINENO" 5
+      ;;
+
+else case e in #(
+  e) case "$host" in
+    *-apple-ios*-macabi)
+      CATALYST_MACOS_VERSION=11.2
+      ;;
+    *)
+      CATALYST_MACOS_VERSION=
+      ;;
+
+ ;;
+esac
+fi
+
+
+
+
+
 EXPORT_XROS_DEPLOYMENT_TARGET='#'
 
 
@@ -4732,7 +4767,7 @@ if test "$cross_compiling" = yes; then
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking iOS deployment target" >&5
 printf %s "checking iOS deployment target... " >&6; }
 		IPHONEOS_DEPLOYMENT_TARGET=$(echo ${_host_os} | cut -c4-)
-		IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:=14.0}  # else it returns invalid version number
+		IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:=14.2}  # else it returns invalid version number
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $IPHONEOS_DEPLOYMENT_TARGET" >&5
 printf "%s\n" "$IPHONEOS_DEPLOYMENT_TARGET" >&6; }
 
@@ -5007,6 +5042,10 @@ EXPORT_MACOSX_DEPLOYMENT_TARGET='#'
 
 
 # XROS_DEPLOYMENT_TARGET should get exported
+
+
+# The minimum macOS version that a Mac Catalyst build can run on.
+
 
 
 # checks for alternative programs

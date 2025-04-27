@@ -26,10 +26,10 @@
 	<string>%VERSION%</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
-		<string>MacCatalyst</string>
+		<string>MacOSX</string>
 	</array>
 	<key>LSMinimumSystemVersion</key>
-	<string>11.0</string>
+	<string>@CATALYST_MACOS_VERSION@</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>2</integer>

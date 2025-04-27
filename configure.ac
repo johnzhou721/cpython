@@ -890,6 +890,31 @@ AC_ARG_WITH(
 ])
 AC_SUBST([APP_STORE_COMPLIANCE_PATCH])
 
+
+AC_ARG_WITH([catalyst-macos-version],
+  [AS_HELP_STRING([--with-catalyst-macos-version=VER],
+  [The minimum macOS version a Catalyst build can run on (only valid for *-apple-ios*-macabi targets)])],
+  [case "$host" in
+    *-apple-ios*-macabi)
+      CATALYST_MACOS_VERSION="$withval"
+      ;;
+    *)
+      AC_MSG_ERROR([--with-catalyst-macos-version is only valid when targeting Mac Catalyst (*-apple-ios*-macabi).])
+      ;;
+  ],
+  [case "$host" in
+    *-apple-ios*-macabi)
+      CATALYST_MACOS_VERSION=11.2
+      ;;
+    *)
+      CATALYST_MACOS_VERSION=
+      ;;
+  ]
+)
+
+
+
+
 EXPORT_XROS_DEPLOYMENT_TARGET='#'
 
 AC_SUBST([_PYTHON_HOST_PLATFORM])
@@ -915,7 +940,7 @@ if test "$cross_compiling" = yes; then
 		# IPHONEOS_DEPLOYMENT_TARGET is the minimum supported iOS version
 		AC_MSG_CHECKING([iOS deployment target])
 		IPHONEOS_DEPLOYMENT_TARGET=$(echo ${_host_os} | cut -c4-)
-		IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:=14.0}  # else it returns invalid version number
+		IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:=14.2}  # else it returns invalid version number
 		AC_MSG_RESULT([$IPHONEOS_DEPLOYMENT_TARGET])
 
 		case "$host_cpu" in
@@ -1175,6 +1200,10 @@ AC_SUBST([WATCHOS_DEPLOYMENT_TARGET])
 AC_SUBST([XROS_DEPLOYMENT_TARGET])
 # XROS_DEPLOYMENT_TARGET should get exported
 AC_SUBST([EXPORT_XROS_DEPLOYMENT_TARGET])
+
+# The minimum macOS version that a Mac Catalyst build can run on.
+AC_SUBST([CATALYST_MACOS_VERSION])
+
 
 # checks for alternative programs
 
