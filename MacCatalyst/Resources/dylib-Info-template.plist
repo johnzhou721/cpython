@@ -16,10 +16,10 @@
 	<string>1.0</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
-		<string>MacOSX</string>
+		<string>MacCatalyst</string>
 	</array>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.0</string>
+	<string>11.0</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>2</integer>

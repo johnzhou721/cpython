@@ -4212,11 +4212,12 @@ fi
 # configure will fail.
 if test -z "$AR"; then
 	case "$host" in
-		aarch64-apple-ios*-simulator) AR=arm64-apple-ios-simulator-ar ;;
+		x86_64-apple-ios*-macabi)  AR=x86_64-apple-ios-macabi-ar ;;
 		aarch64-apple-ios*-macabi) AR=arm64-apple-ios-macabi-ar ;;
-		aarch64-apple-ios*)           AR=arm64-apple-ios-ar ;;
+
 		x86_64-apple-ios*-simulator)  AR=x86_64-apple-ios-simulator-ar ;;
-		x86_64-apple-ios*-macabi) AR=x86_64-apple-ios-macabi-ar ;;
+		aarch64-apple-ios*-simulator) AR=arm64-apple-ios-simulator-ar ;;
+		aarch64-apple-ios*)           AR=arm64-apple-ios-ar ;;
 
 		aarch64-apple-tvos*-simulator) AR=arm64-apple-tvos-simulator-ar ;;
 		aarch64-apple-tvos*)           AR=arm64-apple-tvos-ar ;;
@@ -4233,11 +4234,12 @@ if test -z "$AR"; then
 fi
 if test -z "$CC"; then
 	case "$host" in
-		aarch64-apple-ios*-simulator) CC=arm64-apple-ios-simulator-clang ;;
+		x86_64-apple-ios*-macabi)  CC=x86_64-apple-ios-macabi-clang ;;
 		aarch64-apple-ios*-macabi) CC=arm64-apple-ios-macabi-clang ;;
-		aarch64-apple-ios*)           CC=arm64-apple-ios-clang ;;
+
 		x86_64-apple-ios*-simulator)  CC=x86_64-apple-ios-simulator-clang ;;
-		x86_64-apple-ios*-macabi) CC=x86_64-apple-ios-macabi-clang ;;
+		aarch64-apple-ios*-simulator) CC=arm64-apple-ios-simulator-clang ;;
+		aarch64-apple-ios*)           CC=arm64-apple-ios-clang ;;
 
 		aarch64-apple-tvos*-simulator) CC=arm64-apple-tvos-simulator-clang ;;
 		aarch64-apple-tvos*)           CC=arm64-apple-tvos-clang ;;
@@ -4254,11 +4256,12 @@ if test -z "$CC"; then
 fi
 if test -z "$CPP"; then
 	case "$host" in
-		aarch64-apple-ios*-simulator) CPP=arm64-apple-ios-simulator-cpp ;;
+		x86_64-apple-ios*-macabi)  CPP=x86_64-apple-ios-macabi-cpp ;;
 		aarch64-apple-ios*-macabi) CPP=arm64-apple-ios-macabi-cpp ;;
-		aarch64-apple-ios*)           CPP=arm64-apple-ios-cpp ;;
+
 		x86_64-apple-ios*-simulator)  CPP=x86_64-apple-ios-simulator-cpp ;;
-		x86_64-apple-ios*-macabi) CPP=x86_64-apple-ios-macabi-cpp ;;
+		aarch64-apple-ios*-simulator) CPP=arm64-apple-ios-simulator-cpp ;;
+		aarch64-apple-ios*)           CPP=arm64-apple-ios-cpp ;;
 
 		aarch64-apple-tvos*-simulator) CPP=arm64-apple-tvos-simulator-cpp ;;
 		aarch64-apple-tvos*)           CPP=arm64-apple-tvos-cpp ;;
@@ -4275,11 +4278,12 @@ if test -z "$CPP"; then
 fi
 if test -z "$CXX"; then
 	case "$host" in
-		aarch64-apple-ios*-simulator) CXX=arm64-apple-ios-simulator-clang++ ;;
+		x86_64-apple-ios*-macabi)  CXX=x86_64-apple-ios-macabi-clang++ ;;
 		aarch64-apple-ios*-macabi) CXX=arm64-apple-ios-macabi-clang++ ;;
-		aarch64-apple-ios*)           CXX=arm64-apple-ios-clang++ ;;
+
 		x86_64-apple-ios*-simulator)  CXX=x86_64-apple-ios-simulator-clang++ ;;
-		x86_64-apple-ios*-macabi) CXX=x86_64-apple-ios-macabi-clang++ ;;
+		aarch64-apple-ios*-simulator) CXX=arm64-apple-ios-simulator-clang++ ;;
+		aarch64-apple-ios*)           CXX=arm64-apple-ios-clang++ ;;
 
 		aarch64-apple-tvos*-simulator) CXX=arm64-apple-tvos-simulator-clang++ ;;
 		aarch64-apple-tvos*)           CXX=arm64-apple-tvos-clang++ ;;
@@ -4522,37 +4526,24 @@ then :
 
 				;;
 			iOS) :
-				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
-				case $_flag_ios_catalyst in
+				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
+				FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
+				FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
+				FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
+				FRAMEWORKPYTHONW=
+				INSTALLTARGETS="libinstall inclinstall sharedinstall"
+				prefix=$PYTHONFRAMEWORKPREFIX
+				PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
+
+				is_mac_catalyst=`echo $host | cut -d '-' -f4`
+				case $is_mac_catalyst in
 					macabi)
-						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure"
-						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
-						FRAMEWORKINSTALLLAST=""
-						FRAMEWORKALTINSTALLLAST=""
-						FRAMEWORKPYTHONW=
-						INSTALLTARGETS="libinstall inclinstall sharedinstall"
-
-						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
-						PYTHONFRAMEWORKINSTALLNAMEPREFIX=${prefix}
 						RESSRCDIR=MacCatalyst/Resources
-
-						# Add files for Mac Catalyst specific code to the list of output
-						# files:
 						ac_config_files="$ac_config_files MacCatalyst/Resources/Info.plist"
 
 						;;
 					*)
-						FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
-						FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
-						FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
-						FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
-						FRAMEWORKPYTHONW=
-						INSTALLTARGETS="libinstall inclinstall sharedinstall"
-
-						prefix=$PYTHONFRAMEWORKPREFIX
-						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
 						RESSRCDIR=iOS/Resources
-
 						ac_config_files="$ac_config_files iOS/Resources/Info.plist"
 
 					;;
@@ -7501,15 +7492,15 @@ case $host/$ac_cv_cc_name in #(
     PY_SUPPORT_TIER=3 ;; #(
     x86_64-*-freebsd*/clang) :
     PY_SUPPORT_TIER=3 ;; #(
+    aarch64-apple-ios*-macabi/clang) :
+    PY_SUPPORT_TIER=3 ;; #(
+    x86_64-apple-ios*-macabi/clang) :
+    PY_SUPPORT_TIER=3 ;; #(
     aarch64-apple-ios*-simulator/clang) :
     PY_SUPPORT_TIER=3 ;; #(
     aarch64-apple-ios*/clang) :
     PY_SUPPORT_TIER=3 ;; #(
     aarch64-apple-tvos*-simulator/clang) :
-    PY_SUPPORT_TIER=3 ;; #(
-    aarch64-apple-ios*-macabi/clang) :
-    PY_SUPPORT_TIER=3 ;; #(
-    x86_64-apple-ios*-macabi/clang) :
     PY_SUPPORT_TIER=3 ;; #(
     aarch64-apple-tvos*/clang) :
     PY_SUPPORT_TIER=3 ;; #(
