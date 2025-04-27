@@ -901,6 +901,7 @@ AC_ARG_WITH([catalyst-macos-version],
     *)
       AC_MSG_ERROR([--with-catalyst-macos-version is only valid when targeting Mac Catalyst (*-apple-ios*-macabi).])
       ;;
+   esac
   ],
   [case "$host" in
     *-apple-ios*-macabi)
@@ -909,6 +910,7 @@ AC_ARG_WITH([catalyst-macos-version],
     *)
       CATALYST_MACOS_VERSION=
       ;;
+    esac
   ]
 )
 

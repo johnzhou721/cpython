@@ -4723,6 +4723,7 @@ then :
     *)
       as_fn_error $? "--with-catalyst-macos-version is only valid when targeting Mac Catalyst (*-apple-ios*-macabi)." "$LINENO" 5
       ;;
+   esac
 
 else case e in #(
   e) case "$host" in
@@ -4732,6 +4733,7 @@ else case e in #(
     *)
       CATALYST_MACOS_VERSION=
       ;;
+    esac
 
  ;;
 esac
