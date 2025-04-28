@@ -28,6 +28,15 @@ LOG_PREFIX_REGEX = re.compile(
     r"\s+\(Python\)\s"  # Logger name
 )
 
+# Prefix: 2025-04-27 21:43:38.530606-0500 iOSTestbed[96892:48053672]
+CATALYST_LOG_PREFIX_REGEX = re.compile(
+    r"^\d{4}-\d{2}-\d{2}"        # YYYY-MM-DD
+    r"\s+\d{2}:\d{2}:\d{2}\.\d{6}" # HH:MM:SS.ssssss (microseconds, 6 digits)
+    r"[-+]\d{4}"                  # Timezone offset like -0500
+    r"\s+iOSTestbed\[\d+:\d+\]"    # iOSTestbed[ProcessID:ThreadID] (both numbers)
+)
+
+
 
 # Work around a bug involving sys.exit and TaskGroups
 # (https://github.com/python/cpython/issues/101515).
@@ -243,7 +252,9 @@ async def xcode_test(location, simulator, verbose, catalyst):
         stderr=subprocess.STDOUT,
     ) as process:
         while line := (await process.stdout.readline()).decode(*DECODE_ARGS):
-            line = LOG_PREFIX_REGEX.sub("", line)
+            # For Mac Catalyst, the *actual* logs are streamed here.
+            if catalyst:
+                line = CATALYST_LOG_PREFIX_REGEX.sub("", line)
             sys.stdout.write(line)
             sys.stdout.flush()
 
