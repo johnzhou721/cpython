@@ -213,9 +213,13 @@ async def log_stream_task(initial_devices, lock):
             sys.stdout.flush()
 
 
-async def xcode_test(location, simulator, verbose):
+async def xcode_test(location, simulator, verbose, catalyst):
     # Run the test suite on the named simulator
     print("Starting xcodebuild...", flush=True)
+    if catalyst:
+        destination_arg = "platform=macOS,variant=Mac Catalyst"
+    else:
+        destination_arg = f"platform=iOS Simulator,name={simulator}";
     args = [
         "xcodebuild",
         "test",
@@ -224,7 +228,7 @@ async def xcode_test(location, simulator, verbose):
         "-scheme",
         "iOSTestbed",
         "-destination",
-        f"platform=iOS Simulator,name={simulator}",
+        destination_arg,
         "-resultBundlePath",
         str(location / f"{datetime.now():%Y%m%d-%H%M%S}.xcresult"),
         "-derivedDataPath",
@@ -239,6 +243,7 @@ async def xcode_test(location, simulator, verbose):
         stderr=subprocess.STDOUT,
     ) as process:
         while line := (await process.stdout.readline()).decode(*DECODE_ARGS):
+            line = LOG_PREFIX_REGEX.sub("", line)
             sys.stdout.write(line)
             sys.stdout.flush()
 
@@ -251,20 +256,31 @@ def clone_testbed(
     target: Path,
     framework: Path,
     apps: list[Path],
+    catalyst: bool,
 ) -> None:
     if target.exists():
         print(f"{target} already exists; aborting without creating project.")
         sys.exit(10)
 
     if framework is None:
-        if not (
-            source / "Python.xcframework/ios-arm64_x86_64-simulator/bin"
-        ).is_dir():
-            print(
-                f"The testbed being cloned ({source}) does not contain "
-                f"a simulator framework. Re-run with --framework"
-            )
-            sys.exit(11)
+        if catalyst:
+            if not (
+                source / "Python.xcframework/ios-arm64_x86_64-maccatalyst/Python.framework/Versions"
+            ).is_dir():
+                print(
+                    f"The testbed being cloned ({source}) does not contain "
+                    f"a Mac Catalyst framework. Re-run with --framework"
+                )
+                sys.exit(11)
+        else:
+            if not (
+                source / "Python.xcframework/ios-arm64_x86_64-simulator/bin"
+            ).is_dir():
+                print(
+                    f"The testbed being cloned ({source}) does not contain "
+                    f"a simulator framework. Re-run with --framework"
+                )
+                sys.exit(11)
     else:
         if not framework.is_dir():
             print(f"{framework} does not exist.")
@@ -275,7 +291,7 @@ def clone_testbed(
         ):
             print(
                 f"{framework} is not an XCframework, "
-                f"or a simulator slice of a framework build."
+                f"or a simulator / Catalyst slice of a framework build."
             )
             sys.exit(13)
 
@@ -285,7 +301,10 @@ def clone_testbed(
     print(" done")
 
     xc_framework_path = target / "Python.xcframework"
-    sim_framework_path = xc_framework_path / "ios-arm64_x86_64-simulator"
+    if catalyst:
+        sim_framework_path = xc_framework_path / "ios-arm64_x86_64-maccatalyst"
+    else:
+        sim_framework_path = xc_framework_path / "ios-arm64_x86_64-simulator"
     if framework is not None:
         if framework.suffix == ".xcframework":
             print("  Installing XCFramework...", end="", flush=True)
@@ -298,7 +317,7 @@ def clone_testbed(
             )
             print(" done")
         else:
-            print("  Installing simulator framework...", end="", flush=True)
+            print("  Installing simulator/catalyst framework...", end="", flush=True)
             if sim_framework_path.is_dir():
                 shutil.rmtree(sim_framework_path)
             else:
@@ -330,7 +349,7 @@ def clone_testbed(
             sim_framework_path.is_symlink()
             and not sim_framework_path.readlink().is_absolute()
         ):
-            print("  Rewriting symlink to simulator framework...", end="", flush=True)
+            print("  Rewriting symlink to simulator/catalyst framework...", end="", flush=True)
             # Simulator framework is a relative symlink. Rewrite the symlink
             # relative to the new location.
             orig_sim_framework_path = (
@@ -371,38 +390,42 @@ def update_plist(testbed_path, args):
         plistlib.dump(info, f)
 
 
-async def run_testbed(simulator: str, args: list[str], verbose: bool=False):
+async def run_testbed(simulator: str, args: list[str], catalyst: bool, verbose: bool=False):
     location = Path(__file__).parent
     print("Updating plist...", end="", flush=True)
     update_plist(location, args)
     print(" done.", flush=True)
 
-    # We need to get an exclusive lock on simulator creation, to avoid issues
-    # with multiple simulators starting and being unable to tell which
-    # simulator is due to which testbed instance. See
-    # https://github.com/python/cpython/issues/130294 for details. Wait up to
-    # 10 minutes for a simulator to boot.
-    print("Obtaining lock on simulator creation...", flush=True)
-    simulator_lock = SimulatorLock(timeout=10*60)
-    await simulator_lock.acquire()
-    print("Simulator lock acquired.", flush=True)
+    if not catalyst:
+        # We need to get an exclusive lock on simulator creation, to avoid issues
+        # with multiple simulators starting and being unable to tell which
+        # simulator is due to which testbed instance. See
+        # https://github.com/python/cpython/issues/130294 for details. Wait up to
+        # 10 minutes for a simulator to boot.
+        print("Obtaining lock on simulator creation...", flush=True)
+        simulator_lock = SimulatorLock(timeout=10*60)
+        await simulator_lock.acquire()
+        print("Simulator lock acquired.", flush=True)
 
-    # Get the list of devices that are booted at the start of the test run.
-    # The simulator started by the test suite will be detected as the new
-    # entry that appears on the device list.
-    initial_devices = await list_devices()
+        # Get the list of devices that are booted at the start of the test run.
+        # The simulator started by the test suite will be detected as the new
+        # entry that appears on the device list.
+        initial_devices = await list_devices()
 
-    try:
+        try:
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(log_stream_task(initial_devices, simulator_lock))
+                tg.create_task(xcode_test(location, simulator=simulator, verbose=verbose, catalyst=False))
+        except* MySystemExit as e:
+            raise SystemExit(*e.exceptions[0].args) from None
+        except* subprocess.CalledProcessError as e:
+            # Extract it from the ExceptionGroup so it can be handled by `main`.
+            raise e.exceptions[0]
+        finally:
+            simulator_lock.release()
+    else:
         async with asyncio.TaskGroup() as tg:
-            tg.create_task(log_stream_task(initial_devices, simulator_lock))
-            tg.create_task(xcode_test(location, simulator=simulator, verbose=verbose))
-    except* MySystemExit as e:
-        raise SystemExit(*e.exceptions[0].args) from None
-    except* subprocess.CalledProcessError as e:
-        # Extract it from the ExceptionGroup so it can be handled by `main`.
-        raise e.exceptions[0]
-    finally:
-        simulator_lock.release()
+            tg.create_task(xcode_test(location, simulator="", verbose=verbose, catalyst=True))
 
 
 def main():
@@ -413,7 +436,13 @@ def main():
     )
 
     subcommands = parser.add_subparsers(dest="subcommand")
-
+    
+    parser.add_argument(
+        "--catalyst",
+        action="store_true",
+        help="Use Mac Catalyst.",
+    )
+    
     clone = subcommands.add_parser(
         "clone",
         description=(
@@ -478,11 +507,16 @@ def main():
             target=Path(context.location).resolve(),
             framework=Path(context.framework).resolve() if context.framework else None,
             apps=[Path(app) for app in context.apps],
+            catalyst = context.catalyst
         )
     elif context.subcommand == "run":
         if test_args:
+            if context.catalyst:
+                expected_location = "Python.xcframework/ios-arm64_x86_64-maccatalyst/Python.framework"
+            else:
+                expected_location = "Python.xcframework/ios-arm64_x86_64-simulator/bin"
             if not (
-                Path(__file__).parent / "Python.xcframework/ios-arm64_x86_64-simulator/bin"
+                Path(__file__).parent / expected_location
             ).is_dir():
                 print(
                     f"Testbed does not contain a compiled iOS framework. Use "
@@ -494,8 +528,10 @@ def main():
             asyncio.run(
                 run_testbed(
                     simulator=context.simulator,
+                    # Mac catalyst requires verbose, or no logs will print.
                     verbose=context.verbose,
                     args=test_args,
+                    catalyst=context.catalyst
                 )
             )
         else:
