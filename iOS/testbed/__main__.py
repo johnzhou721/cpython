@@ -436,13 +436,13 @@ def main():
     )
 
     subcommands = parser.add_subparsers(dest="subcommand")
-    
+
     parser.add_argument(
         "--catalyst",
         action="store_true",
         help="Use Mac Catalyst.",
     )
-    
+
     clone = subcommands.add_parser(
         "clone",
         description=(
