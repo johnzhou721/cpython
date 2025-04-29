@@ -33,7 +33,7 @@ CATALYST_LOG_PREFIX_REGEX = re.compile(
     r"^\d{4}-\d{2}-\d{2}"        # YYYY-MM-DD
     r"\s+\d{2}:\d{2}:\d{2}\.\d{6}" # HH:MM:SS.ssssss (microseconds, 6 digits)
     r"[-+]\d{4}"                  # Timezone offset like -0500
-    r"\s+iOSTestbed\[\d+:\d+\]"    # iOSTestbed[ProcessID:ThreadID] (both numbers)
+    r"\s+iOSTestbed\[\d+:\d+\] "    # iOSTestbed[ProcessID:ThreadID] (both numbers), then a space
 )
 
 
@@ -243,7 +243,7 @@ async def xcode_test(location, simulator, verbose, catalyst):
         "-derivedDataPath",
         str(location / "DerivedData"),
     ]
-    if not verbose:
+    if not verbose and not catalyst:
         args += ["-quiet"]
 
     async with async_process(
@@ -252,11 +252,16 @@ async def xcode_test(location, simulator, verbose, catalyst):
         stderr=subprocess.STDOUT,
     ) as process:
         while line := (await process.stdout.readline()).decode(*DECODE_ARGS):
-            # For Mac Catalyst, the *actual* logs are streamed here.
+            # For Mac Catalyst, the *actual* logs are streamed here. Only stream
+            # things that does NOT come from the process when verbose.
             if catalyst:
-                line = CATALYST_LOG_PREFIX_REGEX.sub("", line)
-            sys.stdout.write(line)
-            sys.stdout.flush()
+                if CATALYST_LOG_PREFIX_REGEX.match(line) or verbose:
+                    line = CATALYST_LOG_PREFIX_REGEX.sub("", line)
+                    sys.stdout.write(line)
+                    sys.stdout.flush()
+            else:
+                sys.stdout.write(line)
+                sys.stdout.flush()
 
         status = await asyncio.wait_for(process.wait(), timeout=1)
         exit(status)
