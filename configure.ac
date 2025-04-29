@@ -7900,13 +7900,16 @@ AS_CASE([$ac_sys_system],
     dnl curses and tkinter user interface are not available.
     dnl gdbm and nis aren't available
     dnl Stub implementations are provided for pwd, grp etc APIs
+    dnl subprocess and multiprocessing is however supported for Mac Catalyst
+    case "$_host_device" in
+      macabi) ;;
+      *) PY_STDLIB_MOD_SET_NA([_posixsubprocess], [_multiprocessing]) ;;
+    esac
     PY_STDLIB_MOD_SET_NA(
       [_curses],
       [_curses_panel],
       [_gdbm],
-      [_multiprocessing],
       [_posixshmem],
-      [_posixsubprocess],
       [_scproxy],
       [_tkinter],
       [grp],

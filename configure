@@ -30860,14 +30860,20 @@ case $ac_sys_system in #(
      ;; #(
   iOS|tvOS|watchOS|visionOS) :
 
+                        case "$_host_device" in
+      macabi) ;;
+      *)
+
+    py_cv_module__posixsubprocess=n/a
+    py_cv_module__multiprocessing=n/a
+ ;;
+    esac
 
 
     py_cv_module__curses=n/a
     py_cv_module__curses_panel=n/a
     py_cv_module__gdbm=n/a
-    py_cv_module__multiprocessing=n/a
     py_cv_module__posixshmem=n/a
-    py_cv_module__posixsubprocess=n/a
     py_cv_module__scproxy=n/a
     py_cv_module__tkinter=n/a
     py_cv_module_grp=n/a

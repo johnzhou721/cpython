@@ -1917,8 +1917,8 @@ class SubinterpreterTest(unittest.TestCase):
         self.addCleanup(os.close, w)
 
         # Apple extensions must be distributed as frameworks. This requires
-        # a specialist loader.
-        if support.is_apple_mobile:
+        # a specialist loader. However, on Mac Catalyst this is not needed.
+        if support.is_apple_mobile and not support.is_mac_catalyst:
             loader = "AppleFrameworkLoader"
         else:
             loader = "ExtensionFileLoader"
