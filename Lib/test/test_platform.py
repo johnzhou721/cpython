@@ -524,11 +524,12 @@ class PlatformTest(unittest.TestCase):
             self.assertFalse(result.is_simulator)
 
             # Check the fallback values can be overridden by arguments
-            override = platform.ios_ver("Foo", "Bar", "Whiz", True)
+            override = platform.ios_ver("Foo", "Bar", "Whiz", True, True)
             self.assertEqual(override.system, "Foo")
             self.assertEqual(override.release, "Bar")
             self.assertEqual(override.model, "Whiz")
             self.assertTrue(override.is_simulator)
+            self.assertTrue(override.is_catalyst)
 
     @unittest.skipIf(support.is_emscripten, "Does not apply to Emscripten")
     def test_libc_ver(self):
