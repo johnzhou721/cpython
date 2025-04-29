@@ -26,7 +26,6 @@ _bootstrap = None
 import _imp
 import _io
 import sys
-import platform
 import _warnings
 import marshal
 
@@ -1537,7 +1536,7 @@ def _get_supported_file_loaders():
     extension_loaders = []
     if hasattr(_imp, 'create_dynamic'):
         # Mac Catalyst does NOT use the AppleFrameworkLoader.
-        if sys.platform in {"ios", "tvos", "watchos", "visionos"} and not platform.ios_ver().is_catalyst:
+        if sys.platform in {"ios", "tvos", "watchos", "visionos"} and not sys.implementation._multiarch.endswith("macabi"):
             extension_loaders = [(AppleFrameworkLoader, [
                 suffix.replace(".so", ".fwork")
                 for suffix in _imp.extension_suffixes()
