@@ -7903,12 +7903,13 @@ AS_CASE([$ac_sys_system],
     dnl subprocess and multiprocessing is however supported for Mac Catalyst
     case "$_host_device" in
       macabi) ;;
-      *) PY_STDLIB_MOD_SET_NA([_posixsubprocess], [_multiprocessing]) ;;
+      *) PY_STDLIB_MOD_SET_NA([_posixsubprocess]) ;;
     esac
     PY_STDLIB_MOD_SET_NA(
       [_curses],
       [_curses_panel],
       [_gdbm],
+      [_multiprocessing],
       [_posixshmem],
       [_scproxy],
       [_tkinter],
