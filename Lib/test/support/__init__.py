@@ -596,7 +596,7 @@ has_subprocess_support = not (
     # practice (see PEP 738). And most of the tests that use them are calling
     # sys.executable, which won't work when Python is embedded in an Android app.
     or is_android
-    
+
     # Mac Catalyst supports subprocesses.
     and not is_mac_catalyst
 )
