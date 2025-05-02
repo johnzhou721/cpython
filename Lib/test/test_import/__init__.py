@@ -33,8 +33,7 @@ from test.support import (
     swap_attr,
     swap_item,
     cpython_only,
-    is_apple_mobile,
-    is_mac_catalyst,
+    needs_apple_fworks,
     is_emscripten,
     is_wasi,
     run_in_subinterp,
@@ -112,7 +111,7 @@ def require_builtin(module, *, skip=False):
 def require_extension(module, *, skip=False):
     # Apple extensions must be distributed as frameworks. This requires
     # a specialist loader.
-    if is_apple_mobile and not is_mac_catalyst:
+    if needs_apple_fworks:
         _require_loader(module, AppleFrameworkLoader, skip)
     else:
         _require_loader(module, ExtensionFileLoader, skip)
@@ -127,7 +126,7 @@ def require_pure_python(module, *, skip=False):
 def create_extension_loader(modname, filename):
     # Apple extensions must be distributed as frameworks. This requires
     # a specialist loader.
-    if is_apple_mobile and not is_mac_catalyst:
+    if needs_apple_fworks:
         return AppleFrameworkLoader(modname, filename)
     else:
         return ExtensionFileLoader(modname, filename)
@@ -2218,7 +2217,7 @@ class SubinterpImportTests(unittest.TestCase):
         if filename:
             # Apple extensions must be distributed as frameworks. This requires
             # a specialist loader.
-            if is_apple_mobile and not is_mac_catalyst:
+            if needs_apple_fworks:
                 loader = "AppleFrameworkLoader"
             else:
                 loader = "ExtensionFileLoader"
@@ -2693,7 +2692,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader, and we need to differentiate between the
         # spec.origin and the original file location.
-        if is_apple_mobile and not is_mac_catalyst:
+        if needs_apple_fworks:
             assert cls.LOADER is AppleFrameworkLoader
 
             cls.ORIGIN = spec.origin
