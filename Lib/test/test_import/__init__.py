@@ -112,7 +112,7 @@ def require_builtin(module, *, skip=False):
 def require_extension(module, *, skip=False):
     # Apple extensions must be distributed as frameworks. This requires
     # a specialist loader.
-    if is_apple_mobile:
+    if is_apple_mobile and not is_mac_catalyst:
         _require_loader(module, AppleFrameworkLoader, skip)
     else:
         _require_loader(module, ExtensionFileLoader, skip)
@@ -2218,7 +2218,7 @@ class SubinterpImportTests(unittest.TestCase):
         if filename:
             # Apple extensions must be distributed as frameworks. This requires
             # a specialist loader.
-            if is_apple_mobile:
+            if is_apple_mobile and not is_mac_catalyst:
                 loader = "AppleFrameworkLoader"
             else:
                 loader = "ExtensionFileLoader"
@@ -2693,7 +2693,7 @@ class SinglephaseInitTests(unittest.TestCase):
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader, and we need to differentiate between the
         # spec.origin and the original file location.
-        if is_apple_mobile:
+        if is_apple_mobile and not is_mac_catalyst:
             assert cls.LOADER is AppleFrameworkLoader
 
             cls.ORIGIN = spec.origin
