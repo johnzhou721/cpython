@@ -2602,7 +2602,7 @@ class Test_ModuleStateAccess(unittest.TestCase):
         origin = importlib.util.find_spec('_testmultiphase').origin
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader.
-        if support.is_apple_mobile:
+        if support.is_apple_mobile and not support.is_mac_catalyst:
             loader = importlib.machinery.AppleFrameworkLoader(fullname, origin)
         else:
             loader = importlib.machinery.ExtensionFileLoader(fullname, origin)
