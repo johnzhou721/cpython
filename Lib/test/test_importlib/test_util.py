@@ -714,7 +714,7 @@ class IncompatibleExtensionModuleRestrictionsTests(unittest.TestCase):
     def test_incomplete_multi_phase_init_module(self):
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader.
-        if support.is_apple_mobile:
+        if support.is_apple_mobile and not support.is_mac_catalyst:
             loader = "AppleFrameworkLoader"
         else:
             loader = "ExtensionFileLoader"

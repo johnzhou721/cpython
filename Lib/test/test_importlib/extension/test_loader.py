@@ -1,4 +1,4 @@
-from test.support import is_apple_mobile
+from test.support import is_apple_mobile, is_mac_catalyst
 from test.test_importlib import abc, util
 
 machinery = util.import_importlib('importlib.machinery')
@@ -110,7 +110,7 @@ class SinglePhaseExtensionModuleTests(abc.LoaderTests):
 
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader.
-        if is_apple_mobile:
+        if is_apple_mobile and not is_mac_catalyst:
             self.LoaderClass = self.machinery.AppleFrameworkLoader
         else:
             self.LoaderClass = self.machinery.ExtensionFileLoader
@@ -198,7 +198,7 @@ class MultiPhaseExtensionModuleTests(abc.LoaderTests):
 
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader.
-        if is_apple_mobile:
+        if is_apple_mobile and not is_mac_catalyst:
             self.LoaderClass = self.machinery.AppleFrameworkLoader
         else:
             self.LoaderClass = self.machinery.ExtensionFileLoader
