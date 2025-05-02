@@ -46,7 +46,7 @@ __all__ = [
     # sys
     "MS_WINDOWS", "is_jython", "is_android", "is_emscripten", "is_wasi",
     "is_apple_mobile", "check_impl_detail", "unix_shell", "setswitchinterval",
-    "is_mac_catalyst",
+    "is_mac_catalyst", "needs_apple_fworks",
     # os
     "get_pagesize",
     # network
@@ -571,6 +571,7 @@ def skip_wasi_stack_overflow():
 is_apple_mobile = sys.platform in {"ios", "tvos", "watchos", "visionos"}
 is_apple = is_apple_mobile or sys.platform == "darwin"
 is_mac_catalyst = sys.implementation._multiarch.endswith("macabi")
+needs_apple_fworks = is_apple_mobile and not is_mac_catalyst
 
 has_fork_support = hasattr(os, "fork") and not (
     # WASM and Apple mobile platforms do not support subprocesses.
@@ -581,6 +582,9 @@ has_fork_support = hasattr(os, "fork") and not (
     # Although Android supports fork, it's unsafe to call it from Python because
     # all Android apps are multi-threaded.
     or is_android
+    
+    # Mac Catalyst supports subprocesses.
+    and not is_mac_catalyst
 )
 
 def requires_fork():
