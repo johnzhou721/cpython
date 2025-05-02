@@ -582,7 +582,7 @@ has_fork_support = hasattr(os, "fork") and not (
     # Although Android supports fork, it's unsafe to call it from Python because
     # all Android apps are multi-threaded.
     or is_android
-    
+
     # Mac Catalyst supports subprocesses.
     and not is_mac_catalyst
 )
