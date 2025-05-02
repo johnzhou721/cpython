@@ -7157,7 +7157,7 @@ class CapiTest(unittest.TestCase):
     def test_type_check_in_subinterp(self):
         # Apple mobile platforms EXCEPT Mac Catalyst require the use of the
         # custom framework loader, not the ExtensionFileLoader.
-        if support.is_apple_mobile and not support.is_mac_catalyst:
+        if support.needs_apple_fworks:
             extension_loader = "AppleFrameworkLoader"
         else:
             extension_loader = "ExtensionFileLoader"
