@@ -510,7 +510,7 @@ class PlatformTest(unittest.TestCase):
             if is_simulator:
                 self.assertIn(model, {"iPhone", "iPad"})
             # Mac Catalyst identifies as iPad with no version.
-            else if is_catalyst:
+            elif is_catalyst:
                 self.assertEqual(model, "iPad")
             else:
                 self.assertTrue(
