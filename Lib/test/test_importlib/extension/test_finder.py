@@ -1,4 +1,4 @@
-from test.support import is_apple_mobile
+from test.support import needs_apple_fworks
 from test.test_importlib import abc, util
 
 machinery = util.import_importlib('importlib.machinery')
