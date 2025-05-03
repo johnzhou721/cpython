@@ -2256,49 +2256,27 @@ testios:
 		echo "Cannot run the iOS testbed for a non-iOS build."; \
 		exit 1;\
 	fi
+	@if test $(PYTHONFRAMEWORK) != "Python"; then \
+		echo "Cannot run the iOS testbed with a non-default framework name."; \
+		exit 1;\
+	fi
+	@if ! test -d $(PYTHONFRAMEWORKPREFIX); then \
+		echo "Cannot find a finalized iOS Python.framework. Have you run 'make install' to finalize the framework build?"; \
+		exit 1;\
+	fi
+
 	@if test "$(findstring -iphonesimulator,$(MULTIARCH))" != "-iphonesimulator"; then \
-		echo "Cannot run the iOS testbed for non-simulator builds."; \
-		exit 1;\
+		if test "$(findstring -macabi,$(MULTIARCH))" != "-macabi"; then \
+			echo "Cannot run the iOS testbed for device builds."; \
+			exit 1;\
+		else \
+			$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed --catalyst clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"; \
+			$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" --catalyst run --verbose -- test -uall --single-process --rerun -W; \
+		fi \
+	else \
+		$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"; \
+		$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" run --verbose -- test -uall --single-process --rerun -W; \
 	fi
-	@if test $(PYTHONFRAMEWORK) != "Python"; then \
-		echo "Cannot run the iOS testbed with a non-default framework name."; \
-		exit 1;\
-	fi
-	@if ! test -d $(PYTHONFRAMEWORKPREFIX); then \
-		echo "Cannot find a finalized iOS Python.framework. Have you run 'make install' to finalize the framework build?"; \
-		exit 1;\
-	fi
-
-	# Clone the testbed project into the XCFOLDER-iOS
-	$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"
-
-	# Run the testbed project
-	$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" run --verbose -- test -uall --single-process --rerun -W
-
-.PHONY: testcatalyst
-testcatalyst:
-	@if test "$(MACHDEP)" != "ios"; then \
-		echo "Cannot run the iOS testbed for a non-iOS build."; \
-		exit 1;\
-	fi
-	@if test "$(findstring -macabi,$(MULTIARCH))" != "-macabi"; then \
-		echo "Cannot run the iOS testbed on Mac Catalyst for non-Mac Catalyst builds."; \
-		exit 1;\
-	fi
-	@if test $(PYTHONFRAMEWORK) != "Python"; then \
-		echo "Cannot run the iOS testbed with a non-default framework name."; \
-		exit 1;\
-	fi
-	@if ! test -d $(PYTHONFRAMEWORKPREFIX); then \
-		echo "Cannot find a finalized iOS Python.framework. Have you run 'make install' to finalize the framework build?"; \
-		exit 1;\
-	fi
-
-	# Clone the testbed project into the XCFOLDER-iOS
-	$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed --catalyst clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"
-
-	# Run the testbed project
-	$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" --catalyst run --verbose -- test -uall --single-process --rerun -W
 
 # Run the test suite on the visionOS simulator. Must be run on a macOS machine with
 # a full Xcode install that has an Apple Vision Pro simulator available.
