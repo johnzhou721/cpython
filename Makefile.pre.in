@@ -2297,8 +2297,8 @@ testcatalyst:
 	# Clone the testbed project into the XCFOLDER-iOS
 	$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed --catalyst clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"
 
-	# Run the testbed project, but allow multiprocessing
-	$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" --catalyst run --verbose -- test -uall --rerun -W
+	# Run the testbed project
+	$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" --catalyst run --verbose -- test -uall --single-process --rerun -W
 
 # Run the test suite on the visionOS simulator. Must be run on a macOS machine with
 # a full Xcode install that has an Apple Vision Pro simulator available.
