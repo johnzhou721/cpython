@@ -516,7 +516,7 @@ class PlatformTest(unittest.TestCase):
                 )
 
             self.assertEqual(type(is_simulator), bool)
-            
+
             # Mac Catalyst platform will return iPadOS.
             if is_catalyst:
                 self.assertEqual(system, "iPadOS")
