@@ -485,7 +485,7 @@ class PlatformTest(unittest.TestCase):
 
         # ios_ver is only fully available on iOS where ctypes is available.
         if sys.platform == "ios" and _ctypes:
-            system, release, model, is_simulator = result
+            system, release, model, is_simulator, is_catalyst = result
             # Result is a namedtuple
             self.assertEqual(result.system, system)
             self.assertEqual(result.release, release)
@@ -496,6 +496,7 @@ class PlatformTest(unittest.TestCase):
             # ios_ver(), so we check that the values are broadly what we expect.
 
             # System is either iOS or iPadOS, depending on the test device
+            # Mac Catalyst returns iPadOS for whatever reason.
             self.assertIn(system, {"iOS", "iPadOS"})
 
             # Release is a numeric version specifier with at least 2 parts
@@ -515,6 +516,10 @@ class PlatformTest(unittest.TestCase):
                 )
 
             self.assertEqual(type(is_simulator), bool)
+            
+            # Mac Catalyst platform will return iPadOS.
+            if is_catalyst:
+                self.assertEqual(system, "iPadOS")
         else:
             # On non-iOS platforms, calling ios_ver doesn't fail; you get
             # default values

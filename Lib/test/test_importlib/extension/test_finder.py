@@ -20,7 +20,7 @@ class FinderTests(abc.FinderTests):
             )
 
     def find_spec(self, fullname):
-        if is_apple_mobile:
+        if needs_apple_fworks:
             # Apple mobile platforms require a specialist loader that uses
             # .fwork files as placeholders for the true `.so` files.
             loaders = [
