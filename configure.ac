@@ -731,8 +731,8 @@ AC_ARG_ENABLE([framework],
 				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
 				case $_flag_ios_catalyst in
 					macabi)
-						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure"
-						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure "
+						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs "
 						FRAMEWORKINSTALLLAST=""
 						FRAMEWORKALTINSTALLLAST=""
 						FRAMEWORKPYTHONW=
