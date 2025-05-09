@@ -545,8 +545,9 @@ def tvos_ver(system="", release="", model="", is_simulator=False):
     if sys.platform == "tvos":
         # TODO: Can the iOS implementation be used here?
         import _ios_support
-        result = _ios_support.get_platform_ios()[:-1]  # ignore the Catalyst flag
+        result = _ios_support.get_platform_ios()
         if result is not None:
+            result = result[:-1]  # ignore the Catalyst flag
             return TVOSVersionInfo(*result)
 
     return TVOSVersionInfo(system, release, model, is_simulator)
@@ -569,8 +570,9 @@ def watchos_ver(system="", release="", model="", is_simulator=False):
     if sys.platform == "watchos":
         # TODO: Can the iOS implementation be used here?
         import _ios_support
-        result = _ios_support.get_platform_ios()[:-1]  # ignore the Catalyst flag
+        result = _ios_support.get_platform_ios()
         if result is not None:
+            result = result[:-1]  # ignore the Catalyst flag
             return WatchOSVersionInfo(*result)
 
     return WatchOSVersionInfo(system, release, model, is_simulator)
@@ -593,8 +595,9 @@ def visionos_ver(system="", release="", model="", is_simulator=False):
     if sys.platform == "visionos":
         # TODO: Can the iOS implementation be used here?
         import _ios_support
-        result = _ios_support.get_platform_ios()[:-1]  # ignore the Catalyst flag
+        result = _ios_support.get_platform_ios()
         if result is not None:
+            result = result[:-1]  # ignore the Catalyst flag
             return VisionOSVersionInfo(*result)
 
     return VisionOSVersionInfo(system, release, model, is_simulator)
