@@ -82,6 +82,14 @@ iOS/testbed/Python.xcframework/ios-*/Python.framework
 iOS/testbed/iOSTestbed.xcodeproj/project.xcworkspace
 iOS/testbed/iOSTestbed.xcodeproj/xcuserdata
 iOS/testbed/iOSTestbed.xcodeproj/xcshareddata
+tvOS/testbed/build
+tvOS/testbed/Python.xcframework/tvos-*/bin
+tvOS/testbed/Python.xcframework/tvos-*/include
+tvOS/testbed/Python.xcframework/tvos-*/lib
+tvOS/testbed/Python.xcframework/tvos-*/Python.framework
+tvOS/testbed/tvOSTestbed.xcodeproj/project.xcworkspace
+tvOS/testbed/tvOSTestbed.xcodeproj/xcuserdata
+tvOS/testbed/tvOSTestbed.xcodeproj/xcshareddata
 visionOS/testbed/Python.xcframework/xros-*/bin
 visionOS/testbed/Python.xcframework/xros-*/include
 visionOS/testbed/Python.xcframework/xros-*/lib
