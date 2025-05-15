@@ -440,8 +440,14 @@ async def run_testbed(simulator: str, args: list[str], catalyst: bool, verbose: 
         finally:
             simulator_lock.release()
     else:
-        async with asyncio.TaskGroup() as tg:
-            tg.create_task(xcode_test(location, simulator="", verbose=verbose, catalyst=True))
+        try:
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(xcode_test(location, simulator="", verbose=verbose, catalyst=True))
+        except* MySystemExit as e:
+            raise SystemExit(*e.exceptions[0].args) from None
+        except* subprocess.CalledProcessError as e:
+            # Extract it from the ExceptionGroup so it can be handled by `main`.
+            raise e.exceptions[0]
 
 
 def main():
