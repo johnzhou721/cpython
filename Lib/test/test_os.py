@@ -2510,19 +2510,49 @@ class TestInvalidFD(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(os, 'closerange'), 'test needs os.closerange()')
     def test_closerange(self):
-        fd = os_helper.make_bad_fd()
-        # Make sure none of the descriptors we are about to close are
-        # currently valid (issue 6542).
-        for i in range(10):
-            try: os.fstat(fd+i)
-            except OSError:
-                pass
-            else:
-                break
-        if i < 2:
-            raise unittest.SkipTest(
-                "Unable to acquire a range of invalid file descriptors")
-        self.assertEqual(os.closerange(fd, fd + i-1), None)
+        if support.is_mac_catalyst:
+            # On Mac Catalyst, somehow we're not detecting a guarded FD
+            # using fstat. We make some random fds first, stop once not
+            # consecutive, close all of them one by one using the result
+            # of open(), then assert that closerange is failing.
+            #
+            # This ensures that none of those things we're closing is
+            # guarded, if we're careful to not use code that makes guarded
+            # file descriptors.
+            
+            copies = []
+            # Open a file for testing and get its FD
+            file = open(os_helper.TESTFN, "wb")
+            fd = file.fileno()
+            copies.append(file)
+            for i in range(10):
+                file_dup = open(os_helper.TESTFN, "wb")
+                if file_dup.fileno() != fd + i:
+                    file_dup.close()
+                    break
+                else:
+                    copies.append(file_dup)
+            # Close everything
+            for copy in copies:
+                copy.close()
+            os.unlink(os_helper.TESTFN)
+            
+            # Now we're left with invalid FDs. Let's go close them!
+            self.assertEqual(os.closerange(fd, fd + i-1), None)
+        else:
+            fd = os_helper.make_bad_fd()
+            # Make sure none of the descriptors we are about to close are
+            # currently valid (issue 6542).
+            for i in range(10):
+                try: os.fstat(fd+i)
+                except OSError:
+                    pass
+                else:
+                    break
+            if i < 2:
+                raise unittest.SkipTest(
+                    "Unable to acquire a range of invalid file descriptors")
+            self.assertEqual(os.closerange(fd, fd + i-1), None)
 
     @unittest.skipUnless(hasattr(os, 'dup2'), 'test needs os.dup2()')
     def test_dup2(self):
