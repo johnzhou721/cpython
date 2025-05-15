@@ -2519,7 +2519,7 @@ class TestInvalidFD(unittest.TestCase):
             # This ensures that none of those things we're closing is
             # guarded, if we're careful to not use code that makes guarded
             # file descriptors.
-            
+
             copies = []
             # Open a file for testing and get its FD
             file = open(os_helper.TESTFN, "wb")
@@ -2536,7 +2536,7 @@ class TestInvalidFD(unittest.TestCase):
             for copy in copies:
                 copy.close()
             os.unlink(os_helper.TESTFN)
-            
+
             # Now we're left with invalid FDs. Let's go close them!
             self.assertEqual(os.closerange(fd, fd + i-1), None)
         else:
