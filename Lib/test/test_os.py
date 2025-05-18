@@ -2531,13 +2531,13 @@ class TestInvalidFD(unittest.TestCase):
                     break
                 else:
                     copies.append(file_dup)
-            if i < 2:
-                raise unittest.SkipTest(
-                    "Unable to acquire a range of invalid file descriptors")
             # Close everything
             for copy in copies:
                 copy.close()
             os.unlink(os_helper.TESTFN)
+            if i < 2:
+                raise unittest.SkipTest(
+                    "Unable to acquire a range of invalid file descriptors")
 
             # Now we're left with invalid FDs. Let's go close them!
             self.assertEqual(os.closerange(fd, fd + i-1), None)
