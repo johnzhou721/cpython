@@ -2305,6 +2305,36 @@ testvisionos:
 	# Run the testbed project
 	$(PYTHON_FOR_BUILD) "$(XCFOLDER-visionOS)" run --verbose -- test -uall --single-process --rerun -W
 
+# Run the test suite on the tvOS simulator. Must be run on a macOS machine with
+# a full Xcode install that has an iPhone SE (3rd edition) simulator available.
+# This must be run *after* a `make install` has completed the build. The
+# `--with-framework-name` argument *cannot* be used when configuring the build.
+XCFOLDER-tvOS:=tvOSTestbed.$(MULTIARCH).$(shell date +%s).$$PPID
+.PHONY: testtvos
+testtvos:
+	@if test "$(MACHDEP)" != "tvos"; then \
+		echo "Cannot run the tvOS testbed for a non-tvOS build."; \
+		exit 1;\
+	fi
+	@if test "$(findstring -iphonesimulator,$(MULTIARCH))" != "-iphonesimulator"; then \
+		echo "Cannot run the tvOS testbed for non-simulator builds."; \
+		exit 1;\
+	fi
+	@if test $(PYTHONFRAMEWORK) != "Python"; then \
+		echo "Cannot run the tvOS testbed with a non-default framework name."; \
+		exit 1;\
+	fi
+	@if ! test -d $(PYTHONFRAMEWORKPREFIX); then \
+		echo "Cannot find a finalized tvOS Python.framework. Have you run 'make install' to finalize the framework build?"; \
+		exit 1;\
+	fi
+
+	# Clone the testbed project into the XCFOLDER-tvOS
+	$(PYTHON_FOR_BUILD) $(srcdir)/tvOS/testbed clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-tvOS)"
+
+	# Run the testbed project
+	$(PYTHON_FOR_BUILD) "$(XCFOLDER-tvOS)" run --verbose -- test -uall --single-process --rerun -W
+
 # Like test, but using --slow-ci which enables all test resources and use
 # longer timeout. Run an optional pybuildbot.identify script to include
 # information about the build environment.
