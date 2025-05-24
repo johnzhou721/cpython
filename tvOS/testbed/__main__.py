@@ -453,8 +453,8 @@ def main():
     )
     run.add_argument(
         "--simulator",
-        default="iPhone SE (3rd Generation)",
-        help="The name of the simulator to use (default: 'iPhone SE (3rd Generation)')",
+        default="Apple TV",
+        help="The name of the simulator to use (default: 'Apple TV')",
     )
     run.add_argument(
         "-v", "--verbose",

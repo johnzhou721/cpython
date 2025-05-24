@@ -71,6 +71,7 @@ Lib/test/data/*
 /Makefile
 /Makefile.pre
 /iOSTestbed.*
+/tvOSTestbed.*
 /visionOSTestbed.*
 iOS/Frameworks/
 iOS/Resources/Info.plist
