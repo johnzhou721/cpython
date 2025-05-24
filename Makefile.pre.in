@@ -2316,7 +2316,7 @@ testtvos:
 		echo "Cannot run the tvOS testbed for a non-tvOS build."; \
 		exit 1;\
 	fi
-	@if test "$(findstring -iphonesimulator,$(MULTIARCH))" != "-iphonesimulator"; then \
+	@if test "$(findstring -appletvsimulator,$(MULTIARCH))" != "-appletvsimulator"; then \
 		echo "Cannot run the tvOS testbed for non-simulator builds."; \
 		exit 1;\
 	fi

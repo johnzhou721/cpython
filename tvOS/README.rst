@@ -66,8 +66,9 @@ tvOS builds of Python *must* be constructed as framework builds. To support this
 you must provide the ``--enable-framework`` flag when configuring the build.
 
 The build also requires the use of cross-compilation. The commands for building
-Python for tvOS will look somethign like::
+Python for tvOS will look something like::
 
+  $ export PATH="$(pwd)/tvOS/Resources/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin"
   $ ./configure \
         --enable-framework=/path/to/install \
         --host=aarch64-apple-tvos \
