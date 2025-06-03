@@ -1,4 +1,4 @@
-from test.support import is_apple_mobile
+from test.support import needs_apple_fworks
 from test.test_importlib import abc, util
 
 machinery = util.import_importlib('importlib.machinery')
@@ -20,7 +20,7 @@ class FinderTests(abc.FinderTests):
             )
 
     def find_spec(self, fullname):
-        if is_apple_mobile:
+        if needs_apple_fworks:
             # Apple mobile platforms require a specialist loader that uses
             # .fwork files as placeholders for the true `.so` files.
             loaders = [

@@ -82,6 +82,7 @@ iOS/testbed/Python.xcframework/ios-*/Python.framework
 iOS/testbed/iOSTestbed.xcodeproj/project.xcworkspace
 iOS/testbed/iOSTestbed.xcodeproj/xcuserdata
 iOS/testbed/iOSTestbed.xcodeproj/xcshareddata
+MacCatalyst/Resources/Info.plist
 visionOS/testbed/Python.xcframework/xros-*/bin
 visionOS/testbed/Python.xcframework/xros-*/include
 visionOS/testbed/Python.xcframework/xros-*/lib

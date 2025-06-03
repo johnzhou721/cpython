@@ -1920,7 +1920,7 @@ class SubinterpreterTest(unittest.TestCase):
 
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader.
-        if support.is_apple_mobile:
+        if support.needs_apple_fworks:
             loader = "AppleFrameworkLoader"
         else:
             loader = "ExtensionFileLoader"
@@ -2604,7 +2604,7 @@ class Test_ModuleStateAccess(unittest.TestCase):
         origin = importlib.util.find_spec('_testmultiphase').origin
         # Apple extensions must be distributed as frameworks. This requires
         # a specialist loader.
-        if support.is_apple_mobile:
+        if support.needs_apple_fworks:
             loader = importlib.machinery.AppleFrameworkLoader(fullname, origin)
         else:
             loader = importlib.machinery.ExtensionFileLoader(fullname, origin)

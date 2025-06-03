@@ -25,6 +25,7 @@ else:
 def get_platform_ios():
     # Determine if this is a simulator using the multiarch value
     is_simulator = sys.implementation._multiarch.endswith("simulator")
+    is_catalyst = sys.implementation._multiarch.endswith("macabi")
 
     # We can't use ctypes; abort
     if not objc:
@@ -68,4 +69,4 @@ def get_platform_ios():
     release = objc.objc_msgSend(device_systemVersion, SEL_UTF8String).decode()
     model = objc.objc_msgSend(device_model, SEL_UTF8String).decode()
 
-    return system, release, model, is_simulator
+    return system, release, model, is_simulator, is_catalyst

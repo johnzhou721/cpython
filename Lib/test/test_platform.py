@@ -488,7 +488,7 @@ class PlatformTest(unittest.TestCase):
 
         # ios_ver is only fully available on iOS where ctypes is available.
         if sys.platform == "ios" and _ctypes:
-            system, release, model, is_simulator = result
+            system, release, model, is_simulator, is_catalyst = result
             # Result is a namedtuple
             self.assertEqual(result.system, system)
             self.assertEqual(result.release, release)
@@ -499,6 +499,7 @@ class PlatformTest(unittest.TestCase):
             # ios_ver(), so we check that the values are broadly what we expect.
 
             # System is either iOS or iPadOS, depending on the test device
+            # Mac Catalyst returns iPadOS for whatever reason.
             self.assertIn(system, {"iOS", "iPadOS"})
 
             # Release is a numeric version specifier with at least 2 parts
@@ -511,6 +512,9 @@ class PlatformTest(unittest.TestCase):
             # we get a model descriptor like "iPhone13,1"
             if is_simulator:
                 self.assertIn(model, {"iPhone", "iPad"})
+            # Mac Catalyst identifies as iPad with no version.
+            elif is_catalyst:
+                self.assertEqual(model, "iPad")
             else:
                 self.assertTrue(
                     (model.startswith("iPhone") or model.startswith("iPad"))
@@ -518,6 +522,10 @@ class PlatformTest(unittest.TestCase):
                 )
 
             self.assertEqual(type(is_simulator), bool)
+
+            # Mac Catalyst platform will return iPadOS.
+            if is_catalyst:
+                self.assertEqual(system, "iPadOS")
         else:
             # On non-iOS platforms, calling ios_ver doesn't fail; you get
             # default values
@@ -527,11 +535,12 @@ class PlatformTest(unittest.TestCase):
             self.assertFalse(result.is_simulator)
 
             # Check the fallback values can be overridden by arguments
-            override = platform.ios_ver("Foo", "Bar", "Whiz", True)
+            override = platform.ios_ver("Foo", "Bar", "Whiz", True, True)
             self.assertEqual(override.system, "Foo")
             self.assertEqual(override.release, "Bar")
             self.assertEqual(override.model, "Whiz")
             self.assertTrue(override.is_simulator)
+            self.assertTrue(override.is_catalyst)
 
     @unittest.skipIf(support.is_emscripten, "Does not apply to Emscripten")
     def test_libc_ver(self):

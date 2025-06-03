@@ -508,11 +508,11 @@ def mac_ver(release='', versioninfo=('', '', ''), machine=''):
 # A namedtuple for iOS version information.
 IOSVersionInfo = collections.namedtuple(
     "IOSVersionInfo",
-    ["system", "release", "model", "is_simulator"]
+    ["system", "release", "model", "is_simulator", "is_catalyst"]
 )
 
 
-def ios_ver(system="", release="", model="", is_simulator=False):
+def ios_ver(system="", release="", model="", is_simulator=False, is_catalyst=False):
     """Get iOS version information, and return it as a namedtuple:
         (system, release, model, is_simulator).
 
@@ -525,7 +525,7 @@ def ios_ver(system="", release="", model="", is_simulator=False):
         if result is not None:
             return IOSVersionInfo(*result)
 
-    return IOSVersionInfo(system, release, model, is_simulator)
+    return IOSVersionInfo(system, release, model, is_simulator, is_catalyst)
 
 
 # A namedtuple for tvOS version information.
@@ -547,6 +547,7 @@ def tvos_ver(system="", release="", model="", is_simulator=False):
         import _ios_support
         result = _ios_support.get_platform_ios()
         if result is not None:
+            result = result[:-1]  # ignore the Catalyst flag
             return TVOSVersionInfo(*result)
 
     return TVOSVersionInfo(system, release, model, is_simulator)
@@ -571,6 +572,7 @@ def watchos_ver(system="", release="", model="", is_simulator=False):
         import _ios_support
         result = _ios_support.get_platform_ios()
         if result is not None:
+            result = result[:-1]  # ignore the Catalyst flag
             return WatchOSVersionInfo(*result)
 
     return WatchOSVersionInfo(system, release, model, is_simulator)
@@ -595,6 +597,7 @@ def visionos_ver(system="", release="", model="", is_simulator=False):
         import _ios_support
         result = _ios_support.get_platform_ios()
         if result is not None:
+            result = result[:-1]  # ignore the Catalyst flag
             return VisionOSVersionInfo(*result)
 
     return VisionOSVersionInfo(system, release, model, is_simulator)
@@ -968,7 +971,7 @@ class _Processor:
     # there's only one CPU architecture for devices, so we know the right
     # answer.
     def get_ios():
-        if sys.implementation._multiarch.endswith("simulator"):
+        if sys.implementation._multiarch.endswith("simulator") or sys.implementation._multiarch.endswith("macabi"):
             return os.uname().machine
         return 'arm64'
 
@@ -1148,7 +1151,7 @@ def uname():
 
     # Normalize responses on Apple mobile platforms
     if sys.platform == 'ios':
-        system, release, _, _ = ios_ver()
+        system, release, _, _, _ = ios_ver()
     if sys.platform == 'tvos':
         system, release, _, _ = tvos_ver()
     if sys.platform == 'watchos':
@@ -1443,7 +1446,7 @@ def platform(aliased=False, terse=False):
     if system == 'Darwin':
         # macOS and iOS both report as a "Darwin" kernel
         if sys.platform == "ios":
-            system, release, _, _ = ios_ver()
+            system, release, _, _, _ = ios_ver()
         elif sys.platform == "tvos":
             system, release, _, _ = tvos_ver()
         elif sys.platform == "watchos":

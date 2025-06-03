@@ -426,9 +426,12 @@ AC_SUBST([host_exec_prefix])
 # configure will fail.
 if test -z "$AR"; then
 	case "$host" in
+		x86_64-apple-ios*-macabi)  AR=x86_64-apple-ios-macabi-ar ;;
+		aarch64-apple-ios*-macabi) AR=arm64-apple-ios-macabi-ar ;;
+
+		x86_64-apple-ios*-simulator)  AR=x86_64-apple-ios-simulator-ar ;;
 		aarch64-apple-ios*-simulator) AR=arm64-apple-ios-simulator-ar ;;
 		aarch64-apple-ios*)           AR=arm64-apple-ios-ar ;;
-		x86_64-apple-ios*-simulator)  AR=x86_64-apple-ios-simulator-ar ;;
 
 		aarch64-apple-tvos*-simulator) AR=arm64-apple-tvos-simulator-ar ;;
 		aarch64-apple-tvos*)           AR=arm64-apple-tvos-ar ;;
@@ -445,9 +448,12 @@ if test -z "$AR"; then
 fi
 if test -z "$CC"; then
 	case "$host" in
+		x86_64-apple-ios*-macabi)  CC=x86_64-apple-ios-macabi-clang ;;
+		aarch64-apple-ios*-macabi) CC=arm64-apple-ios-macabi-clang ;;
+
+		x86_64-apple-ios*-simulator)  CC=x86_64-apple-ios-simulator-clang ;;
 		aarch64-apple-ios*-simulator) CC=arm64-apple-ios-simulator-clang ;;
 		aarch64-apple-ios*)           CC=arm64-apple-ios-clang ;;
-		x86_64-apple-ios*-simulator)  CC=x86_64-apple-ios-simulator-clang ;;
 
 		aarch64-apple-tvos*-simulator) CC=arm64-apple-tvos-simulator-clang ;;
 		aarch64-apple-tvos*)           CC=arm64-apple-tvos-clang ;;
@@ -464,9 +470,12 @@ if test -z "$CC"; then
 fi
 if test -z "$CPP"; then
 	case "$host" in
+		x86_64-apple-ios*-macabi)  CPP=x86_64-apple-ios-macabi-cpp ;;
+		aarch64-apple-ios*-macabi) CPP=arm64-apple-ios-macabi-cpp ;;
+
+		x86_64-apple-ios*-simulator)  CPP=x86_64-apple-ios-simulator-cpp ;;
 		aarch64-apple-ios*-simulator) CPP=arm64-apple-ios-simulator-cpp ;;
 		aarch64-apple-ios*)           CPP=arm64-apple-ios-cpp ;;
-		x86_64-apple-ios*-simulator)  CPP=x86_64-apple-ios-simulator-cpp ;;
 
 		aarch64-apple-tvos*-simulator) CPP=arm64-apple-tvos-simulator-cpp ;;
 		aarch64-apple-tvos*)           CPP=arm64-apple-tvos-cpp ;;
@@ -483,9 +492,12 @@ if test -z "$CPP"; then
 fi
 if test -z "$CXX"; then
 	case "$host" in
+		x86_64-apple-ios*-macabi)  CXX=x86_64-apple-ios-macabi-clang++ ;;
+		aarch64-apple-ios*-macabi) CXX=arm64-apple-ios-macabi-clang++ ;;
+
+		x86_64-apple-ios*-simulator)  CXX=x86_64-apple-ios-simulator-clang++ ;;
 		aarch64-apple-ios*-simulator) CXX=arm64-apple-ios-simulator-clang++ ;;
 		aarch64-apple-ios*)           CXX=arm64-apple-ios-clang++ ;;
-		x86_64-apple-ios*-simulator)  CXX=x86_64-apple-ios-simulator-clang++ ;;
 
 		aarch64-apple-tvos*-simulator) CXX=arm64-apple-tvos-simulator-clang++ ;;
 		aarch64-apple-tvos*)           CXX=arm64-apple-tvos-clang++ ;;
@@ -716,18 +728,33 @@ AC_ARG_ENABLE([framework],
 				AC_CONFIG_FILES([Mac/Resources/app/Info.plist])
 				;;
 			iOS) :
-				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
-				FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
-				FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
-				FRAMEWORKPYTHONW=
-				INSTALLTARGETS="libinstall inclinstall sharedinstall"
-
-				prefix=$PYTHONFRAMEWORKPREFIX
-				PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
-				RESSRCDIR=iOS/Resources
-
-				AC_CONFIG_FILES([iOS/Resources/Info.plist])
+				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
+				case $_flag_ios_catalyst in
+					macabi)
+						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs "
+						FRAMEWORKINSTALLLAST=""
+						FRAMEWORKALTINSTALLLAST=""
+						FRAMEWORKPYTHONW=
+						INSTALLTARGETS="libinstall inclinstall sharedinstall"
+						prefix=$PYTHONFRAMEWORKINSTALLDIR/Versions/$VERSION
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR/Versions/$VERSION"
+						RESSRCDIR=MacCatalyst/Resources
+						AC_CONFIG_FILES([MacCatalyst/Resources/Info.plist])
+						;;
+					*)
+						FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
+						FRAMEWORKALTINSTALLFIRST="frameworkinstallunversionedstructure "
+						FRAMEWORKINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKALTINSTALLLAST="frameworkinstallmobileheaders"
+						FRAMEWORKPYTHONW=
+						INSTALLTARGETS="libinstall inclinstall sharedinstall"
+						prefix=$PYTHONFRAMEWORKPREFIX
+						PYTHONFRAMEWORKINSTALLNAMEPREFIX="@rpath/$PYTHONFRAMEWORKDIR"
+						RESSRCDIR=iOS/Resources
+						AC_CONFIG_FILES([iOS/Resources/Info.plist])
+					;;
+				esac
 				;;
 			tvOS) :
 				FRAMEWORKINSTALLFIRST="frameworkinstallunversionedstructure"
@@ -863,6 +890,33 @@ AC_ARG_WITH(
 ])
 AC_SUBST([APP_STORE_COMPLIANCE_PATCH])
 
+
+AC_ARG_WITH([catalyst-macos-version],
+  [AS_HELP_STRING([--with-catalyst-macos-version=VER],
+  [The minimum macOS version a Catalyst build can run on (only valid for *-apple-ios*-macabi targets)])],
+  [case "$host" in
+    *-apple-ios*-macabi)
+      CATALYST_MACOS_VERSION="$withval"
+      ;;
+    *)
+      AC_MSG_ERROR([--with-catalyst-macos-version is only valid when targeting Mac Catalyst (*-apple-ios*-macabi).])
+      ;;
+   esac
+  ],
+  [case "$host" in
+    *-apple-ios*-macabi)
+      CATALYST_MACOS_VERSION=11.2
+      ;;
+    *)
+      CATALYST_MACOS_VERSION=
+      ;;
+    esac
+  ]
+)
+
+
+
+
 EXPORT_XROS_DEPLOYMENT_TARGET='#'
 
 AC_SUBST([_PYTHON_HOST_PLATFORM])
@@ -879,6 +933,26 @@ if test "$cross_compiling" = yes; then
 		;;
 	*-*-cygwin*)
 		_host_ident=
+		;;
+	*-apple-ios*-macabi)
+		_host_os=`echo $host | cut -d '-' -f3`
+		_host_device=`echo $host | cut -d '-' -f4`   # should be macabi
+		_host_device=${_host_device:=os}
+
+		# IPHONEOS_DEPLOYMENT_TARGET is the minimum supported iOS version
+		AC_MSG_CHECKING([iOS deployment target])
+		IPHONEOS_DEPLOYMENT_TARGET=$(echo ${_host_os} | cut -c4-)
+		IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:=14.2}  # else it returns invalid version number
+		AC_MSG_RESULT([$IPHONEOS_DEPLOYMENT_TARGET])
+
+		case "$host_cpu" in
+			aarch64)
+				_host_ident=${IPHONEOS_DEPLOYMENT_TARGET}-arm64-iphoneos-${_host_device}   # platform_triplet.c uses iphoneos-macabi
+				;;
+			*)
+				_host_ident=${IPHONEOS_DEPLOYMENT_TARGET}-$host_cpu-iphoneos-${_host_device}
+				;;
+		esac
 		;;
 	*-apple-ios*)
 		_host_os=`echo $host | cut -d '-' -f3`
@@ -1128,6 +1202,10 @@ AC_SUBST([WATCHOS_DEPLOYMENT_TARGET])
 AC_SUBST([XROS_DEPLOYMENT_TARGET])
 # XROS_DEPLOYMENT_TARGET should get exported
 AC_SUBST([EXPORT_XROS_DEPLOYMENT_TARGET])
+
+# The minimum macOS version that a Mac Catalyst build can run on.
+AC_SUBST([CATALYST_MACOS_VERSION])
+
 
 # checks for alternative programs
 
@@ -1418,6 +1496,8 @@ AS_CASE([$host/$ac_cv_cc_name],
   [powerpc64le-*-linux-gnu/clang],   [PY_SUPPORT_TIER=3], dnl Linux on PPC64 little endian, glibc, clang
   [s390x-*-linux-gnu/gcc],           [PY_SUPPORT_TIER=3], dnl Linux on 64bit s390x (big endian), glibc, gcc
   [x86_64-*-freebsd*/clang],         [PY_SUPPORT_TIER=3], dnl FreeBSD on AMD64
+  [aarch64-apple-ios*-macabi/clang],      [PY_SUPPORT_TIER=3], dnl MacCatalyst on arm64
+  [x86_64-apple-ios*-macabi/clang],       [PY_SUPPORT_TIER=3], dnl MacCatalyst on x86_64
   [aarch64-apple-ios*-simulator/clang],   [PY_SUPPORT_TIER=3], dnl iOS Simulator on arm64
   [aarch64-apple-ios*/clang],             [PY_SUPPORT_TIER=3], dnl iOS on ARM64
   [aarch64-apple-tvos*-simulator/clang],  [PY_SUPPORT_TIER=3], dnl tvOS Simulator on arm64
@@ -7932,13 +8012,17 @@ AS_CASE([$ac_sys_system],
     dnl curses and tkinter user interface are not available.
     dnl gdbm and nis aren't available
     dnl Stub implementations are provided for pwd, grp etc APIs
+    dnl subprocess is however supported for Mac Catalyst
+    case "$_host_device" in
+      macabi) ;;
+      *) PY_STDLIB_MOD_SET_NA([_posixsubprocess]) ;;
+    esac
     PY_STDLIB_MOD_SET_NA(
       [_curses],
       [_curses_panel],
       [_gdbm],
       [_multiprocessing],
       [_posixshmem],
-      [_posixsubprocess],
       [_scproxy],
       [_tkinter],
       [grp],

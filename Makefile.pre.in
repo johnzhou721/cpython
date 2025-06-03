@@ -2277,10 +2277,6 @@ testios:
 		echo "Cannot run the iOS testbed for a non-iOS build."; \
 		exit 1;\
 	fi
-	@if test "$(findstring -iphonesimulator,$(MULTIARCH))" != "-iphonesimulator"; then \
-		echo "Cannot run the iOS testbed for non-simulator builds."; \
-		exit 1;\
-	fi
 	@if test $(PYTHONFRAMEWORK) != "Python"; then \
 		echo "Cannot run the iOS testbed with a non-default framework name."; \
 		exit 1;\
@@ -2290,11 +2286,18 @@ testios:
 		exit 1;\
 	fi
 
-	# Clone the testbed project into the XCFOLDER-iOS
-	$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"
-
-	# Run the testbed project
-	$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" run --verbose -- test -uall --single-process --rerun -W
+	@if test "$(findstring -iphonesimulator,$(MULTIARCH))" != "-iphonesimulator"; then \
+		if test "$(findstring -macabi,$(MULTIARCH))" != "-macabi"; then \
+			echo "Cannot run the iOS testbed for device builds."; \
+			exit 1;\
+		else \
+			$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed --catalyst clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"; \
+			$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" --catalyst run --verbose -- test -uall --single-process --rerun -W; \
+		fi \
+	else \
+		$(PYTHON_FOR_BUILD) $(srcdir)/iOS/testbed clone --framework $(PYTHONFRAMEWORKPREFIX) "$(XCFOLDER-iOS)"; \
+		$(PYTHON_FOR_BUILD) "$(XCFOLDER-iOS)" run --verbose -- test -uall --single-process --rerun -W; \
+	fi
 
 # Run the test suite on the visionOS simulator. Must be run on a macOS machine with
 # a full Xcode install that has an Apple Vision Pro simulator available.
@@ -3013,7 +3016,7 @@ frameworkinstallversionedstructure:	$(LDLIBRARY)
 		fi; \
 	done
 	$(LN) -fsn include/python$(LDVERSION) $(DESTDIR)$(prefix)/Headers
-	sed 's/%VERSION%/'"`$(RUNSHARED) ./$(BUILDPYTHON) -c 'import platform; print(platform.python_version())'`"'/g' < $(RESSRCDIR)/Info.plist > $(DESTDIR)$(prefix)/Resources/Info.plist
+	sed 's/%VERSION%/'"`$(RUNSHARED) ./$(PYTHON_FOR_BUILD) -c 'import platform; print(platform.python_version())'`"'/g' < $(RESSRCDIR)/Info.plist > $(DESTDIR)$(prefix)/Resources/Info.plist
 	$(LN) -fsn $(VERSION) $(DESTDIR)$(PYTHONFRAMEWORKINSTALLDIR)/Versions/Current
 	$(LN) -fsn Versions/Current/$(PYTHONFRAMEWORK) $(DESTDIR)$(PYTHONFRAMEWORKINSTALLDIR)/$(PYTHONFRAMEWORK)
 	$(LN) -fsn Versions/Current/Headers $(DESTDIR)$(PYTHONFRAMEWORKINSTALLDIR)/Headers
@@ -3036,6 +3039,14 @@ frameworkinstallunversionedstructure:	$(LDLIBRARY)
 	$(INSTALL) -d -m $(DIRMODE) $(DESTDIR)$(PYTHONFRAMEWORKINSTALLDIR)
 	sed 's/%VERSION%/'"`$(RUNSHARED) $(PYTHON_FOR_BUILD) -c 'import platform; print(platform.python_version())'`"'/g' < $(RESSRCDIR)/Info.plist > $(DESTDIR)$(PYTHONFRAMEWORKINSTALLDIR)/Info.plist
 	$(INSTALL_SHARED) $(LDLIBRARY) $(DESTDIR)$(PYTHONFRAMEWORKPREFIX)/$(LDLIBRARY)
+	$(INSTALL) -d -m $(DIRMODE) $(DESTDIR)$(BINDIR)
+	for file in $(srcdir)/$(RESSRCDIR)/bin/* ; do \
+		$(INSTALL) -m $(EXEMODE) $$file $(DESTDIR)$(BINDIR); \
+	done
+
+# Stub compilation assistance binaries are installed separately on Mac Catalyst.
+.PHONY: frameworkinstallcatalyststubs
+frameworkinstallcatalyststubs:	$(LDLIBRARY)
 	$(INSTALL) -d -m $(DIRMODE) $(DESTDIR)$(BINDIR)
 	for file in $(srcdir)/$(RESSRCDIR)/bin/* ; do \
 		$(INSTALL) -m $(EXEMODE) $$file $(DESTDIR)$(BINDIR); \
