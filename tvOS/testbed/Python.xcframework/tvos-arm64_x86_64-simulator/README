@@ -1,0 +1,5 @@
+This directory is intentionally empty.
+
+It is used as a destination for --enable-framework when building for AppleTVOS simulator, or
+it could be utilized by the testbed utility to clone a slice here.
+
