@@ -4541,8 +4541,7 @@ then :
 
 				;;
 			iOS) :
-				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
-				case $_flag_ios_catalyst in
+				case $(echo $host | cut -d '-' -f4) in
 					macabi)
 						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs"
 						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs "
@@ -4748,10 +4747,6 @@ else case e in #(
  ;;
 esac
 fi
-
-
-
-
 
 EXPORT_XROS_DEPLOYMENT_TARGET='#'
 
