@@ -966,10 +966,10 @@ class _Processor:
             csid, cpu_number = vms_lib.getsyi('SYI$_CPU', 0)
             return 'Alpha' if cpu_number >= 128 else 'VAX'
 
-    # On the iOS/tvOS/watchOS/visionOS simulator, os.uname returns the architecture as
-    # uname.machine. On device it returns the model name for some reason; but
-    # there's only one CPU architecture for devices, so we know the right
-    # answer.
+    # On the iOS/tvOS/watchOS/visionOS simulator and Mac Catalyst, os.uname returns
+    # the architecture as uname.machine. On device it returns the model name for
+    # some reason; but there's only one CPU architecture for devices, so we know the
+    # right answer.
     def get_ios():
         if sys.implementation._multiarch.endswith("simulator") or sys.implementation._multiarch.endswith("macabi"):
             return os.uname().machine
