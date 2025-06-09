@@ -1535,7 +1535,7 @@ def _get_supported_file_loaders():
     """
     extension_loaders = []
     if hasattr(_imp, 'create_dynamic'):
-        # Mac Catalyst does NOT use the AppleFrameworkLoader.
+        # AppleFrameworkLoader is unessaccary on Mac Catalyst because Mac Catalyst allows "raw" dylib files.
         if sys.platform in {"ios", "tvos", "watchos", "visionos"} and not sys.implementation._multiarch.endswith("macabi"):
             extension_loaders = [(AppleFrameworkLoader, [
                 suffix.replace(".so", ".fwork")

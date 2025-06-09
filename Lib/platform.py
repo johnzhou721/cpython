@@ -1444,7 +1444,7 @@ def platform(aliased=False, terse=False):
         system, release, version = system_alias(system, release, version)
 
     if system == 'Darwin':
-        # macOS and iOS both report as a "Darwin" kernel
+        # All Apple Platforms report as a "Darwin" kernel
         if sys.platform == "ios":
             system, release, _, _, _ = ios_ver()
         elif sys.platform == "tvos":

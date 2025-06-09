@@ -728,8 +728,7 @@ AC_ARG_ENABLE([framework],
 				AC_CONFIG_FILES([Mac/Resources/app/Info.plist])
 				;;
 			iOS) :
-				_flag_ios_catalyst=`echo $host | cut -d '-' -f4`
-				case $_flag_ios_catalyst in
+				case $(echo $host | cut -d '-' -f4) in
 					macabi)
 						FRAMEWORKINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs"
 						FRAMEWORKALTINSTALLFIRST="frameworkinstallversionedstructure frameworkinstallcatalyststubs "
@@ -913,10 +912,6 @@ AC_ARG_WITH([catalyst-macos-version],
     esac
   ]
 )
-
-
-
-
 EXPORT_XROS_DEPLOYMENT_TARGET='#'
 
 AC_SUBST([_PYTHON_HOST_PLATFORM])

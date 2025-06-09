@@ -586,7 +586,6 @@ def main():
             asyncio.run(
                 run_testbed(
                     simulator=context.simulator,
-                    # Mac catalyst requires verbose, or no logs will print.
                     verbose=context.verbose,
                     args=test_args,
                     catalyst=context.catalyst

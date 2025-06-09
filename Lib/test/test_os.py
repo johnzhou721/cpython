@@ -2511,13 +2511,16 @@ class TestInvalidFD(unittest.TestCase):
     @unittest.skipUnless(hasattr(os, 'closerange'), 'test needs os.closerange()')
     def test_closerange(self):
         if support.is_mac_catalyst:
-            # On Mac Catalyst, somehow there's a guarded FD in the way,
-            # undected using fstat. We make some random fds first, stop
-            # once not consecutive, close all of them one by one using
-            # the result of open(), then assert that closerange is failing.
+            # On Mac Catalyst and potentially other Apple platforms,
+            # somehow there's a guarded FD in the way, that has no
+            # effect on fstat. We make some random FDs first, stop
+            # once not consecutive, close all of them one by one by calling
+            # file.close(), then assert that closerange on the FDs is failing.
             # This ensures that none of those things we're closing is
             # guarded, if we're careful to not use code that makes guarded
-            # file descriptors.
+            # file descriptors between when we manually made and
+            # destroyed them and when we're attempting to invoke
+            # closerange.
 
             copies = []
             # Open a file for testing and get its FD

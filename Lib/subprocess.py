@@ -77,7 +77,7 @@ else:
 # some platforms do not support subprocesses
 _can_fork_exec = (
     sys.platform not in {"emscripten", "wasi", "ios", "tvos", "watchos", "visionos"}
-    or sys.implementation._multiarch.endswith("macabi")
+    or sys.implementation._multiarch.endswith("macabi")  # Mac Catalyst
 )
 
 if _mswindows:

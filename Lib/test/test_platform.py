@@ -499,7 +499,7 @@ class PlatformTest(unittest.TestCase):
             # ios_ver(), so we check that the values are broadly what we expect.
 
             # System is either iOS or iPadOS, depending on the test device
-            # Mac Catalyst returns iPadOS for whatever reason.
+            # Mac Catalyst returns iPadOS.
             self.assertIn(system, {"iOS", "iPadOS"})
 
             # Release is a numeric version specifier with at least 2 parts
