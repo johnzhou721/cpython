@@ -496,7 +496,7 @@ def main():
     parser.add_argument(
         "--catalyst",
         action="store_true",
-        help="Use Mac Catalyst.",
+        help="Run or clone the testbed for a Mac Catalyst build.",
     )
 
     clone = subcommands.add_parser(
